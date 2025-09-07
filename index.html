@@ -26,7 +26,7 @@
   .ok{ background:#dcfce7; } .ko{ background:#fee2e2; }
   .ko-input{ color:#be185d !important; font-weight:700; }
 
-  /* Diagonale (fond + texte violets) */
+  /* Diagonale Pythagore */
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
   .diag-txt { color:#8374a7 !important; font-weight:700; }
 
@@ -34,7 +34,7 @@
   .fill-hint { background: rgba(131,116,167,.12) !important; }
   .violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
 
-  /* Cartes pour le mode « toutes les décompositions » (jeu 3) */
+  /* Cartes Jeu 3 */
   .pair-card{
     background: rgba(131,116,167,.10);
     border: 1px solid #8374a7;
@@ -74,10 +74,10 @@ function TopNav({route,go}){
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
           <img src="sacadoLogo.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
-        <div>
-          <div className="font-black leading-tight">Sacado Académie</div>
-          <div className="text-xs opacity-90">Atelier d’automatismes</div>
-        </div>
+          <div>
+            <div className="font-black leading-tight">Sacado Académie</div>
+            <div className="text-xs opacity-90">Atelier d’automatismes</div>
+          </div>
         </div>
         <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
       </div>
@@ -159,7 +159,8 @@ function AccessibilityCard({acc}){
   );
 }
 
-/* ---------- Jeu n°1 — Défi Tables (inchangé) ---------- */
+/* ---------- Jeu n°1 — Défi Tables ---------- */
+/* (identique à la version validée) */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
@@ -201,26 +202,17 @@ function GameDefi({acc}){
             <div className="card rounded-2xl p-4" style={acc.cardStyle}>
               <div className="font-bold mb-2">Réglages</div>
               <div className="mb-2"><div className="text-sm mb-1">Tables</div>
-                <div className="flex flex-wrap gap-2">{range(2,10).map(n=>
-                  <button key={n} onClick={()=>setSelectedTables(p=>p.includes(n)?p.filter(x=>x!==n):[...p,n])}
-                          className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>)}
-                </div>
+                <div className="flex flex-wrap gap-2">{range(2,10).map(n=><button key={n} onClick={()=>setSelectedTables(p=>p.includes(n)?p.filter(x=>x!==n):[...p,n])} className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>)}</div>
               </div>
               <div className="mb-2"><div className="text-sm mb-1">Nombre de questions</div>
-                <div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=>
-                  <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}
-                </div>
+                <div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}</div>
               </div>
               <div><div className="text-sm mb-1">Temps par question</div>
-                <div className="flex gap-2 flex-wrap">{[3,5,10].map(s=>
-                    <button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+                <div className="flex gap-2 flex-wrap">{[3,5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
                   <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button></div>
               </div>
             </div>
-            <div className="card rounded-2xl p-4" style={acc.cardStyle}>
-              <div className="font-bold mb-2">Action</div>
-              <button onClick={start} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Lancer le défi</button>
-            </div>
+            <div className="card rounded-2xl p-4" style={acc.cardStyle}><div className="font-bold mb-2">Action</div><button onClick={start} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Lancer le défi</button></div>
           </div>
         )}
 
@@ -240,21 +232,13 @@ function GameDefi({acc}){
 
         {finished && (
           <div className="space-y-6">
-            <div className="rounded-3xl border p-6 shadow-sm card" style={acc.cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2>
-              <p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p></div>
+            <div className="rounded-3xl border p-6 shadow-sm card" style={acc.cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2><p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p></div>
             <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={acc.cardStyle}>
-              <table className="w-full text-left text-sm">
-                <thead><tr><th>#</th><th>Énoncé</th><th>Réponse</th><th>Correction</th><th>Statut</th></tr></thead>
-                <tbody>{answers.map((r,i)=>(
-                  <tr key={i} className="border-t"><td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td>
-                    <td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td></tr>
-                ))}</tbody>
+              <table className="w-full text-left text-sm"><thead><tr><th>#</th><th>Énoncé</th><th>Réponse</th><th>Correction</th><th>Statut</th></tr></thead>
+                <tbody>{answers.map((r,i)=>(<tr key={i} className="border-t"><td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td><td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td></tr>))}</tbody>
               </table>
             </div>
-            <div className="flex gap-2">
-              <a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a>
-              <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
-            </div>
+            <div className="flex gap-2"><a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a><a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a></div>
           </div>
         )}
       </div>
@@ -285,8 +269,7 @@ function GamePythagore({acc}){
     }else if(mode==="mirror"){
       for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      // 6×7, 6×8, 6×9, 7×8, 7×9, 8×9 — pas de colonne/ligne 10 à remplir
-      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b));
+      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); // ×10 déjà su
     }
     return set;
   },[mode,count,table]);
@@ -358,7 +341,6 @@ function GamePythagore({acc}){
           <strong>Consigne :</strong> <span className="diag-txt">{tip}</span>
         </div>
 
-        {/* Table */}
         <div className="overflow-auto">
           <table className="min-w-[900px] border-collapse">
             <thead>
@@ -374,33 +356,28 @@ function GamePythagore({acc}){
                   {B.map(b=>{
                     const k=`${a}x${b}`, onDiag=a===b;
 
-                    // cases à remplir ?
                     let shouldFill;
                     if(mode==="mirror")      shouldFill = (a<=b && !onDiag);
-                    else if(mode==="minimal")shouldFill = (a>=6 && b>=6 && a<b && b!==10); // colonne ×10 pré-remplie
+                    else if(mode==="minimal")shouldFill = (a>=6 && b>=6 && a<b && b!==10);
                     else if(mode==="diagonal") shouldFill = onDiag;
                     else if(mode==="table")    shouldFill = (a===table);
-                    else /* random */          shouldFill = blanks.has(k);
+                    else                       shouldFill = blanks.has(k);
 
                     const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
 
-                    // diagonale préremplie (mirror & minimal)
                     if((mode==="mirror"||mode==="minimal") && onDiag){
                       return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
-                    // triangle inférieur lecture seule (mirror)
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
                       return <td key={k} className="p-1 text-center diag-bg"><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
                     }
-                    // diagonale à saisir (fond + bordure violets)
                     if(mode==="diagonal" && onDiag){
                       return <td key={k} className="p-1 text-center fill-hint"><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt violet-border "+koClass}/></td>;
                     }
 
-                    // cellule standard
                     const content = shouldFill
                       ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+(needsHint?"violet-border ":"")+koClass}/>
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
@@ -419,7 +396,7 @@ function GamePythagore({acc}){
   );
 }
 
-/* ---------- Jeu n°3 — Retrouve la multiplication (layout 2+2 quand 4 paires) ---------- */
+/* ---------- Jeu n°3 — Retrouve la multiplication ---------- */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
@@ -493,7 +470,6 @@ function GameInverse({acc}){
 
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
-  // petit composant pour une « carte » (paire a × b)
   const PairCard = ({i}) => (
     <div className="pair-card flex items-center gap-3 md:gap-4">
       <input value={rows[i]?.a||""}
@@ -558,23 +534,50 @@ function GameInverse({acc}){
               ) : (
                 (() => {
                   const needed = pairsFor(current.product).length;
+
+                  // Disposition claire :
+                  // 4 paires -> 2 haut + 2 bas
                   if (needed === 4) {
-                    /* 2 cartes en haut + 2 en bas, bien espacées */
                     return (
-                      <div className="flex flex-col items-center gap-8">
-                        <div className="flex gap-8 md:gap-12 justify-center">
-                          <PairCard i={0}/><PairCard i={1}/>
-                        </div>
-                        <div className="flex gap-8 md:gap-12 justify-center">
-                          <PairCard i={2}/><PairCard i={3}/>
-                        </div>
-                        <button onClick={()=>handleSubmit(false)} className="mt-4 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+                      <div className="flex flex-col items-center gap-10">
+                        <div className="flex gap-12 justify-center"><PairCard i={0}/><PairCard i={1}/></div>
+                        <div className="flex gap-12 justify-center"><PairCard i={2}/><PairCard i={3}/></div>
+                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                       </div>
                     );
                   }
-                  /* Autres cas : grille aérée et responsive */
+                  // 3 paires -> 2 haut + 1 bas
+                  if (needed === 3) {
+                    return (
+                      <div className="flex flex-col items-center gap-10">
+                        <div className="flex gap-12 justify-center"><PairCard i={0}/><PairCard i={1}/></div>
+                        <div className="flex gap-12 justify-center"><PairCard i={2}/></div>
+                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+                      </div>
+                    );
+                  }
+                  // 2 paires -> 2 haut
+                  if (needed === 2) {
+                    return (
+                      <div className="flex flex-col items-center gap-10">
+                        <div className="flex gap-12 justify-center"><PairCard i={0}/><PairCard i={1}/></div>
+                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+                      </div>
+                    );
+                  }
+                  // 1 paire -> 1 au centre
+                  if (needed === 1) {
+                    return (
+                      <div className="flex flex-col items-center gap-8">
+                        <div className="flex gap-12 justify-center"><PairCard i={0}/></div>
+                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+                      </div>
+                    );
+                  }
+
+                  // Autres cas (rare) : grille aérée
                   return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-7 justify-items-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 justify-items-center">
                       {pairsFor(current.product).map((_,i)=>(<PairCard key={i} i={i}/>))}
                       <div className="col-span-full text-center pt-2">
                         <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
