@@ -40,12 +40,18 @@
     padding: 14px 16px;
   }
 
+  /* Barre de progression */
+  .progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
+  .progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
+
   /* Écran noir */
   .dark-mode, .dark-mode * { color:#f8fafc !important; }
   .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
   .dark-mode .hdr{ background:#1f2937 !important; }
   .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
   .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
+  .dark-mode .progress-wrap{ background:#0b0b0b !important; }
+  .dark-mode .progress-bar{ background:#a69acc !important; }
 
   /* Police OpenDyslexic locale */
   @font-face{
@@ -157,6 +163,17 @@ function AccessibilityCard({acc}){
   );
 }
 
+/* ---------------- UTIL ---------------- */
+function Progress({remaining, total}) {
+  if (total==null) return null;
+  const pct = Math.max(0, Math.min(100, (remaining/total)*100));
+  return (
+    <div className="progress-wrap mt-2">
+      <div className="progress-bar" style={{width:`${pct}%`}}></div>
+    </div>
+  );
+}
+
 /* ---------------- JEU 1 — Défi Tables ---------------- */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
@@ -241,12 +258,13 @@ function GameDefi({acc}){
 
         {started && current && (
           <div className="space-y-6">
-            {/* Bandeau état */}
+            {/* Bandeau état + barre */}
             <div className="card rounded-2xl p-3" style={acc.cardStyle}>
               <div className="flex items-center justify-between">
                 <div><strong>Question :</strong> {index+1} / {questions.length}</div>
                 <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
               </div>
+              <Progress remaining={remaining??0} total={timeLimit}/>
             </div>
 
             <div className="rounded-3xl border p-6 text-center shadow-sm card" style={acc.cardStyle}>
@@ -518,16 +536,26 @@ function GameInverse({acc}){
 
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
-  // Carte « a × b » – initialisation sûre (corrige le bug de saisie)
+  // Carte « a × b » – initialisation sûre (corrige la saisie)
   const PairCard = ({i}) => (
     <div className="pair-card flex items-center gap-3 md:gap-4">
       <input value={rows[i]?.a||""}
-             onChange={e=>setRows(r=>{const n=[...r]; const cur=n[i] ?? {a:"",b:""}; n[i]={...cur,a:e.target.value.replace(/\D/g,"")}; return n;})}
+             onChange={e=>setRows(r=>{
+               const n=[...r];
+               const cur=n[i] ?? {a:"",b:""};
+               n[i]={...cur,a:e.target.value.replace(/\D/g,"")};
+               return n;
+             })}
              onKeyDown={onEnter}
              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
       <span className="text-2xl">×</span>
       <input value={rows[i]?.b||""}
-             onChange={e=>setRows(r=>{const n=[...r]; const cur=n[i] ?? {a:"",b:""}; n[i]={...cur,b:e.target.value.replace(/\D/g,"")}; return n;})}
+             onChange={e=>setRows(r=>{
+               const n=[...r];
+               const cur=n[i] ?? {a:"",b:""};
+               n[i]={...cur,b:e.target.value.replace(/\D/g,"")};
+               return n;
+             })}
              onKeyDown={onEnter}
              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
     </div>
@@ -563,12 +591,13 @@ function GameInverse({acc}){
 
         {started && current && (
           <div className="space-y-6">
-            {/* Bandeau état */}
+            {/* Bandeau état + barre */}
             <div className="card rounded-2xl p-3" style={cardStyle}>
               <div className="flex items-center justify-between">
                 <div><strong>Question :</strong> {index+1} / {questions.length}</div>
                 <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
               </div>
+              <Progress remaining={remaining??0} total={timeLimit}/>
             </div>
 
             <div className="card rounded-2xl p-3" style={cardStyle}><strong>Consigne :</strong> <span className="diag-txt">{tip}</span></div>
@@ -694,3 +723,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
