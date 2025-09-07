@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Cache-Control" content="no-store"/>
+<title>Sacado Académie — Automatismes (hub + 3 jeux)</title>
+
+<!-- React + ReactDOM -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  :root{ --brand:#8374a7; }
+  body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  .hero{ background:#efe7ff; }
+  .card{ background:#fff; border:1px solid #e5e7eb; }
+  .btn{ background:var(--brand); color:#fff; }
+  .pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
+  .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
+  .hdr{ background:#f1f5f9; }
+  .ok{ background:#dcfce7; } .ko{ background:#fee2e2; }
+
+  /* OpenDyslexic local (tu as des .otf dans ton repo) */
+  @font-face{
+    font-family:'OpenDyslexicLocal';
+    src:url('OpenDyslexic3-Regular.woff2') format('woff2'),
+        url('OpenDyslexic-Regular.otf') format('opentype'),
+        url('OpenDyslexicAlta-Regular.otf') format('opentype'),
+        url('OpenDyslexicMono-Regular.otf') format('opentype');
+    font-display:swap;
+  }
+
+  /* Écran noir (contraste forcé) */
+  .dark-mode, .dark-mode * { color:#f8fafc !important; }
+  .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
+  .dark-mode .hdr{ background:#1f2937 !important; }
+  .dark-mode input, .dark-mode select, .dark-mode textarea{
+    background:#000 !important; color:#f8fafc !important; border-color:#64748b !important;
+  }
+  .dark-mode ::placeholder{ color:#94a3b8 !important; opacity:1; }
+  .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
+  .dark-mode input[type="checkbox"]{ background:#000 !important; border-color:#94a3b8 !important; accent-color:var(--brand); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const {useState,useEffect,useMemo,useRef} = React;
+const BRAND = "#8374a7";
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+
+/* --------------------- UI commun --------------------- */
+
+function TopNav({route,go}){
+  return (
+    <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
+      <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
+        <div className="flex items-center gap-3">
+          <img src="sacadoLogo.png" alt="SACADO" className="h-8 w-8 rounded-lg bg-white/90 p-1"/>
+          <div>
+            <div className="font-black leading-tight">Sacado Académie</div>
+            <div className="text-xs opacity-90">Atelier Automatismes – DogBot</div>
+          </div>
+        </div>
+        <img src="dogbot.png" alt="dogbot" className="h-8 w-8 rounded-full bg-white/90 p-0.5 object-cover"/>
+      </div>
+
+      <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
+        {[
+          {k:"/", label:"Accueil"},
+          {k:"/defi", label:"Jeu n°1 – Défi Tables"},
+          {k:"/pythagore", label:"Jeu n°2 – Table de Pythagore"},
+          {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
+        ].map(tab=>(
+          <button key={tab.k}
+            onClick={()=>go(tab.k)}
+            className={"pill "+(route===tab.k?"active":"")}
+          >{tab.label}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Hero(){
+  return (
+    <header className="hero p-6 md:p-10 text-center rounded-3xl card">
+      <img src="sacadoLogo.png" alt="Sacado Académie" className="inline-block h-10 w-10 rounded-lg bg-white p-1 mb-3">
+      </img>
+      <h1 className="text-3xl md:text-5xl font-extrabold text-[var(--brand)]">Sacado Académie - Atelier Automatismes</h1>
+      <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
+      <img src="dogbot.png" alt="DogBot" className="mx-auto mt-4 h-28 w-28 rounded-full bg-white p-1 shadow">
+      </img>
+    </header>
+  );
+}
+
+function Hub(){
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-8">
+      <Hero/>
+      <h2 className="text-center text-2xl md:text-3xl font-extrabold text-[var(--brand)] my-6">Choisis ton activité</h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        <article className="card rounded-3xl p-6 shadow-sm">
+          <h3 className="text-xl font-extrabold text-[var(--brand)]">Jeu n°1 — Défi Tables</h3>
+          <p className="mt-2 text-slate-700">Réponds vite aux multiplications, avec options dys (polices/tailles, fond jaune, écran noir, audio).</p>
+          <a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a>
+        </article>
+        <article className="card rounded-3xl p-6 shadow-sm">
+          <h3 className="text-xl font-extrabold text-[var(--brand)]">Jeu n°2 — Table de Pythagore</h3>
+          <p className="mt-2 text-slate-700">Complète la table (2×2 à 10×10) en mode aléatoire, par table, diagonale des doubles, ou bords 2/5/10.</p>
+          <a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a>
+        </article>
+        <article className="card rounded-3xl p-6 shadow-sm">
+          <h3 className="text-xl font-extrabold text-[var(--brand)]">Jeu n°3 — Retrouve la multiplication</h3>
+          <p className="mt-2 text-slate-700">On te donne un résultat (ex. 24) : trouve toutes les multiplications possibles (6×4, 4×6, 3×8, 8×3…).</p>
+          <a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a>
+        </article>
+      </div>
+    </main>
+  );
+}
+
+/* --------------------- Accessibilité (partagée) --------------------- */
+
+function useAccessibility(){
+  const [dys,setDys] = useState(false);
+  const [font,setFont] = useState("Arial");
+  const [size,setSize] = useState(16);
+  const [yellow,setYellow]=useState(false);
+  const [black,setBlack]=useState(false);
+  const [audio,setAudio]=useState(false);
+
+  useEffect(()=>{
+    document.body.style.fontSize = dys ? `${size}px` : "16px";
+  },[dys,size]);
+
+  const rootBg  = black ? "#000000" : (yellow ? "#fff7cc" : "#f8fafc");
+  const surface = black ? "#111111" : (yellow ? "#fff2a8" : "#ffffff");
+  const rootText= black ? "#f8fafc" : undefined;
+  const cardStyle = { backgroundColor: surface, color: rootText };
+  const fontFamily =
+    font==="Verdana" ? "Verdana, Geneva, Tahoma, sans-serif" :
+    font==="OpenDyslexic" ? "OpenDyslexicLocal, Arial, sans-serif" :
+    "Arial, Helvetica, sans-serif";
+
+  const speak = (txt)=>{
+    try{
+      if(!audio) return;
+      const u=new SpeechSynthesisUtterance(txt);
+      u.lang="fr-FR"; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+    }catch(e){}
+  };
+
+  return {dys,font,setFont,size,setSize,yellow,setYellow,black,setBlack,audio,setAudio,
+          rootBg, surface, rootText, cardStyle, fontFamily, speak};
+}
+
+function AccessibilityPanel({acc}){
+  const {dys,setFont,setSize, setYellow,setBlack, audio,setAudio} = acc;
+  const [dysLoc,setDysLoc]=useState(false);
+  useEffect(()=>setDysLoc(dys),[dys]); // lecture seule visuelle
+
+  return (
+    <div className="grid md:grid-cols-3 gap-4 mb-6">
+      <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+        <div className="font-bold mb-2">Accessibilité</div>
+        <label className="block">
+          <input type="checkbox" checked={dysLoc} onChange={e=>{acc.dys = e.target.checked; /* noop just visual */}} disabled/> Mode dys (activé dans tous les jeux)
+        </label>
+        <div className="mt-2 space-y-2">
+          <div className="flex gap-2 flex-wrap">
+            <select defaultValue="Arial" onChange={e=>setFont(e.target.value)} className="border rounded p-1">
+              <option>Arial</option><option>Verdana</option><option>OpenDyslexic</option>
+            </select>
+            <select defaultValue="16" onChange={e=>setSize(parseInt(e.target.value))} className="border rounded p-1">
+              {[16,18,20,22,24].map(s=><option key={s} value={s}>{s}px</option>)}
+            </select>
+          </div>
+          <label className="block"><input type="checkbox" onChange={e=>setYellow(e.target.checked)}/> Fond jaune</label>
+          <label className="block"><input type="checkbox" onChange={e=>setBlack(e.target.checked)}/> Écran noir</label>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <input type="checkbox" checked={audio} onChange={e=>setAudio(e.target.checked)}/>
+          <label>Audio (TTS) – lire les énoncés</label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------- Jeu n°1 – Défi Tables --------------------- */
+
+function GameDefi({acc}){
+  const {rootBg, rootText, cardStyle, fontFamily, speak, black} = acc;
+  const [selectedTables,setSelectedTables]=useState(range(2,10));
+  const [questionCount,setQuestionCount]=useState(10);
+  const [timeLimit,setTimeLimit]=useState(5); // null = Pas de limite
+  const [started,setStarted]=useState(false);
+  const [finished,setFinished]=useState(false);
+  const [questions,setQuestions]=useState([]);
+  const [index,setIndex]=useState(0);
+  const [input,setInput]=useState("");
+  const [tick,setTick]=useState(0);
+  const [answers,setAnswers]=useState([]);
+  const inputRef=useRef(null);
+
+  useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id); },[started,finished]);
+  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit) handleSubmit(true); },[tick]);
+
+  useEffect(()=>{ if(started && !finished && questions[index]){ const q=questions[index]; speak(`${q.a} multiplié par ${q.b}`);} },[index,started,finished]);
+
+  const start=()=>{
+    const list=[];
+    for(let i=0;i<questionCount;i++){
+      const a=selectedTables[Math.floor(Math.random()*selectedTables.length)];
+      const b=Math.floor(Math.random()*9)+2;
+      list.push({a,b,product:a*b});
+    }
+    setQuestions(list);
+    setIndex(0); setAnswers([]); setInput(""); setTick(0);
+    setStarted(true); setFinished(false);
+    setTimeout(()=>inputRef.current?.focus(),0);
+    speak("Prépare-toi. Première question.");
+  };
+
+  const current=questions[index];
+  const progressPct = useMemo(()=>{
+    if(!started) return 0; if(timeLimit==null) return 100;
+    const total=timeLimit, remaining=Math.max(0,total-tick);
+    return (remaining/total)*100;
+  },[started,tick,timeLimit]);
+
+  const handleSubmit=(timeout=false)=>{
+    if(!current) return;
+    const userNum=Number(input), userProvided=input!=="", correct=!timeout && userNum===current.product && userProvided;
+    const record={a:current.a,b:current.b,product:current.product,user:timeout?null:(userProvided?userNum:null),
+                  correct,time:timeLimit!=null?Math.min(tick,timeLimit):tick,timeout};
+    setAnswers(p=>[...p,record]);
+    if(!correct){
+      if(timeout) speak(`Hors délai. La bonne réponse est ${current.product}`);
+      else if(!userProvided) speak(`Pas de réponse. La bonne réponse est ${current.product}`);
+      else speak(`Incorrect. La bonne réponse est ${current.product}`);
+    }
+    if(index+1>=questions.length){ setFinished(true); setStarted(false); }
+    else { setIndex(i=>i+1); setTick(0); setInput(""); }
+  };
+
+  const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
+
+  return (
+    <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg, color:rootText, fontFamily}}>
+      <TopNav route="/defi" go={(k)=>location.hash="#"+k}/>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {!started && !finished && (
+          <>
+            <AccessibilityPanel acc={acc}/>
+            <div className="p-4 rounded-2xl border card" style={cardStyle}>
+              <label className="block text-sm mb-2">Tables</label>
+              <div className="flex flex-wrap gap-2">
+                {range(2,10).map(n=>(
+                  <button key={n} onClick={()=>setSelectedTables(prev=>prev.includes(n)?prev.filter(x=>x!==n):[...prev,n])}
+                    className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl border card" style={cardStyle}>
+              <label className="block text-sm mb-2">Nombre de questions</label>
+              <div className="flex gap-2 flex-wrap">
+                {[5,10,15,20].map(n=>(
+                  <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl border card" style={cardStyle}>
+              <label className="block text-sm mb-2">Temps par question</label>
+              <div className="flex gap-2 flex-wrap">
+                {[3,5,10].map(s=>(
+                  <button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>
+                ))}
+                <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de limite</button>
+              </div>
+            </div>
+
+            <button onClick={start} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>
+              Lancer le défi
+            </button>
+          </>
+        )}
+
+        {started && current && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>Question {index+1}/{questions.length}</div>
+              {timeLimit!=null && (
+                <div className="w-52">
+                  <div className="w-full h-3 rounded-full bg-slate-200 overflow-hidden">
+                    <div className="h-full transition-all" style={{width:`${Math.max(0,Math.min(100,progressPct))}%`,backgroundColor:BRAND}}/>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+              <div className="font-black text-5xl mb-4">{current.a} × {current.b} = ?</div>
+              <div className="flex gap-3 justify-center">
+                <input ref={inputRef} value={input}
+                  onChange={e=>setInput(e.target.value.replace(/\D/g,""))}
+                  onKeyDown={e=>{ if(e.key==='Enter') handleSubmit(false); }}
+                  className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border"
+                  style={{borderColor:BRAND, backgroundColor:black?'#000':'#fff', color:acc.rootText}}
+                  placeholder="Réponse"/>
+                <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>
+                  Valider
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {finished && (
+          <div className="space-y-6">
+            <div className="rounded-3xl border p-6 shadow-sm card" style={cardStyle}>
+              <h2 className="text-2xl font-black">Récapitulatif</h2>
+              <p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p>
+            </div>
+            <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={cardStyle}>
+              <table className="w-full text-left text-sm">
+                <thead><tr><th>#</th><th>Énoncé</th><th>Réponse</th><th>Correction</th><th>Statut</th></tr></thead>
+                <tbody>
+                  {answers.map((r,i)=>(
+                    <tr key={i} className="border-t">
+                      <td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td>
+                      <td>{r.timeout ? "⏱ Hors délai" : (r.user==null ? "— Pas de réponse" : (r.correct ? "✔ Juste" : "✘ Faux"))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={()=>{ setStarted(false); setFinished(false); setAnswers([]); }}
+                className="px-5 py-3 rounded-2xl border card" style={{...cardStyle, color:acc.rootText}}>
+                Retour aux réglages
+              </button>
+              <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------- Jeu n°2 – Table de Pythagore --------------------- */
+
+function GamePythagore({acc}){
+  const {rootBg, rootText, cardStyle, fontFamily, speak} = acc;
+  const A=range(2,10), B=range(2,10);
+  const [mode,setMode]=useState("random"); // random | table | diagonal | borders
+  const [count,setCount]=useState(10);
+  const [table,setTable]=useState(6);
+  const blanks = useMemo(()=>{
+    const set=new Set();
+    if(mode==="random"){
+      const all=[]; for(const a of A)for(const b of B) all.push(`${a}x${b}`);
+      while(set.size<Math.min(count,all.length)) set.add(all[Math.floor(Math.random()*all.length)]);
+    }else if(mode==="table"){
+      B.forEach(b=> set.add(`${table}x${b}`));
+    }else if(mode==="diagonal"){
+      A.forEach(a=> set.add(`${a}x${a}`));
+    }else if(mode==="borders"){
+      [2,5,10].forEach(t=>{
+        B.forEach(b=> set.add(`${t}x${b}`));
+        A.forEach(a=> set.add(`${a}x${t}`));
+      });
+    }
+    return set;
+  },[mode,count,table]);
+
+  const [values,setValues]=useState({});
+  const [checked,setChecked]=useState({});
+  const firstRef=useRef(null);
+
+  useEffect(()=>{ setValues({}); setChecked({}); setTimeout(()=>firstRef.current?.focus(),0); },[mode,count,table]);
+
+  const onChange=(k,v)=> setValues(p=>({...p,[k]:v.replace(/\D/g,"")}));
+  const onFocus=(a,b)=> speak(`Complète ${a} multiplié par ${b}`);
+
+  const checkAll=()=>{
+    const res={};
+    for(const a of A)for(const b of B){
+      const k=`${a}x${b}`;
+      if(!blanks.has(k)) continue;
+      const good=a*b; const v=values[k];
+      res[k] = v!==undefined && v!=="" && Number(v)===good ? "ok":"ko";
+    }
+    setChecked(res);
+    const wrong = Object.values(res).filter(x=>x==="ko").length;
+    speak(wrong===0 ? "Bravo, tout est correct !" : `${wrong} case${wrong>1?"s":""} à corriger`);
+  };
+  const reset=()=>{ setValues({}); setChecked({}); setTimeout(()=>firstRef.current?.focus(),0); };
+
+  return (
+    <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg, color:rootText, fontFamily}}>
+      <TopNav route="/pythagore" go={(k)=>location.hash="#"+k}/>
+      <div className="max-w-5xl mx-auto">
+        <AccessibilityPanel acc={acc}/>
+
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <div className="card rounded-2xl p-4" style={cardStyle}>
+            <div className="font-bold mb-2">Mode</div>
+            <div className="space-y-2">
+              <label className="block"><input type="radio" name="m" checked={mode==="random"} onChange={()=>setMode("random")}/> Aléatoires</label>
+              {mode==="random" && (
+                <div className="ml-6 mt-1">
+                  <label className="text-sm">Nombre de cases</label>
+                  <input type="number" min="1" max="81" value={count} onChange={e=>setCount(parseInt(e.target.value)||1)} className="border rounded px-2 py-1 w-24 ml-2"/>
+                </div>
+              )}
+              <label className="block"><input type="radio" name="m" checked={mode==="table"} onChange={()=>setMode("table")}/> Table par table</label>
+              {mode==="table" && (
+                <div className="ml-6 mt-1">
+                  <label className="text-sm">Table</label>
+                  <select value={table} onChange={e=>setTable(parseInt(e.target.value))} className="border rounded px-2 py-1 ml-2">
+                    {A.map(t=><option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              )}
+              <label className="block"><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des doubles</label>
+              <label className="block"><input type="radio" name="m" checked={mode==="borders"} onChange={()=>setMode("borders")}/> Bords (2, 5, 10)</label>
+            </div>
+          </div>
+
+          <div className="card rounded-2xl p-4" style={cardStyle}>
+            <div className="font-bold mb-2">Actions</div>
+            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
+            <button onClick={reset} className="px-4 py-2 rounded-2xl border">Réinitialiser</button>
+          </div>
+        </div>
+
+        <div className="overflow-auto">
+          <table className="min-w-[720px] border-collapse">
+            <thead>
+              <tr>
+                <th className="p-2 hdr text-left">×</th>
+                {B.map(b=><th key={b} className="p-2 hdr">{b}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {A.map((a,ai)=>(
+                <tr key={a}>
+                  <th className="p-2 hdr text-left">{a}</th>
+                  {B.map((b,bi)=>{
+                    const k=`${a}x${b}`, fill=blanks.has(k), good=a*b, st=checked[k];
+                    const ref = (!ai && !bi && fill) ? {ref:firstRef} : {};
+                    return (
+                      <td key={k} className={"p-1 text-center "+(st==="ok"?"ok":st==="ko"?"ko":"")}>
+                        {fill ? (
+                          <input {...ref} onFocus={()=>onFocus(a,b)}
+                            value={(values[k]??"")} onChange={e=>onChange(k,e.target.value)}
+                            className="border rounded px-2 py-1 w-[72px] text-center"/>
+                        ) : (
+                          <span className="inline-block min-w-[72px]">{good}</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6">
+          <a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------- Jeu n°3 – Retrouve la multiplication --------------------- */
+
+function GameInverse({acc}){
+  const {rootBg, rootText, cardStyle, fontFamily, speak} = acc;
+  const [product,setProduct]=useState(()=>{ const a=2+Math.floor(Math.random()*9), b=2+Math.floor(Math.random()*9); return a*b; });
+  const [selected,setSelected]=useState(new Set());
+  const [checked,setChecked]=useState(false);
+
+  const pairsFor=(n)=>{ const out=[]; for(let a=2;a<=10;a++){ const b=n/a; if(Number.isInteger(b)&&b>=2&&b<=10) out.push([a,b]); } return out; };
+  const allPairs = useMemo(()=>pairsFor(product),[product]);
+  const key=(a,b)=>`${a}x${b}`;
+  const correctSet = useMemo(()=> new Set(allPairs.map(([a,b])=>key(a,b))), [allPairs]);
+
+  useEffect(()=>{ speak(`Trouve toutes les multiplications qui donnent ${product}`); },[product]);
+
+  const toggle=(a,b)=>{ if(checked) return;
+    setSelected(prev=>{ const n=new Set(prev); const k=key(a,b); if(n.has(k)) n.delete(k); else n.add(k); return n; });
+  };
+
+  const score = useMemo(()=>{ if(!checked) return 0; let ok=0; for(const k of selected) if(correctSet.has(k)) ok++; return ok; },[checked,selected,correctSet]);
+  const onCheck=()=>{ setChecked(true); const ok=Array.from(selected).filter(k=>correctSet.has(k)).length; speak(`Tu as trouvé ${ok} bonne${ok>1?"s":""} réponse${ok>1?"s":""} sur ${correctSet.size}.`); };
+  const onAgain=()=>{ setProduct(()=>{ const a=2+Math.floor(Math.random()*9), b=2+Math.floor(Math.random()*9); return a*b; }); setSelected(new Set()); setChecked(false); };
+
+  return (
+    <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg, color:rootText, fontFamily}}>
+      <TopNav route="/inverse" go={(k)=>location.hash="#"+k}/>
+      <div className="max-w-4xl mx-auto">
+        <AccessibilityPanel acc={acc}/>
+
+        <div className="card rounded-2xl p-5 mb-5" style={cardStyle}>
+          <div className="text-slate-500 muted">Résultat</div>
+          <div className="text-5xl font-black">{product}</div>
+        </div>
+
+        <div className="card rounded-2xl p-5 mb-5" style={cardStyle}>
+          <div className="font-bold mb-2">Choisis toutes les multiplications qui donnent {product} :</div>
+          <div className="flex flex-wrap gap-2">
+            {range(2,10).flatMap(a=>range(2,10).map(b=>{
+              const k=key(a,b), isActive=selected.has(k), isCorrect=checked?correctSet.has(k):null;
+              return (
+                <button key={k} onClick={()=>toggle(a,b)}
+                  className={"pill "+(isActive?"active ":"")+(checked?(isCorrect?" ok":" ko"):"")}>
+                  {a}×{b}
+                </button>
+              );
+            }))}
+          </div>
+
+          {!checked ? (
+            <button onClick={onCheck} className="mt-4 px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Corriger</button>
+          ) : (
+            <div className="mt-4 flex items-center gap-3">
+              <div className="font-bold">Bonnes réponses sélectionnées : {score} / {correctSet.size}</div>
+              <button onClick={onAgain} className="px-4 py-2 rounded-2xl border">Rejouer</button>
+            </div>
+          )}
+        </div>
+
+        <a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------- App / Router --------------------- */
+
+function App(){
+  const [route,setRoute]=useState(()=>{
+    const h=location.hash.replace(/^#/, ""); return h||"/";
+  });
+  const acc = useAccessibility(); // partagé
+
+  useEffect(()=>{
+    const onHash=()=> setRoute(location.hash.replace(/^#/, "")||"/");
+    window.addEventListener("hashchange", onHash);
+    return ()=>window.removeEventListener("hashchange", onHash);
+  },[]);
+
+  // activer "mode dys" partout (on ne l'éteint pas ici, juste options d'affichage)
+  acc.dys = true;
+
+  if(route==="/defi")  return <GameDefi acc={acc}/>;
+  if(route==="/pythagore") return <GamePythagore acc={acc}/>;
+  if(route==="/inverse")   return <GameInverse acc={acc}/>;
+
+  // Accueil
+  return (
+    <div className="min-h-screen p-6">
+      <TopNav route="/" go={(k)=>location.hash="#"+k}/>
+      <Hub/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
