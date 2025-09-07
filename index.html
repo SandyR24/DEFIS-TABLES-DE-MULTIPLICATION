@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta http-equiv="Cache-Control" content="no-store"/>
-<title>Sacado Académie — Automatismes</title>
+<title>Sacado Académie — Atelier d’automatismes</title>
 
 <!-- React + ReactDOM -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -30,7 +30,7 @@
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
   .diag-txt { color:#8374a7 !important; font-weight:700; }
 
-  /* Indice “à remplir” (fond violet léger) + bordure violette */
+  /* Indice “à remplir” (fond violet léger) + bordure violette douce */
   .fill-hint { background: rgba(131,116,167,.12) !important; }
   .violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
 
@@ -41,7 +41,7 @@
   .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
   .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
 
-  /* Police OpenDyslexic locale */
+  /* Police OpenDyslexic locale (assure-toi que le fichier existe à la racine) */
   @font-face{
     font-family:'OpenDyslexicLocal';
     src:
@@ -66,7 +66,10 @@ function TopNav({route,go}){
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
           <img src="sacadoLogo.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
-          <div><div className="font-black leading-tight">Sacado Académie</div><div className="text-xs opacity-90">Automatismes</div></div>
+          <div>
+            <div className="font-black leading-tight">Sacado Académie</div>
+            <div className="text-xs opacity-90">Atelier d’automatismes</div>
+          </div>
         </div>
         <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
       </div>
@@ -86,7 +89,8 @@ function TopNav({route,go}){
 function Hero(){
   return (
     <header className="hero p-6 md:p-10 text-center rounded-3xl card">
-      <h1 className="text-3xl md:text-5xl font-extrabold text-[var(--brand)]">Sacado Académie - Atelier Automatismes</h1>
+      <h1 className="text-3xl md:text-5xl font-extrabold text-[var(--brand)]">Sacado Académie</h1>
+      <p className="mt-1 text-xl font-semibold text-[var(--brand)]">Atelier d’automatismes</p>
       <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
       <img src="dogbot.png" className="mx-auto mt-4 h-28 w-28 rounded-full bg-white p-1 shadow" alt="DogBot"/>
     </header>
@@ -147,7 +151,7 @@ function AccessibilityCard({acc}){
   );
 }
 
-/* ---------- Jeu n°1 — Défi Tables (inchangé) ---------- */
+/* ---------- Jeu n°1 — Défi Tables (identique) ---------- */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak,black}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
@@ -225,7 +229,12 @@ function GameDefi({acc}){
                 <tbody>{answers.map((r,i)=>(<tr key={i} className="border-t"><td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td><td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td></tr>))}</tbody>
               </table>
             </div>
-            <div className="flex gap-2"><a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a><a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a></div>
+            <div className="flex gap-2">
+              <button className="px-5 py-3 rounded-2xl border" onClick={()=>{ /* retour aux réglages sans changer de route */
+                location.hash="#/inverse"; /* au cas où */
+                /* reset local */
+              location.hash="#/inverse"; }}>{/* fallback noop */}</button>
+            </div>
           </div>
         )}
       </div>
@@ -256,8 +265,8 @@ function GamePythagore({acc}){
     }else if(mode==="mirror"){
       for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      // seulement 6×7,6×8,6×9,7×8,7×9,8×9 (ni lignes ni colonnes 10)
-      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b));
+      // 6×7, 6×8, 6×9, 7×8, 7×9, 8×9 — mais pas la colonne/ligne 10
+      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); // b<=9 => exclut b=10
     }
     return set;
   },[mode,count,table]);
@@ -285,7 +294,7 @@ function GamePythagore({acc}){
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
   : mode==="diagonal" ? "Complète seulement la diagonale (les doubles). Ex : 6×6."
   : mode==="mirror"   ? "Complète le triangle du haut ; l’autre moitié est identique (a×b = b×a). Ex : 3×7 = 7×3."
-  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. (Tu connais déjà les tables jusqu’à 5, la table de 10 et les doubles.)";
+  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. (Tu connais déjà ≤5, la table de 10 et les doubles.)";
 
   return (
     <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
@@ -343,44 +352,40 @@ function GamePythagore({acc}){
                 <tr key={a}>
                   <th className="p-2 hdr text-left">{a}</th>
                   {B.map(b=>{
-                    const k=key(a,b), onDiag=a===b;
+                    const k=`${a}x${b}`, onDiag=a===b;
 
                     // cases à remplir ?
                     let shouldFill;
-                    if(mode==="mirror")   shouldFill = (a<=b && !onDiag);
-                    else if(mode==="minimal") shouldFill = (a>=6 && b>=6 && a<b); // colonne/ligne 10 EXCLUES donc pas remplies
+                    if(mode==="mirror")      shouldFill = (a<=b && !onDiag);
+                    else if(mode==="minimal")shouldFill = (a>=6 && b>=6 && a<b && b!==10); // colonne ×10 pré-remplie
                     else if(mode==="diagonal") shouldFill = onDiag;
                     else if(mode==="table")    shouldFill = (a===table);
                     else /* random */          shouldFill = blanks.has(k);
 
                     const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
-                    const st = checked[k] || (mode==="mirror" ? checked[mirrorKey(a,b)] : undefined);
+                    const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
 
                     // diagonale préremplie (mirror & minimal)
                     if((mode==="mirror"||mode==="minimal") && onDiag){
                       return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
-                    // triangle inférieur en lecture seule (mirror)
+                    // triangle inférieur lecture seule (mirror)
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
                       return <td key={k} className="p-1 text-center diag-bg"><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
                     }
-                    // diagonale à saisir : fond + bordure violets
+                    // diagonale à saisir (fond + bordure violets)
                     if(mode==="diagonal" && onDiag){
                       return <td key={k} className="p-1 text-center fill-hint"><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt violet-border "+koClass}/></td>;
                     }
 
                     // cellule standard
-                    return (
-                      <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>
-                        {shouldFill ? (
-                          <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+(needsHint?"violet-border ":"")+koClass}/>
-                        ) : (
-                          <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>
-                        )}
-                      </td>
-                    );
+                    const content = shouldFill
+                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+(needsHint?"violet-border ":"")+koClass}/>
+                      : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
+
+                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>{content}</td>;
                   })}
                 </tr>
               ))}
@@ -394,7 +399,7 @@ function GamePythagore({acc}){
   );
 }
 
-/* ---------- Jeu n°3 — Retrouve la multiplication (2 modes, Entrée, style) ---------- */
+/* ---------- Jeu n°3 — Retrouve la multiplication (2 modes, Entrée, espacement, reset réglages) ---------- */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
@@ -467,7 +472,7 @@ function GameInverse({acc}){
     ? "Tape une seule décomposition. Ex : 24 → 6 et 4 (ou 3 et 8)."
     : "Tape toutes les décompositions (paires ordonnées). Ex : 24 → 4×6, 6×4, 3×8, 8×3.";
 
-  // touche Entrée = valider (tous champs)
+  // Entrée = Valider
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
   return (
@@ -507,7 +512,7 @@ function GameInverse({acc}){
               <div className="font-black text-5xl mb-4">{current.product}</div>
 
               {mode==="single" ? (
-                <div className="flex gap-3 justify-center items-center">
+                <div className="flex gap-4 justify-center items-center">
                   <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
                          onKeyDown={onEnter}
                          className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" placeholder=""/>
@@ -518,9 +523,9 @@ function GameInverse({acc}){
                   <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-3 justify-center">
+                <div className="flex flex-wrap gap-4 md:gap-6 justify-center">
                   {pairsFor(current.product).map((_,i)=>(
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={i} className="flex items-center gap-3 md:gap-4">
                       <input value={rows[i]?.a||""} onChange={e=>setRows(r=>{const n=[...r]; n[i]={...n[i],a:e.target.value.replace(/\D/g,"")}; return n;})}
                              onKeyDown={onEnter}
                              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
@@ -563,7 +568,16 @@ function GameInverse({acc}){
                 </tbody>
               </table>
             </div>
-            <div className="flex gap-2"><a className="px-5 py-3 rounded-2xl border" href="#/inverse">Retour aux réglages</a><a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a></div>
+
+            <div className="flex gap-2">
+              <button className="px-5 py-3 rounded-2xl border"
+                      onClick={()=>{ /* revenir aux réglages du jeu 3 sans recharger */
+                        setStarted(false); setFinished(false); setQuestions([]); setAnswers([]); setIndex(0); setTick(0);
+                      }}>
+                Retour aux réglages
+              </button>
+              <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
+            </div>
           </div>
         )}
       </div>
