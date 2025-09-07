@@ -276,7 +276,6 @@ function GameDefi({acc}){
 
         {started && current && (
           <div className="space-y-6">
-            {/* Bandeau état + barre */}
             <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={acc.cardStyle}>
               <div className="flex items-center justify-between">
                 <div><strong>Question :</strong> {index+1} / {questions.length}</div>
@@ -290,6 +289,7 @@ function GameDefi({acc}){
               <div className="flex gap-3 justify-center">
                 <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value.replace(/\D/g,""))}
                        onKeyDown={e=>{ if(e.key==='Enter') handleSubmit(false); }}
+                       inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
                        className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
                 <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
               </div>
@@ -297,15 +297,13 @@ function GameDefi({acc}){
           </div>
         )}
 
-        {finished && (
-          <Summary cardStyle={cardStyle} answers={answers} />
-        )}
+        {finished && <Summary cardStyle={cardStyle} answers={answers} />}
       </div>
     </div>
   );
 }
 
-/* Récapitulatif commun (réutilisé) */
+/* Récapitulatif commun */
 function Summary({cardStyle,answers}) {
   const score = answers.filter(a=>a.correct).length;
   return (
@@ -340,7 +338,6 @@ function Summary({cardStyle,answers}) {
 }
 
 /* ---------------- JEU 2 — Table de Pythagore ---------------- */
-/* (identique à ta version précédente avec diagonale/miroir/minimal, conservé ci-dessous) */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
@@ -363,7 +360,7 @@ function GamePythagore({acc}){
     }else if(mode==="mirror"){
       for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); // 6 cases ; colonne ×10 déjà connue
+      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b));
     }
     return set;
   },[mode,count,table]);
@@ -435,7 +432,6 @@ function GamePythagore({acc}){
           <strong>Consigne :</strong> <span className="diag-txt">{tip}</span>
         </div>
 
-        {/* Table de Pythagore */}
         <div className="overflow-auto">
           <table className="min-w-[900px] border-collapse">
             <thead>
@@ -508,12 +504,14 @@ function GameInverse({acc}){
   const [x,setX]=useState(""), [y,setY]=useState("");
   const xRef=useRef(null);
 
-  // mode 2
+  // mode 2 — champs “comme le mode 1”, mais en tableau contrôlé
   const pairsFor=(n)=>{ const out=[]; for(let a=2;a<=10;a++){ const b=n/a; if(Number.isInteger(b)&&b>=2&&b<=10) out.push([a,b]); } return out; };
-  const current = questions[index];
-  const [rows,setRows]=useState([]); // [{a:"",b:""}, ...]
+  const [fields,setFields]=useState([]); // [{a:'',b:''}, ...]
+  const firstFieldRef=useRef(null);
 
-  // Tick (chrono)
+  const current = questions[index];
+
+  /* Tick (chrono) + expiration */
   useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
   useEffect(()=>{ 
     if(!started||finished) return; 
@@ -530,27 +528,32 @@ function GameInverse({acc}){
     const list=[]; for(let i=0;i<questionCount;i++) list.push({product:newProduct()});
     setQuestions(list); setIndex(0); setAnswers([]); setTick(0);
     setStarted(true); setFinished(false);
+
     const p=list[0].product;
-    if(mode==="single"){ setX(""); setY(""); setTimeout(()=>xRef.current?.focus(),0); }
-    else{ setRows(pairsFor(p).map(()=>({a:"",b:""}))); }
+    if(mode==="single"){
+      setX(""); setY(""); setTimeout(()=>xRef.current?.focus(),0);
+    }else{
+      const n = pairsFor(p).length;
+      setFields(Array.from({length:n},()=>({a:"",b:""})));
+      setTimeout(()=>firstFieldRef.current?.focus(),0);
+    }
   };
 
-  // Important : garantir que rows a toujours la bonne taille (corrige la saisie partout)
-  useEffect(()=>{
-    if(!started || !current || mode!=="all") return;
-    const needed = pairsFor(current.product).length;
-    setRows(prev=>{
-      let out = prev ? prev.slice(0,needed) : [];
-      while(out.length < needed) out.push({a:"",b:""});
-      return out;
-    });
-  },[started,mode,current?.product]);
-
-  // Préparer les champs à chaque nouvelle question ou en mode single
+  // Ré-initialiser à chaque question / changement de mode (modèle simple & robuste)
   useEffect(()=>{
     if(!started || !current) return;
-    if(mode==="single"){ setX(""); setY(""); setTimeout(()=>xRef.current?.focus(),0); }
+    if(mode==="single"){
+      setX(""); setY(""); setTimeout(()=>xRef.current?.focus(),0);
+    }else{
+      const n = pairsFor(current.product).length;
+      setFields(Array.from({length:n},()=>({a:"",b:""})));
+      setTimeout(()=>firstFieldRef.current?.focus(),0);
+    }
   },[started,index,mode]);
+
+  const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
+
+  const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
   const handleSubmit=(timeout=false)=>{
     if(!current) return;
@@ -561,64 +564,62 @@ function GameInverse({acc}){
       setAnswers(p=>[...p,{mode,product:current.product,a:provided?a:null,b:provided?b:null,correct:ok,timeout}]);
     }else{
       const target = pairsFor(current.product);
-      const wanted = new Map(); target.forEach(([a,b])=>wanted.set(`${a}x${b}`,(wanted.get(`${a}x${b}`)||0)+1));
-      const used = new Map();
+      const want = new Map(); target.forEach(([a,b])=>want.set(`${a}x${b}`,(want.get(`${a}x${b}`)||0)+1));
+      const use  = new Map();
       let exact=true;
-      for(const r of rows){
+      for(const r of fields){
         const a=parseInt(r.a,10), b=parseInt(r.b,10);
         const valid = Number.isInteger(a)&&Number.isInteger(b)&&a>=2&&a<=10&&b>=2&&b<=10&&(a*b===current.product);
         if(!valid){ exact=false; continue; }
-        const k=`${a}x${b}`; used.set(k,(used.get(k)||0)+1);
+        const k=`${a}x${b}`; use.set(k,(use.get(k)||0)+1);
       }
-      for(const [k,c] of wanted){ if(used.get(k)!==c){ exact=false; break; } }
-      for(const [k,c] of used){ if(wanted.get(k)!==c){ exact=false; break; } }
-      setAnswers(p=>[...p,{mode,product:current.product,rows:[...rows],correct:!timeout&&exact&&rows.every(r=>r.a&&r.b),timeout,expected:target}]);
+      for(const [k,c] of want){ if(use.get(k)!==c){ exact=false; break; } }
+      for(const [k,c] of use){ if(want.get(k)!==c){ exact=false; break; } }
+      setAnswers(p=>[...p,{mode,product:current.product,rows:[...fields],correct:!timeout&&exact&&fields.every(r=>r.a&&r.b),timeout,expected:target}]);
     }
     if(index+1>=questions.length){ setFinished(true); setStarted(false); } else { setIndex(i=>i+1); setTick(0); }
   };
-
-  const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
-  const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
 
   const tip = mode==="single"
     ? "Tape une seule décomposition. Ex : 24 → 6 et 4 (ou 3 et 8)."
     : "Tape toutes les décompositions (paires ordonnées). Ex : 24 → 4×6, 6×4, 3×8, 8×3.";
 
-  const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
-
-  // Carte « a × b » – initialisation sûre
+  // Carte « a × b » — EXACTEMENT le même modèle de saisie que le mode 1
   const PairCard = ({i}) => (
-    <div className="pair-card flex items-center gap-3 md:gap-4" key={`row-${i}`}>
-      <input value={rows[i]?.a ?? ""}
-             onChange={e=>setRows(r=>{
-               let n = r ? [...r] : [];
-               if (n.length <= i) { // sécurité : pad jusqu'à i
-                 while(n.length <= i) n.push({a:"",b:""});
-               }
-               const cur=n[i] ?? {a:"",b:""};
-               n[i]={...cur,a:e.target.value.replace(/\D/g,"")};
-               return n;
-             })}
-             onKeyDown={onEnter}
-             className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
+    <div className="pair-card flex items-center gap-3 md:gap-4">
+      <input
+        ref={i===0?firstFieldRef:null}
+        value={fields[i]?.a ?? ""}
+        onChange={e=>{
+          const v=e.target.value.replace(/\D/g,"");
+          setFields(prev=>{
+            const arr = prev.slice();
+            arr[i] = {...(arr[i]||{a:"",b:""}), a:v};
+            return arr;
+          });
+        }}
+        onKeyDown={onEnter}
+        inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+        className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
       <span className="text-2xl">×</span>
-      <input value={rows[i]?.b ?? ""}
-             onChange={e=>setRows(r=>{
-               let n = r ? [...r] : [];
-               if (n.length <= i) {
-                 while(n.length <= i) n.push({a:"",b:""});
-               }
-               const cur=n[i] ?? {a:"",b:""};
-               n[i]={...cur,b:e.target.value.replace(/\D/g,"")};
-               return n;
-             })}
-             onKeyDown={onEnter}
-             className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
+      <input
+        value={fields[i]?.b ?? ""}
+        onChange={e=>{
+          const v=e.target.value.replace(/\D/g,"");
+          setFields(prev=>{
+            const arr = prev.slice();
+            arr[i] = {...(arr[i]||{a:"",b:""}), b:v};
+            return arr;
+          });
+        }}
+        onKeyDown={onEnter}
+        inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+        className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
     </div>
   );
 
-  // Rendu pour n paires : 2 en haut, reste en bas, bien espacées
-  const PairsLayout = ({n}) => {
+  const PairsLayout = () => {
+    const n = current ? pairsFor(current.product).length : 0;
     const top = Math.min(2,n), bottom = n-top;
     return (
       <div className="flex flex-col items-center gap-10">
@@ -634,6 +635,8 @@ function GameInverse({acc}){
       </div>
     );
   };
+
+  const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
 
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
@@ -674,7 +677,10 @@ function GameInverse({acc}){
               <Progress remaining={remaining??0} total={timeLimit}/>
             </div>
 
-            <div className="card rounded-2xl p-3" style={cardStyle}><strong>Consigne :</strong> <span className="diag-txt">{tip}</span></div>
+            <div className="card rounded-2xl p-3" style={cardStyle}><strong>Consigne :</strong> <span className="diag-txt">{mode==="single"
+              ? "Tape une seule décomposition. Ex : 24 → 6 et 4 (ou 3 et 8)."
+              : "Tape toutes les décompositions (paires ordonnées). Ex : 24 → 4×6, 6×4, 3×8, 8×3."
+            }</span></div>
 
             <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
               <div className="text-slate-500">Résultat</div>
@@ -684,23 +690,23 @@ function GameInverse({acc}){
                 <div className="flex gap-4 justify-center items-center">
                   <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
                          onKeyDown={onEnter}
+                         inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
                          className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
                   <span className="text-3xl">×</span>
                   <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))}
                          onKeyDown={onEnter}
+                         inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
                          className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
                   <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                 </div>
               ) : (
-                <PairsLayout n={pairsFor(current.product).length}/>
+                <PairsLayout/>
               )}
             </div>
           </div>
         )}
 
-        {finished && (
-          <Summary cardStyle={cardStyle} answers={answers} />
-        )}
+        {finished && <Summary cardStyle={cardStyle} answers={answers} />}
       </div>
     </div>
   );
@@ -722,3 +728,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
