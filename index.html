@@ -345,34 +345,51 @@ function GameDefi({acc}){
   );
 }
 
-/* --------------------- Jeu n°2 – Table de Pythagore --------------------- */
+/* --------------------- Jeu n°2 – Table de Pythagore (modes enrichis) --------------------- */
 
 function GamePythagore({acc}){
   const {rootBg, rootText, cardStyle, fontFamily, speak} = acc;
   const A=range(2,10), B=range(2,10);
-  const [mode,setMode]=useState("random"); // random | table | diagonal | borders
+
+  // NEW: modes ajoutés 'mirror' et 'minimal'
+  const [mode,setMode]=useState("random"); // random | table | diagonal | borders | mirror | minimal
   const [count,setCount]=useState(10);
   const [table,setTable]=useState(6);
+
+  const key=(a,b)=>`${a}x${b}`;
+  const mirrorKey=(a,b)=>`${b}x${a}`;
+
+  // --- Génération des cases à remplir selon le mode ---
   const blanks = useMemo(()=>{
     const set=new Set();
     if(mode==="random"){
-      const all=[]; for(const a of A)for(const b of B) all.push(`${a}x${b}`);
+      const all=[]; for(const a of A)for(const b of B) all.push(key(a,b));
       while(set.size<Math.min(count,all.length)) set.add(all[Math.floor(Math.random()*all.length)]);
     }else if(mode==="table"){
-      B.forEach(b=> set.add(`${table}x${b}`));
+      B.forEach(b=> set.add(key(table,b)));
     }else if(mode==="diagonal"){
-      A.forEach(a=> set.add(`${a}x${a}`));
+      A.forEach(a=> set.add(key(a,a)));
     }else if(mode==="borders"){
       [2,5,10].forEach(t=>{
-        B.forEach(b=> set.add(`${t}x${b}`));
-        A.forEach(a=> set.add(`${a}x${t}`));
+        B.forEach(b=> set.add(key(t,b)));
+        A.forEach(a=> set.add(key(a,t)));
       });
+    }else if(mode==="mirror"){
+      // Triangle supérieur uniquement (a <= b)
+      for(const a of A) for(const b of B) if(a<=b) set.add(key(a,b));
+    }else if(mode==="minimal"){
+      // Petit carré 6..9 au-dessus de la diagonale (a <= b) + exclusion 2..5 et 10
+      for(let a=6;a<=9;a++){
+        for(let b=a;b<=9;b++){
+          set.add(key(a,b));
+        }
+      }
     }
     return set;
   },[mode,count,table]);
 
-  const [values,setValues]=useState({});
-  const [checked,setChecked]=useState({});
+  const [values,setValues]=useState({});   // k -> string (saisi)
+  const [checked,setChecked]=useState({}); // k -> 'ok' | 'ko'
   const firstRef=useRef(null);
 
   useEffect(()=>{ setValues({}); setChecked({}); setTimeout(()=>firstRef.current?.focus(),0); },[mode,count,table]);
@@ -380,18 +397,39 @@ function GamePythagore({acc}){
   const onChange=(k,v)=> setValues(p=>({...p,[k]:v.replace(/\D/g,"")}));
   const onFocus=(a,b)=> speak(`Complète ${a} multiplié par ${b}`);
 
+  // pour affichage miroir en lecture seule
+  const getDisplayValue=(a,b)=>{
+    const k=key(a,b), m=mirrorKey(a,b);
+    if(values[k]!=null && values[k]!=="") return values[k];
+    // en mode 'mirror', la case (b,a) reflète (a,b)
+    if(mode==="mirror" && values[m]!=null && values[m]!=="") return values[m];
+    return "";
+  };
+
+  const isMirrorReadOnly=(a,b)=>{
+    return mode==="mirror" && a>b; // triangle inférieur : lecture seule (miroir)
+  };
+
   const checkAll=()=>{
     const res={};
     for(const a of A)for(const b of B){
-      const k=`${a}x${b}`;
-      if(!blanks.has(k)) continue;
-      const good=a*b; const v=values[k];
-      res[k] = v!==undefined && v!=="" && Number(v)===good ? "ok":"ko";
+      const k=key(a,b);
+      // si la case n'est pas à remplir dans ce mode ET pas une case miroir lue => on ignore
+      if(!blanks.has(k) && !(mode==="mirror" && a>b && blanks.has(mirrorKey(a,b)))) continue;
+
+      const good=a*b;
+      // valeur candidate = saisie directe ou miroir
+      const vStr = (values[k] ?? (mode==="mirror" ? values[mirrorKey(a,b)] : ""));
+      const ok = vStr!==undefined && vStr!=="" && Number(vStr)===good;
+      res[k] = ok ? "ok" : "ko";
     }
     setChecked(res);
+
+    // Synthèse audio
     const wrong = Object.values(res).filter(x=>x==="ko").length;
     speak(wrong===0 ? "Bravo, tout est correct !" : `${wrong} case${wrong>1?"s":""} à corriger`);
   };
+
   const reset=()=>{ setValues({}); setChecked({}); setTimeout(()=>firstRef.current?.focus(),0); };
 
   return (
@@ -399,31 +437,41 @@ function GamePythagore({acc}){
       <TopNav route="/pythagore" go={(k)=>location.hash="#"+k}/>
       <div className="max-w-6xl mx-auto">
         {/* Accessibilité / Mode / Actions sur une seule ligne */}
-        <div className="grid lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid xl:grid-cols-3 gap-4 mb-6">
           <AccessibilityCard acc={acc}/>
+
+          {/* MODE */}
           <div className="card rounded-2xl p-4" style={cardStyle}>
             <div className="font-bold mb-2">Mode</div>
-            <div className="space-y-2">
-              <label className="block"><input type="radio" name="m" checked={mode==="random"} onChange={()=>setMode("random")}/> Aléatoires</label>
+            <div className="grid grid-cols-1 gap-2">
+              <label><input type="radio" name="m" checked={mode==="random"}   onChange={()=>setMode("random")}/> Aléatoires</label>
               {mode==="random" && (
-                <div className="ml-6 mt-1">
+                <div className="ml-6">
                   <label className="text-sm">Nombre de cases</label>
-                  <input type="number" min="1" max="81" value={count} onChange={e=>setCount(parseInt(e.target.value)||1)} className="border rounded px-2 py-1 w-24 ml-2"/>
+                  <input type="number" min="1" max="81" value={count}
+                         onChange={e=>setCount(parseInt(e.target.value)||1)}
+                         className="border rounded px-2 py-1 w-24 ml-2"/>
                 </div>
               )}
-              <label className="block"><input type="radio" name="m" checked={mode==="table"} onChange={()=>setMode("table")}/> Table par table</label>
+              <label><input type="radio" name="m" checked={mode==="table"}    onChange={()=>setMode("table")}/> Table par table</label>
               {mode==="table" && (
-                <div className="ml-6 mt-1">
+                <div className="ml-6">
                   <label className="text-sm">Table</label>
-                  <select value={table} onChange={e=>setTable(parseInt(e.target.value))} className="border rounded px-2 py-1 ml-2">
+                  <select value={table} onChange={e=>setTable(parseInt(e.target.value))}
+                          className="border rounded px-2 py-1 ml-2">
                     {A.map(t=><option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
               )}
-              <label className="block"><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des doubles</label>
-              <label className="block"><input type="radio" name="m" checked={mode==="borders"} onChange={()=>setMode("borders")}/> Bords (2, 5, 10)</label>
+              <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des doubles</label>
+              <label><input type="radio" name="m" checked={mode==="borders"}  onChange={()=>setMode("borders")}/> Bords (2, 5, 10)</label>
+              {/* NEW */}
+              <label><input type="radio" name="m" checked={mode==="mirror"}   onChange={()=>setMode("mirror")}/> Miroir de la diagonale (commutativité)</label>
+              <label><input type="radio" name="m" checked={mode==="minimal"}  onChange={()=>setMode("minimal")}/> Reste à apprendre (6–9)</label>
             </div>
           </div>
+
+          {/* ACTIONS */}
           <div className="card rounded-2xl p-4" style={cardStyle}>
             <div className="font-bold mb-2">Actions</div>
             <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
@@ -431,7 +479,7 @@ function GamePythagore({acc}){
           </div>
         </div>
 
-        {/* Table plus grande */}
+        {/* Table agrandie */}
         <div className="overflow-auto">
           <table className="min-w-[900px] border-collapse">
             <thead>
@@ -445,14 +493,23 @@ function GamePythagore({acc}){
                 <tr key={a}>
                   <th className="p-2 hdr text-left">{a}</th>
                   {B.map((b,bi)=>{
-                    const k=`${a}x${b}`, fill=blanks.has(k), good=a*b, st=checked[k];
-                    const ref = (!ai && !bi && fill) ? {ref: (el)=>{ if(el && !firstRef.current) firstRef.current=el; }} : {};
+                    const k=key(a,b);
+                    const fill = blanks.has(k) || (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))); // miroir lisible
+                    const good = a*b;
+                    const st = checked[k] || (mode==="mirror" ? checked[mirrorKey(a,b)] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
+                    const readOnlyMirror = isMirrorReadOnly(a,b);
+
+                    const props = readOnlyMirror ? {readOnly:true} : {};
+                    const ref = (!ai && !bi && fill && !readOnlyMirror) ? {ref:firstRef} : {};
+
                     return (
                       <td key={k} className={"p-1 text-center "+(st==="ok"?"ok":st==="ko"?"ko":"")}>
                         {fill ? (
-                          <input {...ref} onFocus={()=>onFocus(a,b)}
-                            value={(values[k]??"")} onChange={e=>onChange(k,e.target.value)}
+                          <input {...ref} {...props}
+                            onFocus={()=>onFocus(a,b)}
+                            value={getDisplayValue(a,b)}
+                            onChange={e=>onChange(readOnlyMirror ? mirrorKey(a,b) : k, e.target.value)}
                             className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+koClass}/>
                         ) : (
                           <span className="inline-block min-w-[84px] text-lg">{good}</span>
