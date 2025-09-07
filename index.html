@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -26,13 +26,13 @@
   .ok{ background:#dcfce7; } .ko{ background:#fee2e2; }
   .ko-input{ color:#be185d !important; font-weight:700; }
 
-  /* Styles violets : diagonale + cases à remplir */
+  /* Violets pédagogiques */
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
   .diag-txt { color:#8374a7 !important; font-weight:700; }
   .fill-hint { background: rgba(131,116,167,.12) !important; }
   .violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
 
-  /* Cartes Jeu 3 (décompositions) */
+  /* Cartes Jeu 3 */
   .pair-card{
     background: rgba(131,116,167,.10);
     border: 1px solid #8374a7;
@@ -40,7 +40,7 @@
     padding: 14px 16px;
   }
 
-  /* Écran noir (contrastes élevés) */
+  /* Écran noir */
   .dark-mode, .dark-mode * { color:#f8fafc !important; }
   .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
   .dark-mode .hdr{ background:#1f2937 !important; }
@@ -65,7 +65,7 @@ const {useState,useEffect,useMemo,useRef} = React;
 const BRAND = "#8374a7";
 const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
 
-/* ---------- NAV / HUB ---------- */
+/* ---------------- NAV / HUB ---------------- */
 function TopNav({route,go}){
   return (
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
@@ -116,7 +116,7 @@ function Hub(){
   );
 }
 
-/* ---------- ACCESSIBILITÉ ---------- */
+/* ---------------- ACCESSIBILITÉ ---------------- */
 function useAccessibility(){
   const [font,setFont]=useState("Arial");
   const [size,setSize]=useState(16);
@@ -157,7 +157,7 @@ function AccessibilityCard({acc}){
   );
 }
 
-/* ---------- JEU 1 — Défi Tables ---------- */
+/* ---------------- JEU 1 — Défi Tables ---------------- */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
@@ -196,6 +196,7 @@ function GameDefi({acc}){
   };
 
   const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
+  const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
 
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
@@ -240,6 +241,14 @@ function GameDefi({acc}){
 
         {started && current && (
           <div className="space-y-6">
+            {/* Bandeau état */}
+            <div className="card rounded-2xl p-3" style={acc.cardStyle}>
+              <div className="flex items-center justify-between">
+                <div><strong>Question :</strong> {index+1} / {questions.length}</div>
+                <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
+              </div>
+            </div>
+
             <div className="rounded-3xl border p-6 text-center shadow-sm card" style={acc.cardStyle}>
               <div className="font-black text-5xl mb-4">{current.a} × {current.b} = ?</div>
               <div className="flex gap-3 justify-center">
@@ -281,7 +290,7 @@ function GameDefi({acc}){
   );
 }
 
-/* ---------- JEU 2 — Table de Pythagore ---------- */
+/* ---------------- JEU 2 — Table de Pythagore ---------------- */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
@@ -302,10 +311,9 @@ function GamePythagore({acc}){
     }else if(mode==="diagonal"){
       A.forEach(a=> set.add(key(a,a)));
     }else if(mode==="mirror"){
-      for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b)); // triangle haut (sans diagonale)
+      for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      // seulement les 6 « restes à apprendre » ; colonne ×10 pré-remplie
-      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b));
+      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); // 6 cases ; colonne ×10 déjà connue
     }
     return set;
   },[mode,count,table]);
@@ -393,33 +401,28 @@ function GamePythagore({acc}){
                   {B.map(b=>{
                     const k=`${a}x${b}`, onDiag=a===b;
 
-                    // Faut-il remplir ?
                     let shouldFill;
                     if(mode==="mirror")      shouldFill = (a<=b && !onDiag);
-                    else if(mode==="minimal")shouldFill = (a>=6 && b>=6 && a<b && b!==10); // colonne ×10 pré-remplie
+                    else if(mode==="minimal")shouldFill = (a>=6 && b>=6 && a<b && b!==10);
                     else if(mode==="diagonal") shouldFill = onDiag;
                     else if(mode==="table")    shouldFill = (a===table);
-                    else /* random */          shouldFill = blanks.has(k);
+                    else                       shouldFill = blanks.has(k);
 
                     const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
 
-                    // diagonale préremplie (mirror & minimal)
                     if((mode==="mirror"||mode==="minimal") && onDiag){
                       return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
-                    // triangle inférieur lecture seule (mirror)
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
                       return <td key={k} className="p-1 text-center diag-bg"><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
                     }
-                    // diagonale à saisir (fond + bordure violets)
                     if(mode==="diagonal" && onDiag){
                       return <td key={k} className="p-1 text-center fill-hint"><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt violet-border "+koClass}/></td>;
                     }
 
-                    // cellule standard
                     const content = shouldFill
                       ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+(needsHint?"violet-border ":"")+koClass}/>
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
@@ -438,12 +441,12 @@ function GamePythagore({acc}){
   );
 }
 
-/* ---------- JEU 3 — Retrouve la multiplication ---------- */
+/* ---------------- JEU 3 — Retrouve la multiplication ---------------- */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
   const [questionCount,setQuestionCount]=useState(10);
-  const [timeLimit,setTimeLimit]=useState(5); // null = Pas de chrono (3s retiré)
+  const [timeLimit,setTimeLimit]=useState(5); // null = Pas de chrono
   const [mode,setMode]=useState("single");    // "single" | "all"
 
   const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
@@ -459,6 +462,7 @@ function GameInverse({acc}){
   const current = questions[index];
   const [rows,setRows]=useState([]); // [{a:"",b:""}, ...]
 
+  // Tick (chrono)
   useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
   useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit) handleSubmit(true); },[tick]);
 
@@ -473,6 +477,7 @@ function GameInverse({acc}){
     else{ setRows(pairsFor(p).map(()=>({a:"",b:""}))); }
   };
 
+  // Préparer les champs à chaque nouvelle question ou changement de mode
   useEffect(()=>{
     if(!started || !current) return;
     if(mode==="single"){ setX(""); setY(""); setTimeout(()=>xRef.current?.focus(),0); }
@@ -505,6 +510,7 @@ function GameInverse({acc}){
   };
 
   const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
+  const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
 
   const tip = mode==="single"
     ? "Tape une seule décomposition. Ex : 24 → 6 et 4 (ou 3 et 8)."
@@ -512,7 +518,7 @@ function GameInverse({acc}){
 
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
-  // Carte « a × b » – correctif d’init pour permettre la saisie
+  // Carte « a × b » – initialisation sûre (corrige le bug de saisie)
   const PairCard = ({i}) => (
     <div className="pair-card flex items-center gap-3 md:gap-4">
       <input value={rows[i]?.a||""}
@@ -557,6 +563,14 @@ function GameInverse({acc}){
 
         {started && current && (
           <div className="space-y-6">
+            {/* Bandeau état */}
+            <div className="card rounded-2xl p-3" style={cardStyle}>
+              <div className="flex items-center justify-between">
+                <div><strong>Question :</strong> {index+1} / {questions.length}</div>
+                <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
+              </div>
+            </div>
+
             <div className="card rounded-2xl p-3" style={cardStyle}><strong>Consigne :</strong> <span className="diag-txt">{tip}</span></div>
 
             <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
@@ -664,7 +678,7 @@ function GameInverse({acc}){
   );
 }
 
-/* ---------- APP ---------- */
+/* ---------------- APP ---------------- */
 function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
