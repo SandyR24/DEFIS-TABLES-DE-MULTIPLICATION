@@ -230,7 +230,6 @@ function GameDefi({acc}){
     else { setIndex(i=>i+1); setTick(0); setInput(""); }
   };
 
-  const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
   const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
 
   return (
@@ -289,7 +288,7 @@ function GameDefi({acc}){
               <div className="flex gap-3 justify-center">
                 <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value.replace(/\D/g,""))}
                        onKeyDown={e=>{ if(e.key==='Enter') { e.preventDefault(); handleSubmit(false);} }}
-                       inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+                       inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
                        className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
                 <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
               </div>
@@ -360,7 +359,7 @@ function GamePythagore({acc}){
     }else if(mode==="mirror"){
       for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b));
+      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); // 6 cases
     }
     return set;
   },[mode,count,table]);
@@ -492,7 +491,7 @@ function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
   const [questionCount,setQuestionCount]=useState(10);
-  const [timeLimit,setTimeLimit]=useState(5); // null = Pas de chrono
+  const [timeLimit,setTimeLimit]=useState(15); // 15 par défaut (peut être 20 ou pas de chrono)
   const [mode,setMode]=useState("single");    // "single" | "all"
 
   const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
@@ -554,8 +553,6 @@ function GameInverse({acc}){
 
   const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
 
-  const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } /* Tab natif inchangé */ };
-
   const handleSubmit=(timeout=false)=>{
     if(!current) return;
     if(mode==="single"){
@@ -585,6 +582,8 @@ function GameInverse({acc}){
     ? "Tape une seule décomposition. Ex : 24 → 6 et 4 (ou 3 et 8)."
     : "Tape toutes les décompositions (paires ordonnées). Ex : 24 → 4×6, 6×4, 3×8, 8×3.";
 
+  const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } }; // Enter = valider (comme mode 1)
+
   /* Carte a×b — inputs contrôlés, Enter = valider, Tab natif */
   const PairCard = ({i}) => (
     <div className="pair-card flex items-center gap-3 md:gap-4">
@@ -594,13 +593,14 @@ function GameInverse({acc}){
         onChange={e=>{
           const v=e.target.value.replace(/\D/g,"");
           setFields(prev=>{
-            const arr = prev.slice();
-            arr[i] = {...(arr[i]||{a:"",b:""}), a:v};
+            const arr = Array.isArray(prev) ? prev.slice() : [];
+            if(!arr[i]) arr[i]={a:"",b:""};
+            arr[i]={...arr[i], a:v};
             return arr;
           });
         }}
         onKeyDown={onEnter}
-        inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false" tabIndex={0}
         className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
       <span className="text-2xl">×</span>
       <input
@@ -608,23 +608,24 @@ function GameInverse({acc}){
         onChange={e=>{
           const v=e.target.value.replace(/\D/g,"");
           setFields(prev=>{
-            const arr = prev.slice();
-            arr[i] = {...(arr[i]||{a:"",b:""}), b:v};
+            const arr = Array.isArray(prev) ? prev.slice() : [];
+            if(!arr[i]) arr[i]={a:"",b:""};
+            arr[i]={...arr[i], b:v};
             return arr;
           });
         }}
         onKeyDown={onEnter}
-        inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false" tabIndex={0}
         className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
     </div>
   );
 
-  /* Disposition 2 en haut, reste en bas – clé par question pour remount */
-  const PairsLayout = ({qIndex}) => {
+  /* Disposition 2 en haut, reste en bas (espacés) */
+  const PairsLayout = () => {
     const n = current ? pairsFor(current.product).length : 0;
     const top = Math.min(2,n), bottom = n-top;
     return (
-      <div key={"q-"+qIndex} className="flex flex-col items-center gap-10">
+      <div className="flex flex-col items-center gap-10">
         <div className="flex gap-12 justify-center">
           {Array.from({length:top},(_,i)=><PairCard i={i} key={`top-${i}`}/>)}
         </div>
@@ -639,7 +640,6 @@ function GameInverse({acc}){
   };
 
   const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
-  const remainingPct = timeLimit==null ? null : Math.max(0, Math.min(100, (remaining/timeLimit)*100));
 
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
@@ -661,7 +661,7 @@ function GameInverse({acc}){
               )}</div>
               <div className="font-bold mt-4 mb-1">Temps par question</div>
               <div className="flex gap-2 flex-wrap">
-                {[5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+                {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
                 <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
               </div>
             </div>
@@ -690,17 +690,17 @@ function GameInverse({acc}){
                 <div className="flex gap-4 justify-center items-center">
                   <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
                          onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); handleSubmit(false);} }}
-                         inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
                          className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
                   <span className="text-3xl">×</span>
                   <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))}
                          onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); handleSubmit(false);} }}
-                         inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck="false"
+                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
                          className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
                   <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                 </div>
               ) : (
-                <PairsLayout qIndex={index}/>
+                <PairsLayout/>
               )}
             </div>
           </div>
