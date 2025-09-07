@@ -44,6 +44,14 @@
   .progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
   .progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
 
+  /* Flash rouge à l’expiration */
+  .flash { animation: flash-red 600ms ease-in-out; }
+  @keyframes flash-red {
+    0%{ box-shadow:0 0 0 0 rgba(220,38,38,0); }
+    30%{ box-shadow:0 0 0 6px rgba(220,38,38,.45); }
+    100%{ box-shadow:0 0 0 0 rgba(220,38,38,0); }
+  }
+
   /* Écran noir */
   .dark-mode, .dark-mode * { color:#f8fafc !important; }
   .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
@@ -173,6 +181,7 @@ function Progress({remaining, total}) {
     </div>
   );
 }
+const vibrate = (pattern=[80,40,120]) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(_){} };
 
 /* ---------------- JEU 1 — Défi Tables ---------------- */
 function GameDefi({acc}){
@@ -183,10 +192,19 @@ function GameDefi({acc}){
   const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
   const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
   const [input,setInput]=useState(""), [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
+  const [flash,setFlash]=useState(false);
   const inputRef=useRef(null);
 
   useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
-  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit) handleSubmit(true); },[tick]);
+  useEffect(()=>{ 
+    if(!started||finished) return; 
+    if(timeLimit!=null && tick>=timeLimit){
+      setFlash(true); vibrate();
+      setTimeout(()=>setFlash(false), 650);
+      handleSubmit(true);
+    }
+  },[tick]);
+
   useEffect(()=>{ if(started && !finished && questions[index]){ const q=questions[index]; speak(`${q.a} multiplié par ${q.b}`);} },[index,started,finished]);
 
   const start=()=>{
@@ -259,7 +277,7 @@ function GameDefi({acc}){
         {started && current && (
           <div className="space-y-6">
             {/* Bandeau état + barre */}
-            <div className="card rounded-2xl p-3" style={acc.cardStyle}>
+            <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={acc.cardStyle}>
               <div className="flex items-center justify-between">
                 <div><strong>Question :</strong> {index+1} / {questions.length}</div>
                 <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
@@ -280,35 +298,49 @@ function GameDefi({acc}){
         )}
 
         {finished && (
-          <div className="space-y-6">
-            <div className="rounded-3xl border p-6 shadow-sm card" style={acc.cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2>
-              <p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p>
-            </div>
-            <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={acc.cardStyle}>
-              <table className="w-full text-left text-sm">
-                <thead><tr><th>#</th><th>Énoncé</th><th>Réponse</th><th>Correction</th><th>Statut</th></tr></thead>
-                <tbody>
-                  {answers.map((r,i)=>(
-                    <tr key={i} className="border-t">
-                      <td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td>
-                      <td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex gap-2">
-              <a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a>
-              <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
-            </div>
-          </div>
+          <Summary cardStyle={cardStyle} answers={answers} />
         )}
       </div>
     </div>
   );
 }
 
+/* Récapitulatif commun (réutilisé) */
+function Summary({cardStyle,answers}) {
+  const score = answers.filter(a=>a.correct).length;
+  return (
+    <>
+      <div className="rounded-3xl border p-6 shadow-sm card" style={cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2>
+        <p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p>
+      </div>
+      <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={cardStyle}>
+        <table className="w-full text-left text-sm">
+          <thead><tr><th>#</th><th>Énoncé / Résultat</th><th>Réponse(s)</th><th>Correction</th><th>Statut</th></tr></thead>
+          <tbody>
+            {answers.map((r,i)=>(
+              <tr key={i} className="border-t">
+                <td>{i+1}</td>
+                <td>{r.a!=null?`${r.a}×${r.b}`:r.product}</td>
+                <td>{r.user!=null ? r.user : (r.rows? r.rows.map(v=>v.a&&v.b?`${v.a}×${v.b}`:"—").join(" ; ") : "—")}</td>
+                <td>{r.product ?? (r.expected?r.expected.map(([a,b])=>`${a}×${b}`).join(" ; "):"")}</td>
+                <td>{r.timeout ? "⏱ Hors délai"
+                               : (r.user==null && !r.rows ? "— Pas de réponse"
+                               : (r.correct?"✔ Juste":"✘ Faux"))}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex gap-2">
+        <a className="px-5 py-3 rounded-2xl border" href="javascript:history.back()">Retour aux réglages</a>
+        <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
+      </div>
+    </>
+  );
+}
+
 /* ---------------- JEU 2 — Table de Pythagore ---------------- */
+/* (identique à ta version précédente avec diagonale/miroir/minimal, conservé ci-dessous) */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
@@ -319,7 +351,7 @@ function GamePythagore({acc}){
   const key=(a,b)=>`${a}x${b}`;
   const mirrorKey=(a,b)=>`${b}x${a}`;
 
-  const blanks=useMemo(()=>{
+  const blanks=React.useMemo(()=>{
     const set=new Set();
     if(mode==="random"){
       const all=[]; for(const a of A)for(const b of B) all.push(key(a,b));
@@ -470,6 +502,7 @@ function GameInverse({acc}){
   const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
   const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
   const [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
+  const [flash,setFlash]=useState(false);
 
   // mode 1
   const [x,setX]=useState(""), [y,setY]=useState("");
@@ -482,7 +515,14 @@ function GameInverse({acc}){
 
   // Tick (chrono)
   useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
-  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit) handleSubmit(true); },[tick]);
+  useEffect(()=>{ 
+    if(!started||finished) return; 
+    if(timeLimit!=null && tick>=timeLimit){
+      setFlash(true); vibrate();
+      setTimeout(()=>setFlash(false), 650);
+      handleSubmit(true);
+    }
+  },[tick]);
 
   const newProduct=()=>{ const a=2+Math.floor(Math.random()*9), b=2+Math.floor(Math.random()*9); return a*b; };
 
@@ -495,11 +535,21 @@ function GameInverse({acc}){
     else{ setRows(pairsFor(p).map(()=>({a:"",b:""}))); }
   };
 
-  // Préparer les champs à chaque nouvelle question ou changement de mode
+  // Important : garantir que rows a toujours la bonne taille (corrige la saisie partout)
+  useEffect(()=>{
+    if(!started || !current || mode!=="all") return;
+    const needed = pairsFor(current.product).length;
+    setRows(prev=>{
+      let out = prev ? prev.slice(0,needed) : [];
+      while(out.length < needed) out.push({a:"",b:""});
+      return out;
+    });
+  },[started,mode,current?.product]);
+
+  // Préparer les champs à chaque nouvelle question ou en mode single
   useEffect(()=>{
     if(!started || !current) return;
     if(mode==="single"){ setX(""); setY(""); setTimeout(()=>xRef.current?.focus(),0); }
-    else{ setRows(pairsFor(current.product).map(()=>({a:"",b:""}))); }
   },[started,index,mode]);
 
   const handleSubmit=(timeout=false)=>{
@@ -536,12 +586,15 @@ function GameInverse({acc}){
 
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
-  // Carte « a × b » – initialisation sûre (corrige la saisie)
+  // Carte « a × b » – initialisation sûre
   const PairCard = ({i}) => (
-    <div className="pair-card flex items-center gap-3 md:gap-4">
-      <input value={rows[i]?.a||""}
+    <div className="pair-card flex items-center gap-3 md:gap-4" key={`row-${i}`}>
+      <input value={rows[i]?.a ?? ""}
              onChange={e=>setRows(r=>{
-               const n=[...r];
+               let n = r ? [...r] : [];
+               if (n.length <= i) { // sécurité : pad jusqu'à i
+                 while(n.length <= i) n.push({a:"",b:""});
+               }
                const cur=n[i] ?? {a:"",b:""};
                n[i]={...cur,a:e.target.value.replace(/\D/g,"")};
                return n;
@@ -549,9 +602,12 @@ function GameInverse({acc}){
              onKeyDown={onEnter}
              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
       <span className="text-2xl">×</span>
-      <input value={rows[i]?.b||""}
+      <input value={rows[i]?.b ?? ""}
              onChange={e=>setRows(r=>{
-               const n=[...r];
+               let n = r ? [...r] : [];
+               if (n.length <= i) {
+                 while(n.length <= i) n.push({a:"",b:""});
+               }
                const cur=n[i] ?? {a:"",b:""};
                n[i]={...cur,b:e.target.value.replace(/\D/g,"")};
                return n;
@@ -560,6 +616,24 @@ function GameInverse({acc}){
              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" />
     </div>
   );
+
+  // Rendu pour n paires : 2 en haut, reste en bas, bien espacées
+  const PairsLayout = ({n}) => {
+    const top = Math.min(2,n), bottom = n-top;
+    return (
+      <div className="flex flex-col items-center gap-10">
+        <div className="flex gap-12 justify-center">
+          {Array.from({length:top},(_,i)=><PairCard i={i} key={`top-${i}`}/>)}
+        </div>
+        {bottom>0 && (
+          <div className="flex gap-12 justify-center">
+            {Array.from({length:bottom},(_,j)=><PairCard i={top+j} key={`bot-${j}`}/>)}
+          </div>
+        )}
+        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+      </div>
+    );
+  };
 
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
@@ -591,8 +665,8 @@ function GameInverse({acc}){
 
         {started && current && (
           <div className="space-y-6">
-            {/* Bandeau état + barre */}
-            <div className="card rounded-2xl p-3" style={cardStyle}>
+            {/* Bandeau état + barre + flash */}
+            <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={cardStyle}>
               <div className="flex items-center justify-between">
                 <div><strong>Question :</strong> {index+1} / {questions.length}</div>
                 <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
@@ -618,89 +692,14 @@ function GameInverse({acc}){
                   <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                 </div>
               ) : (
-                (() => {
-                  const needed = pairsFor(current.product).length;
-                  if (needed === 4) {
-                    return (
-                      <div className="flex flex-col items-center gap-10">
-                        <div className="flex gap-12 justify-center"><PairCard i={0}/><PairCard i={1}/></div>
-                        <div className="flex gap-12 justify-center"><PairCard i={2}/><PairCard i={3}/></div>
-                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-                      </div>
-                    );
-                  }
-                  if (needed === 3) {
-                    return (
-                      <div className="flex flex-col items-center gap-10">
-                        <div className="flex gap-12 justify-center"><PairCard i={0}/><PairCard i={1}/></div>
-                        <div className="flex gap-12 justify-center"><PairCard i={2}/></div>
-                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-                      </div>
-                    );
-                  }
-                  if (needed === 2) {
-                    return (
-                      <div className="flex flex-col items-center gap-10">
-                        <div className="flex gap-12 justify-center"><PairCard i={0}/><PairCard i={1}/></div>
-                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-                      </div>
-                    );
-                  }
-                  if (needed === 1) {
-                    return (
-                      <div className="flex flex-col items-center gap-8">
-                        <div className="flex gap-12 justify-center"><PairCard i={0}/></div>
-                        <button onClick={()=>handleSubmit(false)} className="mt-2 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 justify-items-center">
-                      {pairsFor(current.product).map((_,i)=>(<PairCard key={i} i={i}/>))}
-                      <div className="col-span-full text-center pt-2">
-                        <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-                      </div>
-                    </div>
-                  );
-                })()
+                <PairsLayout n={pairsFor(current.product).length}/>
               )}
             </div>
           </div>
         )}
 
         {finished && (
-          <div className="space-y-6">
-            <div className="rounded-3xl border p-6 shadow-sm card" style={cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2><p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p></div>
-            <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={cardStyle}>
-              <table className="w-full text-left text-sm">
-                <thead><tr><th>#</th><th>Résultat</th><th>Réponse(s)</th><th>Correction attendue</th><th>Statut</th></tr></thead>
-                <tbody>
-                  {answers.map((r,i)=>(
-                    <tr key={i} className="border-t">
-                      <td>{i+1}</td>
-                      <td>{r.product}</td>
-                      <td>{r.mode==="single" ? (r.a!=null&&r.b!=null?`${r.a}×${r.b}`:"—")
-                                              : (r.rows||[]).map(v=>v.a&&v.b?`${v.a}×${v.b}`:"—").join(" ; ")}</td>
-                      <td>{r.mode==="single" ? r.product : (pairsFor(r.product)||[]).map(([a,b])=>`${a}×${b}`).join(" ; ")}</td>
-                      <td>{r.timeout ? "⏱ Hors délai"
-                                     : (r.mode==="single"
-                                        ? (r.a==null||r.b==null ? "— Pas de réponse" : (r.correct?"✔ Juste":"✘ Faux"))
-                                        : ((r.rows||[]).some(x=>!x.a||!x.b) ? "— Pas de réponse" : (r.correct?"✔ Juste":"✘ Faux")))
-                         }</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex gap-2">
-              <button className="px-5 py-3 rounded-2xl border"
-                      onClick={()=>{ setStarted(false); setFinished(false); setQuestions([]); setAnswers([]); setIndex(0); setTick(0); }}>
-                Retour aux réglages
-              </button>
-              <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
-            </div>
-          </div>
+          <Summary cardStyle={cardStyle} answers={answers} />
         )}
       </div>
     </div>
