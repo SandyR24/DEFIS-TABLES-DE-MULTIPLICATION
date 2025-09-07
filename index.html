@@ -74,10 +74,10 @@ function TopNav({route,go}){
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
           <img src="sacadoLogo.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
-          <div>
-            <div className="font-black leading-tight">Sacado Académie</div>
-            <div className="text-xs opacity-90">Atelier d’automatismes</div>
-          </div>
+        <div>
+          <div className="font-black leading-tight">Sacado Académie</div>
+          <div className="text-xs opacity-90">Atelier d’automatismes</div>
+        </div>
         </div>
         <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
       </div>
@@ -159,7 +159,7 @@ function AccessibilityCard({acc}){
   );
 }
 
-/* ---------- Jeu n°1 — Défi Tables ---------- */
+/* ---------- Jeu n°1 — Défi Tables (inchangé) ---------- */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
@@ -201,17 +201,26 @@ function GameDefi({acc}){
             <div className="card rounded-2xl p-4" style={acc.cardStyle}>
               <div className="font-bold mb-2">Réglages</div>
               <div className="mb-2"><div className="text-sm mb-1">Tables</div>
-                <div className="flex flex-wrap gap-2">{range(2,10).map(n=><button key={n} onClick={()=>setSelectedTables(p=>p.includes(n)?p.filter(x=>x!==n):[...p,n])} className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>)}</div>
+                <div className="flex flex-wrap gap-2">{range(2,10).map(n=>
+                  <button key={n} onClick={()=>setSelectedTables(p=>p.includes(n)?p.filter(x=>x!==n):[...p,n])}
+                          className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>)}
+                </div>
               </div>
               <div className="mb-2"><div className="text-sm mb-1">Nombre de questions</div>
-                <div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}</div>
+                <div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=>
+                  <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}
+                </div>
               </div>
               <div><div className="text-sm mb-1">Temps par question</div>
-                <div className="flex gap-2 flex-wrap">{[3,5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+                <div className="flex gap-2 flex-wrap">{[3,5,10].map(s=>
+                    <button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
                   <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button></div>
               </div>
             </div>
-            <div className="card rounded-2xl p-4" style={acc.cardStyle}><div className="font-bold mb-2">Action</div><button onClick={start} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Lancer le défi</button></div>
+            <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+              <div className="font-bold mb-2">Action</div>
+              <button onClick={start} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Lancer le défi</button>
+            </div>
           </div>
         )}
 
@@ -231,13 +240,21 @@ function GameDefi({acc}){
 
         {finished && (
           <div className="space-y-6">
-            <div className="rounded-3xl border p-6 shadow-sm card" style={acc.cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2><p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p></div>
+            <div className="rounded-3xl border p-6 shadow-sm card" style={acc.cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2>
+              <p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p></div>
             <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={acc.cardStyle}>
-              <table className="w-full text-left text-sm"><thead><tr><th>#</th><th>Énoncé</th><th>Réponse</th><th>Correction</th><th>Statut</th></tr></thead>
-                <tbody>{answers.map((r,i)=>(<tr key={i} className="border-t"><td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td><td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td></tr>))}</tbody>
+              <table className="w-full text-left text-sm">
+                <thead><tr><th>#</th><th>Énoncé</th><th>Réponse</th><th>Correction</th><th>Statut</th></tr></thead>
+                <tbody>{answers.map((r,i)=>(
+                  <tr key={i} className="border-t"><td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td>
+                    <td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td></tr>
+                ))}</tbody>
               </table>
             </div>
-            <div className="flex gap-2"><a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a><a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a></div>
+            <div className="flex gap-2">
+              <a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a>
+              <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
+            </div>
           </div>
         )}
       </div>
@@ -402,7 +419,7 @@ function GamePythagore({acc}){
   );
 }
 
-/* ---------- Jeu n°3 — Retrouve la multiplication (espacement ++, pas de 3s) ---------- */
+/* ---------- Jeu n°3 — Retrouve la multiplication (layout 2+2 quand 4 paires) ---------- */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
@@ -476,6 +493,21 @@ function GameInverse({acc}){
 
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
+  // petit composant pour une « carte » (paire a × b)
+  const PairCard = ({i}) => (
+    <div className="pair-card flex items-center gap-3 md:gap-4">
+      <input value={rows[i]?.a||""}
+             onChange={e=>setRows(r=>{const n=[...r]; n[i]={...n[i],a:e.target.value.replace(/\D/g,"")}; return n;})}
+             onKeyDown={onEnter}
+             className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
+      <span className="text-2xl">×</span>
+      <input value={rows[i]?.b||""}
+             onChange={e=>setRows(r=>{const n=[...r]; n[i]={...n[i],b:e.target.value.replace(/\D/g,"")}; return n;})}
+             onKeyDown={onEnter}
+             className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
+    </div>
+  );
+
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
       <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
@@ -524,23 +556,32 @@ function GameInverse({acc}){
                   <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                 </div>
               ) : (
-                /* grille aérée et jolies cartes */
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-7 justify-items-center">
-                  {pairsFor(current.product).map((_,i)=>(
-                    <div key={i} className="pair-card flex items-center gap-3 md:gap-4">
-                      <input value={rows[i]?.a||""} onChange={e=>setRows(r=>{const n=[...r]; n[i]={...n[i],a:e.target.value.replace(/\D/g,"")}; return n;})}
-                             onKeyDown={onEnter}
-                             className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
-                      <span className="text-2xl">×</span>
-                      <input value={rows[i]?.b||""} onChange={e=>setRows(r=>{const n=[...r]; n[i]={...n[i],b:e.target.value.replace(/\D/g,"")}; return n;})}
-                             onKeyDown={onEnter}
-                             className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
+                (() => {
+                  const needed = pairsFor(current.product).length;
+                  if (needed === 4) {
+                    /* 2 cartes en haut + 2 en bas, bien espacées */
+                    return (
+                      <div className="flex flex-col items-center gap-8">
+                        <div className="flex gap-8 md:gap-12 justify-center">
+                          <PairCard i={0}/><PairCard i={1}/>
+                        </div>
+                        <div className="flex gap-8 md:gap-12 justify-center">
+                          <PairCard i={2}/><PairCard i={3}/>
+                        </div>
+                        <button onClick={()=>handleSubmit(false)} className="mt-4 px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+                      </div>
+                    );
+                  }
+                  /* Autres cas : grille aérée et responsive */
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-7 justify-items-center">
+                      {pairsFor(current.product).map((_,i)=>(<PairCard key={i} i={i}/>))}
+                      <div className="col-span-full text-center pt-2">
+                        <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+                      </div>
                     </div>
-                  ))}
-                  <div className="col-span-full text-center pt-2">
-                    <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-                  </div>
-                </div>
+                  );
+                })()
               )}
             </div>
           </div>
