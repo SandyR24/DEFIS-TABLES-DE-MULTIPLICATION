@@ -30,9 +30,17 @@
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
   .diag-txt { color:#8374a7 !important; font-weight:700; }
 
-  /* Indice “à remplir” (fond violet léger) + bordure violette douce */
+  /* Indice “à remplir” + bordure violette */
   .fill-hint { background: rgba(131,116,167,.12) !important; }
   .violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
+
+  /* Cartes pour le mode « toutes les décompositions » (jeu 3) */
+  .pair-card{
+    background: rgba(131,116,167,.10);
+    border: 1px solid #8374a7;
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
 
   /* Écran noir */
   .dark-mode, .dark-mode * { color:#f8fafc !important; }
@@ -41,7 +49,7 @@
   .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
   .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
 
-  /* Police OpenDyslexic locale (assure-toi que le fichier existe à la racine) */
+  /* Police OpenDyslexic locale */
   @font-face{
     font-family:'OpenDyslexicLocal';
     src:
@@ -151,9 +159,9 @@ function AccessibilityCard({acc}){
   );
 }
 
-/* ---------- Jeu n°1 — Défi Tables (identique) ---------- */
+/* ---------- Jeu n°1 — Défi Tables ---------- */
 function GameDefi({acc}){
-  const {rootBg,rootText,cardStyle,speak,black}=acc;
+  const {rootBg,rootText,cardStyle,speak}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
   const [questionCount,setQuestionCount]=useState(10);
   const [timeLimit,setTimeLimit]=useState(5); // null = Pas de chrono
@@ -169,7 +177,7 @@ function GameDefi({acc}){
   const start=()=>{
     const list=[]; for(let i=0;i<questionCount;i++){ const a=selectedTables[Math.floor(Math.random()*selectedTables.length)], b=Math.floor(Math.random()*9)+2; list.push({a,b,product:a*b});}
     setQuestions(list); setIndex(0); setAnswers([]); setInput(""); setTick(0); setStarted(true); setFinished(false);
-    setTimeout(()=>inputRef.current?.focus(),0); speak("Prépare-toi. Première question.");
+    setTimeout(()=>inputRef.current?.focus(),0);
   };
   const current=questions[index];
 
@@ -229,12 +237,7 @@ function GameDefi({acc}){
                 <tbody>{answers.map((r,i)=>(<tr key={i} className="border-t"><td>{i+1}</td><td>{r.a}×{r.b}</td><td>{r.user ?? "—"}</td><td>{r.product}</td><td>{r.timeout?"⏱ Hors délai":(r.user==null?"— Pas de réponse":(r.correct?"✔ Juste":"✘ Faux"))}</td></tr>))}</tbody>
               </table>
             </div>
-            <div className="flex gap-2">
-              <button className="px-5 py-3 rounded-2xl border" onClick={()=>{ /* retour aux réglages sans changer de route */
-                location.hash="#/inverse"; /* au cas où */
-                /* reset local */
-              location.hash="#/inverse"; }}>{/* fallback noop */}</button>
-            </div>
+            <div className="flex gap-2"><a className="px-5 py-3 rounded-2xl border" href="#/defi">Retour aux réglages</a><a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a></div>
           </div>
         )}
       </div>
@@ -265,8 +268,8 @@ function GamePythagore({acc}){
     }else if(mode==="mirror"){
       for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      // 6×7, 6×8, 6×9, 7×8, 7×9, 8×9 — mais pas la colonne/ligne 10
-      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); // b<=9 => exclut b=10
+      // 6×7, 6×8, 6×9, 7×8, 7×9, 8×9 — pas de colonne/ligne 10 à remplir
+      for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b));
     }
     return set;
   },[mode,count,table]);
@@ -294,7 +297,7 @@ function GamePythagore({acc}){
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
   : mode==="diagonal" ? "Complète seulement la diagonale (les doubles). Ex : 6×6."
   : mode==="mirror"   ? "Complète le triangle du haut ; l’autre moitié est identique (a×b = b×a). Ex : 3×7 = 7×3."
-  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. (Tu connais déjà ≤5, la table de 10 et les doubles.)";
+  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. (Tu connais déjà toutes les tables jusqu’à 5, la table de 10 et les doubles.)";
 
   return (
     <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
@@ -399,12 +402,12 @@ function GamePythagore({acc}){
   );
 }
 
-/* ---------- Jeu n°3 — Retrouve la multiplication (2 modes, Entrée, espacement, reset réglages) ---------- */
+/* ---------- Jeu n°3 — Retrouve la multiplication (espacement ++, pas de 3s) ---------- */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
   const [questionCount,setQuestionCount]=useState(10);
-  const [timeLimit,setTimeLimit]=useState(5); // null = Pas de chrono
+  const [timeLimit,setTimeLimit]=useState(5); // null = Pas de chrono (3s retiré)
   const [mode,setMode]=useState("single");    // "single" | "all"
 
   const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
@@ -467,12 +470,10 @@ function GameInverse({acc}){
 
   const score=useMemo(()=>answers.filter(a=>a.correct).length,[answers]);
 
-  // consignes avec exemples
   const tip = mode==="single"
     ? "Tape une seule décomposition. Ex : 24 → 6 et 4 (ou 3 et 8)."
     : "Tape toutes les décompositions (paires ordonnées). Ex : 24 → 4×6, 6×4, 3×8, 8×3.";
 
-  // Entrée = Valider
   const onEnter=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); handleSubmit(false); } };
 
   return (
@@ -495,7 +496,7 @@ function GameInverse({acc}){
               )}</div>
               <div className="font-bold mt-4 mb-1">Temps par question</div>
               <div className="flex gap-2 flex-wrap">
-                {[3,5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+                {[5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
                 <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
               </div>
             </div>
@@ -509,7 +510,7 @@ function GameInverse({acc}){
 
             <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
               <div className="text-slate-500">Résultat</div>
-              <div className="font-black text-5xl mb-4">{current.product}</div>
+              <div className="font-black text-5xl mb-6">{current.product}</div>
 
               {mode==="single" ? (
                 <div className="flex gap-4 justify-center items-center">
@@ -523,9 +524,10 @@ function GameInverse({acc}){
                   <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-4 md:gap-6 justify-center">
+                /* grille aérée et jolies cartes */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-7 justify-items-center">
                   {pairsFor(current.product).map((_,i)=>(
-                    <div key={i} className="flex items-center gap-3 md:gap-4">
+                    <div key={i} className="pair-card flex items-center gap-3 md:gap-4">
                       <input value={rows[i]?.a||""} onChange={e=>setRows(r=>{const n=[...r]; n[i]={...n[i],a:e.target.value.replace(/\D/g,"")}; return n;})}
                              onKeyDown={onEnter}
                              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
@@ -535,7 +537,7 @@ function GameInverse({acc}){
                              className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint" placeholder=""/>
                     </div>
                   ))}
-                  <div className="basis-full text-center pt-2">
+                  <div className="col-span-full text-center pt-2">
                     <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
                   </div>
                 </div>
@@ -571,9 +573,7 @@ function GameInverse({acc}){
 
             <div className="flex gap-2">
               <button className="px-5 py-3 rounded-2xl border"
-                      onClick={()=>{ /* revenir aux réglages du jeu 3 sans recharger */
-                        setStarted(false); setFinished(false); setQuestions([]); setAnswers([]); setIndex(0); setTick(0);
-                      }}>
+                      onClick={()=>{ setStarted(false); setFinished(false); setQuestions([]); setAnswers([]); setIndex(0); setTick(0); }}>
                 Retour aux réglages
               </button>
               <a className="px-5 py-3 rounded-2xl border" href="#/">Retour au menu</a>
