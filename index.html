@@ -346,20 +346,20 @@ function GameDefi({acc}){
 }
 
 /* --------------------- Jeu n°2 – Table de Pythagore (modes enrichis) --------------------- */
-
+  
 function GamePythagore({acc}){
   const {rootBg, rootText, cardStyle, fontFamily, speak} = acc;
   const A=range(2,10), B=range(2,10);
 
-  // NEW: modes ajoutés 'mirror' et 'minimal'
-  const [mode,setMode]=useState("random"); // random | table | diagonal | borders | mirror | minimal
+  // Modes: random | table | diagonal | borders | mirror | minimal
+  const [mode,setMode]=useState("random");
   const [count,setCount]=useState(10);
   const [table,setTable]=useState(6);
 
   const key=(a,b)=>`${a}x${b}`;
   const mirrorKey=(a,b)=>`${b}x${a}`;
 
-  // --- Génération des cases à remplir selon le mode ---
+  // --- Cases à remplir selon le mode ---
   const blanks = useMemo(()=>{
     const set=new Set();
     if(mode==="random"){
@@ -375,12 +375,12 @@ function GamePythagore({acc}){
         A.forEach(a=> set.add(key(a,t)));
       });
     }else if(mode==="mirror"){
-      // Triangle supérieur uniquement (a <= b)
+      // Triangle supérieur (a <= b) : l'autre demi-table se déduit (commutativité)
       for(const a of A) for(const b of B) if(a<=b) set.add(key(a,b));
     }else if(mode==="minimal"){
-      // Petit carré 6..9 au-dessus de la diagonale (a <= b) + exclusion 2..5 et 10
+      // Reste à apprendre quand on connaît tables ≤5 + doubles : 6×7,6×8,6×9,7×8,7×9,8×9
       for(let a=6;a<=9;a++){
-        for(let b=a;b<=9;b++){
+        for(let b=a+1;b<=9;b++){ // a < b  (diag exclue car "doubles" connus)
           set.add(key(a,b));
         }
       }
@@ -388,8 +388,8 @@ function GamePythagore({acc}){
     return set;
   },[mode,count,table]);
 
-  const [values,setValues]=useState({});   // k -> string (saisi)
-  const [checked,setChecked]=useState({}); // k -> 'ok' | 'ko'
+  const [values,setValues]=useState({});
+  const [checked,setChecked]=useState({});
   const firstRef=useRef(null);
 
   useEffect(()=>{ setValues({}); setChecked({}); setTimeout(()=>firstRef.current?.focus(),0); },[mode,count,table]);
@@ -397,46 +397,54 @@ function GamePythagore({acc}){
   const onChange=(k,v)=> setValues(p=>({...p,[k]:v.replace(/\D/g,"")}));
   const onFocus=(a,b)=> speak(`Complète ${a} multiplié par ${b}`);
 
-  // pour affichage miroir en lecture seule
+  // valeur à afficher (prend la valeur miroir si mode "mirror")
   const getDisplayValue=(a,b)=>{
     const k=key(a,b), m=mirrorKey(a,b);
     if(values[k]!=null && values[k]!=="") return values[k];
-    // en mode 'mirror', la case (b,a) reflète (a,b)
     if(mode==="mirror" && values[m]!=null && values[m]!=="") return values[m];
     return "";
   };
 
-  const isMirrorReadOnly=(a,b)=>{
-    return mode==="mirror" && a>b; // triangle inférieur : lecture seule (miroir)
-  };
+  const isMirrorReadOnly=(a,b)=> mode==="mirror" && a>b; // triangle inférieur = lecture seule
 
   const checkAll=()=>{
     const res={};
     for(const a of A)for(const b of B){
       const k=key(a,b);
-      // si la case n'est pas à remplir dans ce mode ET pas une case miroir lue => on ignore
-      if(!blanks.has(k) && !(mode==="mirror" && a>b && blanks.has(mirrorKey(a,b)))) continue;
+      const onDiag = a===b;
+      // Cases à vérifier ?
+      const shouldCheck =
+        blanks.has(k) ||
+        (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))); // miroir lisible
+      if(!shouldCheck) continue;
 
       const good=a*b;
-      // valeur candidate = saisie directe ou miroir
+      // Valeur = saisie locale ou miroir (en mode mirror)
       const vStr = (values[k] ?? (mode==="mirror" ? values[mirrorKey(a,b)] : ""));
       const ok = vStr!==undefined && vStr!=="" && Number(vStr)===good;
       res[k] = ok ? "ok" : "ko";
     }
     setChecked(res);
 
-    // Synthèse audio
     const wrong = Object.values(res).filter(x=>x==="ko").length;
     speak(wrong===0 ? "Bravo, tout est correct !" : `${wrong} case${wrong>1?"s":""} à corriger`);
   };
 
   const reset=()=>{ setValues({}); setChecked({}); setTimeout(()=>firstRef.current?.focus(),0); };
 
+  // Texte pédagogique
+  const helpText =
+    mode==="mirror"
+      ? "Astuce : grâce à la commutativité (a×b = b×a), connaître la moitié de la table suffit. La diagonale violette regroupe les doubles."
+      : mode==="minimal"
+      ? "Si tu connais tes tables jusqu’à 5 et les doubles (diagonale violette), il ne reste que 6 résultats à apprendre : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9."
+      : null;
+
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg, color:rootText, fontFamily}}>
       <TopNav route="/pythagore" go={(k)=>location.hash="#"+k}/>
       <div className="max-w-6xl mx-auto">
-        {/* Accessibilité / Mode / Actions sur une seule ligne */}
+        {/* Accessibilité / Mode / Actions sur une ligne */}
         <div className="grid xl:grid-cols-3 gap-4 mb-6">
           <AccessibilityCard acc={acc}/>
 
@@ -465,7 +473,7 @@ function GamePythagore({acc}){
               )}
               <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des doubles</label>
               <label><input type="radio" name="m" checked={mode==="borders"}  onChange={()=>setMode("borders")}/> Bords (2, 5, 10)</label>
-              {/* NEW */}
+              {/* Nouveaux modes */}
               <label><input type="radio" name="m" checked={mode==="mirror"}   onChange={()=>setMode("mirror")}/> Miroir de la diagonale (commutativité)</label>
               <label><input type="radio" name="m" checked={mode==="minimal"}  onChange={()=>setMode("minimal")}/> Reste à apprendre (6–9)</label>
             </div>
@@ -474,7 +482,7 @@ function GamePythagore({acc}){
           {/* ACTIONS */}
           <div className="card rounded-2xl p-4" style={cardStyle}>
             <div className="font-bold mb-2">Actions</div>
-            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
+            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:"#8374a7"}}>Corriger</button>
             <button onClick={reset} className="px-4 py-2 rounded-2xl border">Réinitialiser</button>
           </div>
         </div>
@@ -494,25 +502,50 @@ function GamePythagore({acc}){
                   <th className="p-2 hdr text-left">{a}</th>
                   {B.map((b,bi)=>{
                     const k=key(a,b);
-                    const fill = blanks.has(k) || (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))); // miroir lisible
-                    const good = a*b;
+                    const onDiag = a===b;
+                    // cellules à saisir ? (hors diagonale pré-remplie en mirror/minimal)
+                    const shouldFill =
+                      (mode==="mirror"   ? (a<=b && !onDiag) :
+                       mode==="minimal"  ? (a>=6 && b>=6 && a<b) :
+                       blanks.has(k));
+
+                    // état de correction
                     const st = checked[k] || (mode==="mirror" ? checked[mirrorKey(a,b)] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
-                    const readOnlyMirror = isMirrorReadOnly(a,b);
 
-                    const props = readOnlyMirror ? {readOnly:true} : {};
-                    const ref = (!ai && !bi && fill && !readOnlyMirror) ? {ref:firstRef} : {};
+                    // Contenu "lecture seule" pour diagonale en mirror/minimal
+                    if( (mode==="mirror" || mode==="minimal") && onDiag ){
+                      return (
+                        <td key={k} className={"p-1 text-center diag-bg"}>
+                          <span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span>
+                        </td>
+                      );
+                    }
 
+                    // Cellule "miroir" en lecture seule (triangle inférieur) pour mirror
+                    if(mode==="mirror" && a>b){
+                      const val=getDisplayValue(a,b);
+                      return (
+                        <td key={k} className={"p-1 text-center "+(st==="ok"?"ok":st==="ko"?"ko":"")+" diag-bg"}>
+                          <input readOnly
+                                 value={val}
+                                 className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/>
+                        </td>
+                      );
+                    }
+
+                    // Cellule éditable (remplir)
+                    const ref = (!ai && !bi && shouldFill) ? {ref:firstRef} : {};
                     return (
                       <td key={k} className={"p-1 text-center "+(st==="ok"?"ok":st==="ko"?"ko":"")}>
-                        {fill ? (
-                          <input {...ref} {...props}
+                        {shouldFill ? (
+                          <input {...ref}
                             onFocus={()=>onFocus(a,b)}
                             value={getDisplayValue(a,b)}
-                            onChange={e=>onChange(readOnlyMirror ? mirrorKey(a,b) : k, e.target.value)}
+                            onChange={e=>onChange(k, e.target.value)}
                             className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+koClass}/>
                         ) : (
-                          <span className="inline-block min-w-[84px] text-lg">{good}</span>
+                          <span className={"inline-block min-w-[84px] text-lg " + (onDiag?"diag-txt":"")}>{a*b}</span>
                         )}
                       </td>
                     );
@@ -522,6 +555,13 @@ function GamePythagore({acc}){
             </tbody>
           </table>
         </div>
+
+        {/* Cartouche pédagogique */}
+        {helpText && (
+          <div className="mt-4 card rounded-2xl p-4" style={cardStyle}>
+            <strong>Astuce pédagogique</strong> — <span className="diag-txt">{helpText}</span>
+          </div>
+        )}
 
         <div className="mt-6">
           <a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a>
