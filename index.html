@@ -36,13 +36,49 @@
   .flash { animation: flash-red 600ms ease-in-out; }
   @keyframes flash-red { 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
 
+  /* ---- DARK MODE -------------------------------------------------------- */
   .dark-mode, .dark-mode * { color:#f8fafc !important; }
   .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
   .dark-mode .hdr{ background:#1f2937 !important; }
   .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
   .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
+  .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111827 !important; }
   .dark-mode .progress-wrap{ background:#0b0b0b !important; }
   .dark-mode .progress-bar{ background:#a69acc !important; }
+
+  /* Sélecteurs lisibles en sombre */
+  .dark-mode select,
+  .dark-mode option,
+  .dark-mode optgroup {
+    background: #0b0b0b !important;
+    color: #f8fafc !important;
+    border-color: #64748b !important;
+  }
+  .dark-mode select:focus {
+    border-color: #a69acc !important;
+    box-shadow: 0 0 0 2px rgba(166,154,204,.35) inset;
+  }
+  .dark-mode option:checked {
+    background: #3f3f46 !important;
+    color: #f8fafc !important;
+  }
+
+  /* Checkboxes lisibles en sombre */
+  .dark-mode input[type="checkbox"]{
+    accent-color: #a69acc;
+  }
+  /* Pour colorer le label quand coché (on cible le <span> après l'input) */
+  label > input[type="checkbox"]:checked + span {
+    color: #8374a7;
+    font-weight: 700;
+  }
+  .dark-mode label > input[type="checkbox"]:checked + span {
+    color: #a69acc;
+    font-weight: 700;
+  }
+
+  /* Indices plus visibles en sombre */
+  .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
   @font-face{
     font-family:'OpenDyslexicLocal';
@@ -125,9 +161,11 @@ function useAccessibility(){
   const rootText= black ? "#f8fafc" : undefined;
   const cardStyle = { backgroundColor: surface, color: rootText };
   const fontFamily =
-    font==="Verdana" ? "Verdana, Geneva, Tahoma, sans-serif" :
-    font==="OpenDyslexic" ? "OpenDyslexicLocal, Arial, sans-serif" :
-    "Arial, Helvetica, sans-serif";
+    font==="Verdana"       ? "Verdana, Geneva, Tahoma, sans-serif" :
+    font==="OpenDyslexic"  ? "OpenDyslexicLocal, Arial, sans-serif" :
+    font==="Comic"         ? '"Comic Sans MS","Comic Sans",cursive' :
+    font==="SansSerif"     ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif' :
+                             "Arial, Helvetica, sans-serif";
 
   const speak=(txt)=>{ try{ if(!audio) return; const u=new SpeechSynthesisUtterance(txt); u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} };
 
@@ -139,15 +177,28 @@ function AccessibilityCard({acc}){
       <div className="font-bold mb-2">Accessibilité</div>
       <div className="flex gap-2 flex-wrap mb-2">
         <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1">
-          <option>Arial</option><option>Verdana</option><option>OpenDyslexic</option>
+          <option>Arial</option>
+          <option>Verdana</option>
+          <option>OpenDyslexic</option>
+          <option>Comic</option>
+          <option>SansSerif</option>
         </select>
         <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1">
           {[16,18,20,22,24].map(s=><option key={s} value={s}>{s}px</option>)}
         </select>
       </div>
-      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.setYellow(e.target.checked)}/> Fond jaune</label>
-      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.setBlack(e.target.checked)}/> Écran noir</label>
-      <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/><label>Audio (TTS)</label></div>
+      <label className="block">
+        <input type="checkbox" checked={acc.yellow} onChange={e=>acc.setYellow(e.target.checked)}/>
+        <span> Fond jaune</span>
+      </label>
+      <label className="block">
+        <input type="checkbox" checked={acc.black} onChange={e=>acc.setBlack(e.target.checked)}/>
+        <span> Écran noir</span>
+      </label>
+      <div className="mt-2 flex items-center gap-2">
+        <input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/>
+        <span>Audio (TTS)</span>
+      </div>
     </div>
   );
 }
@@ -230,7 +281,7 @@ function GameDefi({acc}){
 
   const handleSubmit=(timeout=false)=>{
     if(!current) return;
-    const userNum=Number(input), userProvided=input!=="";
+    const userNum=Number(input), userProvided=input!=="".
     const correct=!timeout && userProvided && userNum===current.product;
     const record={game:"defi",a:current.a,b:current.b,product:current.product,user:timeout?null:(userProvided?userNum:null),correct,timeout};
     setAnswers(p=>[...p,record]);
@@ -308,7 +359,7 @@ function GameDefi({acc}){
   );
 }
 
-/* JEU 2 — Table de Pythagore (inchangé) */
+/* JEU 2 — Table de Pythagore (corrigé) */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
@@ -429,17 +480,36 @@ function GamePythagore({acc}){
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
 
+                    // Diagonale affichée en miroir/minimal : valeur fixe
                     if((mode==="mirror"||mode==="minimal") && onDiag){
                       return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
+                    // Triangle inférieur en miroir : readonly mais feedback ok/ko appliqué au <td>
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
-                      return <td key={k} className="p-1 text-center diag-bg"><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
+                      return <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
                     }
+                    // ✅ Correction : diagonale en mode "diagonal" (feedback rose et réédition possible)
                     if(mode==="diagonal" && onDiag){
-                      return <td key={k} className="p-1 text-center fill-hint"><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt violet-border "+koClass}/></td>;
+                      return (
+                        <td
+                          key={k}
+                          className={
+                            "p-1 text-center " +
+                            (needsHint ? "fill-hint " : "") +
+                            (st==="ok" ? " ok" : st==="ko" ? " ko" : "")
+                          }
+                        >
+                          <input
+                            value={getDisplayValue(a,b)}
+                            onChange={e=>onChange(k,e.target.value)}
+                            className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt violet-border "+koClass}
+                          />
+                        </td>
+                      );
                     }
 
+                    // Cas générique
                     const content = shouldFill
                       ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+(needsHint?"violet-border ":"")+koClass}/>
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
@@ -458,7 +528,7 @@ function GamePythagore({acc}){
   );
 }
 
-/* JEU 3 — Retrouve la multiplication (mode unique) */
+/* JEU 3 — Retrouve la multiplication (avec note) */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
@@ -535,6 +605,7 @@ function GameInverse({acc}){
 
             <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
               <div className="text-slate-500">Résultat</div>
+              <div className="text-sm mt-1 mb-3 text-slate-500">Multiplications dans les tables de 2 à 10.</div>
               <div className="font-black text-5xl mb-6">{current.product}</div>
 
               <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
@@ -562,7 +633,14 @@ function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
   useEffect(()=>{ const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/"); window.addEventListener("hashchange",onHash); return ()=>window.removeEventListener("hashchange",onHash);},[]);
-  useEffect(()=>{ document.body.style.fontFamily = acc.font==="OpenDyslexic" ? "OpenDyslexicLocal, Arial, sans-serif" : (acc.font==="Verdana" ? "Verdana, Geneva, Tahoma, sans-serif" : "Arial, Helvetica, sans-serif"); },[acc.font]);
+  useEffect(()=>{
+    document.body.style.fontFamily =
+      acc.font==="OpenDyslexic" ? "OpenDyslexicLocal, Arial, sans-serif" :
+      acc.font==="Verdana"      ? "Verdana, Geneva, Tahoma, sans-serif" :
+      acc.font==="Comic"        ? '"Comic Sans MS","Comic Sans",cursive' :
+      acc.font==="SansSerif"    ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif' :
+                                  "Arial, Helvetica, sans-serif";
+  },[acc.font]);
 
   if(route==="/defi") return <GameDefi acc={acc}/>;
   if(route==="/pythagore") return <GamePythagore acc={acc}/>;
