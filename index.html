@@ -281,7 +281,8 @@ function GameDefi({acc}){
 
   const handleSubmit=(timeout=false)=>{
     if(!current) return;
-    const userNum=Number(input), userProvided=input!=="".
+    const userNum=Number(input), userProvided=input!=="";
+    const userProvided = input !== "";
     const correct=!timeout && userProvided && userNum===current.product;
     const record={game:"defi",a:current.a,b:current.b,product:current.product,user:timeout?null:(userProvided?userNum:null),correct,timeout};
     setAnswers(p=>[...p,record]);
