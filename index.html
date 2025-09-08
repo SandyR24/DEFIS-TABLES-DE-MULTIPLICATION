@@ -21,7 +21,10 @@
   .pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
   .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
   .hdr{ background:#f1f5f9; }
-  .ok{ background:#dcfce7; } .ko{ background:#fee2e2; }
+
+  /* ✅ statut doit primer sur les hints (rose/vert visibles partout) */
+  .ok{ background:#dcfce7 !important; }
+  .ko{ background:#fee2e2 !important; }
   .ko-input{ color:#be185d !important; font-weight:700; }
 
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
@@ -387,7 +390,7 @@ function GamePythagore({acc}){
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
   : mode==="diagonal" ? "Complète seulement la diagonale (les doubles). Ex : 6×6."
   : mode==="mirror"   ? "Complète le triangle du haut ; l’autre moitié est identique (a×b = b×a). Ex : 3×7 = 7×3."
-  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. (Tu connais déjà toutes les tables jusqu’à 5, la table de 10 et les doubles.)";
+  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
 
   return (
     <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
@@ -418,7 +421,7 @@ function GamePythagore({acc}){
               )}
               <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des doubles</label>
               <label><input type="radio" name="m" checked={mode==="mirror"} onChange={()=>setMode("mirror")}/> Miroir de la diagonale</label>
-              <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6–9)</label>
+              <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6 cases)</label>
             </div>
           </div>
           <div className="card rounded-2xl p-4" style={cardStyle}>
