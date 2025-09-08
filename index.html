@@ -29,8 +29,6 @@
   .fill-hint { background: rgba(131,116,167,.12) !important; }
   .violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
 
-  .pair-card{ background: rgba(131,116,167,.10); border:1px solid #8374a7; border-radius:16px; padding:14px 16px; }
-
   .progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
   .progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
   .flash { animation: flash-red 600ms ease-in-out; }
@@ -46,38 +44,16 @@
   .dark-mode .progress-wrap{ background:#0b0b0b !important; }
   .dark-mode .progress-bar{ background:#a69acc !important; }
 
-  /* Sélecteurs lisibles en sombre */
-  .dark-mode select,
-  .dark-mode option,
-  .dark-mode optgroup {
-    background: #0b0b0b !important;
-    color: #f8fafc !important;
-    border-color: #64748b !important;
+  .dark-mode select, .dark-mode option, .dark-mode optgroup {
+    background:#0b0b0b !important; color:#f8fafc !important; border-color:#64748b !important;
   }
-  .dark-mode select:focus {
-    border-color: #a69acc !important;
-    box-shadow: 0 0 0 2px rgba(166,154,204,.35) inset;
-  }
-  .dark-mode option:checked {
-    background: #3f3f46 !important;
-    color: #f8fafc !important;
-  }
+  .dark-mode select:focus { border-color:#a69acc !important; box-shadow:0 0 0 2px rgba(166,154,204,.35) inset; }
+  .dark-mode option:checked { background:#3f3f46 !important; color:#f8fafc !important; }
 
-  /* Checkboxes lisibles en sombre */
-  .dark-mode input[type="checkbox"]{
-    accent-color: #a69acc;
-  }
-  /* Pour colorer le label quand coché (on cible le <span> après l'input) */
-  label > input[type="checkbox"]:checked + span {
-    color: #8374a7;
-    font-weight: 700;
-  }
-  .dark-mode label > input[type="checkbox"]:checked + span {
-    color: #a69acc;
-    font-weight: 700;
-  }
+  .dark-mode input[type="checkbox"]{ accent-color:#a69acc; }
+  label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
+  .dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
 
-  /* Indices plus visibles en sombre */
   .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
   @font-face{
@@ -126,8 +102,8 @@ function TopNav({route,go}){
 function Hero(){
   return (
     <header className="hero p-6 md:p-10 text-center rounded-3xl card">
-      <h1 className="text-3xl md:text-5xl font-extrabold text-[var(--brand)]">Sacado Académie</h1>
-      <p className="mt-1 text-xl font-semibold text-[var(--brand)]">Atelier d’automatismes</p>
+      <h1 className="text-3xl md:text-5xl font-extrabold" style={{color:"var(--brand)"}}>Sacado Académie</h1>
+      <p className="mt-1 text-xl font-semibold" style={{color:"var(--brand)"}}>Atelier d’automatismes</p>
       <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
       <img src="dogbot.png" className="mx-auto mt-4 h-28 w-28 rounded-full bg-white p-1 shadow" alt="DogBot"/>
     </header>
@@ -137,11 +113,11 @@ function Hub(){
   return (
     <main className="max-w-5xl mx-auto px-4 py-8">
       <Hero/>
-      <h2 className="text-center text-2xl md:text-3xl font-extrabold text-[var(--brand)] my-6">Choisis ton activité</h2>
+      <h2 className="text-center text-2xl md:text-3xl font-extrabold" style={{color:"var(--brand)"}}>Choisis ton activité</h2>
       <div className="grid md:grid-cols-3 gap-6">
-        <article className="card rounded-3xl p-6"><h3 className="text-xl font-extrabold text-[var(--brand)]">Jeu n°1 — Défi Tables</h3><a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a></article>
-        <article className="card rounded-3xl p-6"><h3 className="text-xl font-extrabold text-[var(--brand)]">Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a></article>
-        <article className="card rounded-3xl p-6"><h3 className="text-xl font-extrabold text-[var(--brand)]">Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a></article>
+        <article className="card rounded-3xl p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°1 — Défi Tables</h3><a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a></article>
+        <article className="card rounded-3xl p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a></article>
+        <article className="card rounded-3xl p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a></article>
       </div>
     </main>
   );
