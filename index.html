@@ -59,6 +59,20 @@
 
   .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
+  /* --- Bulle DogBot ------------------------------------------------------ */
+  .bot-bubble{
+    display:flex; gap:.75rem; align-items:flex-start;
+    border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+  }
+  .bot-bubble.ok{ border-color:#22c55e; }
+  .bot-bubble.ko{ border-color:#ef4444; }
+  .bot-bubble .msg{ line-height:1.25; }
+  .bot-bubble img{ width:36px; height:36px; border-radius:9999px; background:#fff; padding:2px; border:1px solid #e5e7eb; }
+  .dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
+  .dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
+  .dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
+
   @font-face{
     font-family:'OpenDyslexicLocal';
     src:url('OpenDyslexic-Regular.otf') format('opentype'),
@@ -81,7 +95,7 @@ function TopNav({route,go}){
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
-          <img src="sacadoLogo.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
+          <img src="dogbot.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
           <div>
             <div className="font-black leading-tight">Sacado Académie</div>
             <div className="text-xs opacity-90">Atelier d’automatismes</div>
@@ -326,7 +340,7 @@ function GameDefi({acc}){
                 <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value.replace(/\D/g,""))}
                        onKeyDown={e=>{ if(e.key==='Enter') { e.preventDefault(); handleSubmit(false);} }}
                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                       className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
+                       className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
                 <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
               </div>
             </div>
@@ -339,13 +353,15 @@ function GameDefi({acc}){
   );
 }
 
-/* JEU 2 — Table de Pythagore (corrigé) */
+/* JEU 2 — Table de Pythagore */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
   const [mode,setMode]=useState("random");      // random | table | diagonal | mirror | minimal
   const [count,setCount]=useState(10);
   const [table,setTable]=useState(6);
+
+  const [feedback,setFeedback]=useState(null); // {type:'ok'|'ko', msg:string}
 
   const key=(a,b)=>`${a}x${b}`;
   const mirrorKey=(a,b)=>`${b}x${a}`;
@@ -374,15 +390,28 @@ function GamePythagore({acc}){
 
   const checkAll=()=>{
     const res={};
+    let total=0, errors=0;
     for(const a of A)for(const b of B){
       const k=key(a,b), onDiag=(a===b);
-      const shouldCheck = blanks.has(k) || (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))) || (mode==="diagonal" && onDiag);
+      const shouldCheck =
+        blanks.has(k) ||
+        (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))) ||
+        (mode==="diagonal" && onDiag);
       if(!shouldCheck) continue;
+      total++;
       const good=a*b;
       const vStr = values[k] ?? (mode==="mirror" ? values[mirrorKey(a,b)] : "");
-      res[k] = vStr!==undefined && vStr!=="" && Number(vStr)===good ? "ok":"ko";
+      const isOk = vStr!==undefined && vStr!=="" && Number(vStr)===good;
+      res[k] = isOk ? "ok":"ko";
+      if(!isOk) errors++;
     }
     setChecked(res);
+    if(total>0){
+      if(errors===0) setFeedback({type:"ok", msg:"Bravo ! Toutes les réponses sont correctes 🎉"});
+      else setFeedback({type:"ko", msg:`Tu as ${errors} erreur${errors>1?"s":""}. Essaie encore !`});
+    } else {
+      setFeedback(null);
+    }
   };
 
   const tip =
@@ -424,9 +453,20 @@ function GamePythagore({acc}){
               <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6 cases)</label>
             </div>
           </div>
-          <div className="card rounded-2xl p-4" style={cardStyle}>
+          <div className="card rounded-2xl p-4 space-y-3" style={cardStyle}>
             <div className="font-bold mb-2">Actions</div>
             <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
+            {feedback && (
+              <div className={"bot-bubble "+feedback.type}>
+                <img src="dogbot.png" alt="DogBot"/>
+                <div className="msg">
+                  <div className="font-semibold" style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>
+                    {feedback.type==="ok" ? "DogBot" : "DogBot"}
+                  </div>
+                  <div>{feedback.msg}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -460,13 +500,16 @@ function GamePythagore({acc}){
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
                     const koClass = st==="ko" ? "ko-input" : "";
 
+                    // Diagonale affichée figée pour miroir/minimal
                     if((mode==="mirror"||mode==="minimal") && onDiag){
                       return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
+                    // Triangle inférieur en miroir : readonly + statut sur <td>
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
                       return <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
                     }
+                    // Diagonale des doubles : éditable
                     if(mode==="diagonal" && onDiag){
                       return (
                         <td
@@ -486,8 +529,9 @@ function GamePythagore({acc}){
                       );
                     }
 
+                    // Cas générique (Aléatoires, Table par table, Minimal hors diagonale)
                     const content = shouldFill
-                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg "+(needsHint?"violet-border ":"")+koClass}/>
+                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg violet-border diag-txt "+koClass}/>
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
 
                     return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>{content}</td>;
@@ -587,11 +631,11 @@ function GameInverse({acc}){
               <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
                 <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                       className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
+                       className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
                 <span className="text-3xl">×</span>
                 <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))}
                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                       className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint" />
+                       className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
                 <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
               </form>
             </div>
