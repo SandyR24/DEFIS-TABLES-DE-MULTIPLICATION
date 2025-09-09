@@ -560,41 +560,26 @@ function GamePythagore({acc}){
   );
 }
 
-/* JEU 3 — Retrouve la multiplication (mêmes réglages que le jeu 2) */
+  /* JEU 3 — Retrouve la multiplication avec 3 modes */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
-  // Réglages communs
   const [questionCount,setQuestionCount]=useState(10);
   const [timeLimit,setTimeLimit]=useState(15);
+  const [mode, setMode] = useState("classique"); // classique | tousCouples | divisions
+  const [divTables,setDivTables]=useState(range(2,10));
 
-  // Modes : on garde le mode 1 et on ajoute les 2 nouveaux
-  //  - classique  : "Retrouve la multiplication" (comme avant)
-  //  - tousCouples: "Tous les couples de facteurs"
-  //  - divisions  : "Divisions inverses"
-  const [mode, setMode] = useState("classique");
-
-  // Pour "divisions" : choix des tables (diviseur) 2..10 (même esprit que jeu 1)
-  const [divTables,setDivTables]=useState(range(2,10)); // tables actives
-
-  // État du jeu
   const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
   const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
   const [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
   const [flash,setFlash]=useState(false);
 
-  // Saisies — classique
   const [x,setX]=useState(""), [y,setY]=useState(""); const xRef=useRef(null);
-  // Saisies — tousCouples
   const [pairs,setPairs]=useState([]);
-  // Saisie — divisions
   const [quotient,setQuotient]=useState("");
-
-  /* ---------- Génération questions ---------- */
 
   const rand = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
 
-  // Paires de facteurs (a<=b) dans 2..10 pour un produit donné
   function factorPairs(product){
     const res=[];
     for(let a=2;a<=10;a++){
@@ -604,7 +589,7 @@ function GameInverse({acc}){
     }
     return res;
   }
-  // Produit avec au moins 2 paires de facteurs dans 2..10
+
   function newProductWithMultiPairs(){
     while(true){
       const a=rand(2,10), b=rand(2,10);
@@ -613,13 +598,13 @@ function GameInverse({acc}){
       if(fps.length>=2) return {product:p, pairs:fps};
     }
   }
-  // Question division : choisir un diviseur dans les tables sélectionnées
+
   function newDivisionQuestion(){
     const divisor = divTables[Math.floor(Math.random()*divTables.length)];
     const q = rand(2,10);
     return { dividend: divisor*q, divisor, quotient:q };
   }
-  // Question classique
+
   function newClassicProduct(){ const a=rand(2,10), b=rand(2,10); return a*b; }
 
   useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
@@ -637,7 +622,6 @@ function GameInverse({acc}){
     setQuestions(list);
     setIndex(0); setAnswers([]); setTick(0); setStarted(true); setFinished(false);
 
-    // reset inputs
     setX(""); setY(""); setPairs([]); setQuotient("");
     setTimeout(()=>xRef.current?.focus(),0);
   };
@@ -645,10 +629,9 @@ function GameInverse({acc}){
   useEffect(()=>{
     if(!started) return;
     setTick(0);
-    // reset inputs à chaque nouvelle question
     setX(""); setY(""); setQuotient("");
     if(questions[index]?.kind==="pairs"){
-      const slots = questions[index].pairs.length; // affiche exactement le bon nombre de couples
+      const slots = questions[index].pairs.length;
       setPairs(Array.from({length:slots},()=>({a:"",b:""})));
     } else {
       setPairs([]);
@@ -659,7 +642,6 @@ function GameInverse({acc}){
   const current = questions[index];
   const remaining = timeLimit==null ? null : Math.max(0,timeLimit-tick);
 
-  /* ---------- Soumission ---------- */
   const handleSubmit=(timeout=false)=>{
     if(!current) return;
 
@@ -679,7 +661,7 @@ function GameInverse({acc}){
         if(!Number.isInteger(ai)||!Number.isInteger(bi)){ allProvided=false; break; }
         providedPairs.push(norm(ai,bi));
       }
-      const expected = current.pairs.map(([A,B])=>[A,B]); // déjà normalisées
+      const expected = current.pairs.map(([A,B])=>[A,B]);
       const key = (p)=>p.join("×");
       const setE = new Set(expected.map(key));
       const setP = new Set(providedPairs.map(key));
@@ -710,23 +692,20 @@ function GameInverse({acc}){
       setAnswers(p=>[...p,rec]);
     }
 
-    // avancer
     if(index+1>=questions.length){ setFinished(true); setStarted(false); }
     else { setIndex(i=>i+1); }
   };
 
-  /* ---------- UI ---------- */
   const tip =
     mode==="classique"   ? "Retrouve une multiplication dans les tables de 2 à 10."
   : mode==="tousCouples" ? "Retrouve tous les couples de facteurs possibles dans les tables de 2 à 10 (ex. 24 = 3×8 et 4×6)."
-  : /* divisions */       "Complète la division : le diviseur est choisi dans tes tables (2 à 10).";
+  :                       "Complète la division : le diviseur est choisi dans tes tables (2 à 10).";
 
   return (
     <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
       <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
       <div className="max-w-4xl mx-auto space-y-6">
 
-        {/* Réglages — même présentation que le jeu 2 */}
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
             <AccessibilityCard acc={acc}/>
@@ -735,14 +714,7 @@ function GameInverse({acc}){
               <div className="font-bold mb-2">Mode</div>
               <div className="grid gap-2">
                 <label><input type="radio" name="m3" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label>
-
                 <label><input type="radio" name="m3" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Tous les couples de facteurs</label>
-                {mode==="tousCouples" && (
-                  <div className="ml-6 text-sm text-slate-500">
-                    On ne propose que des produits ayant plusieurs décompositions dans les tables 2–10.
-                  </div>
-                )}
-
                 <label><input type="radio" name="m3" checked={mode==="divisions"} onChange={()=>setMode("divisions")}/> Divisions inverses</label>
                 {mode==="divisions" && (
                   <div className="ml-6">
@@ -758,19 +730,19 @@ function GameInverse({acc}){
                     </div>
                   </div>
                 )}
+              </div>
 
-                <div className="font-bold mt-3 mb-1">Nombre de questions</div>
-                <div className="flex gap-2 flex-wrap">
-                  {[5,10,15,20].map(n=>
-                    <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>
-                  )}
-                </div>
+              <div className="font-bold mt-3 mb-1">Nombre de questions</div>
+              <div className="flex gap-2 flex-wrap">
+                {[5,10,15,20].map(n=>
+                  <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>
+                )}
+              </div>
 
-                <div className="font-bold mt-3 mb-1">Temps par question</div>
-                <div className="flex gap-2 flex-wrap">
-                  {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
-                  <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
-                </div>
+              <div className="font-bold mt-3 mb-1">Temps par question</div>
+              <div className="flex gap-2 flex-wrap">
+                {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+                <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
               </div>
             </div>
 
@@ -781,7 +753,6 @@ function GameInverse({acc}){
           </div>
         )}
 
-        {/* En-tête question + barre de temps */}
         {started && current && (
           <div className="space-y-6">
             <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={cardStyle}>
@@ -792,17 +763,14 @@ function GameInverse({acc}){
               <Progress remaining={remaining??0} total={timeLimit}/>
             </div>
 
-            {/* Consigne */}
             <div className="card rounded-2xl p-3" style={cardStyle}>
               <strong>Consigne :</strong> <span className="diag-txt">{tip}</span>
             </div>
 
-            {/* Corps selon le mode */}
             {current.kind==="classic" && (
               <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
                 <div className="text-slate-500">Résultat</div>
                 <div className="font-black text-5xl mb-6">{current.product}</div>
-
                 <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
                   <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
@@ -820,7 +788,6 @@ function GameInverse({acc}){
               <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
                 <div className="text-slate-500">Produit</div>
                 <div className="font-black text-5xl mb-6">{current.product}</div>
-
                 <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="space-y-3">
                   {pairs.map((p,idx)=>(
                     <div key={idx} className="flex gap-3 justify-center items-center">
@@ -845,7 +812,6 @@ function GameInverse({acc}){
               <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
                 <div className="text-slate-500">Division</div>
                 <div className="font-black text-4xl mb-6">{current.dividend} ÷ {current.divisor} = ?</div>
-
                 <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
                   <input value={quotient} onChange={e=>setQuotient(e.target.value.replace(/\D/g,""))}
                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
@@ -862,6 +828,7 @@ function GameInverse({acc}){
     </div>
   );
 }
+
 
 
 /* APP */
