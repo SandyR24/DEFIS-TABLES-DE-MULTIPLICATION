@@ -216,21 +216,64 @@ const vibrate = (pattern=[80,40,120]) => { try { if (navigator.vibrate) navigato
 
 /* RÉCAP — sans “retour aux réglages” */
 function Summary({cardStyle,answers}){
-  const score = answers.filter(a=>a.correct).length;
-  const statusText = (r) => r.timeout ? "⏱ Hors délai"
-                       : (r.user==null ? "— Pas de réponse" : (r.correct ? "✔ Vrai" : "✘ Faux"));
-  const displayPrompt = (r) => r.game==="inverse" ? r.product : `${r.a}×${r.b}`;
-  const displayUser   = (r) => r.user ?? "—";
-  const displayCorr   = (r) => r.game==="inverse" ? r.product : r.product;
+  const total = answers.length;
+  const score = answers.filter(a => a.correct).length;
+  const pct = total ? Math.round((score/total)*100) : 0;
+
+  const statusText = (r) =>
+    r.timeout ? "⏱ Hors délai"
+    : (r.user==null ? "— Pas de réponse" : (r.correct ? "✔ Vrai" : "✘ Faux"));
+
+  // Texte de l’énoncé, solide pour tous les jeux
+  const displayPrompt = (r) => {
+    // Jeu 3 — divisions inverses
+    if ((r.game==="inverse-div") || (r.dividend!=null && r.divisor!=null)) {
+      return `${r.dividend} ÷ ${r.divisor}`;
+    }
+    // Jeu 3 — retrouve/ couples de facteurs (on a un product sans a/b)
+    if ((r.game==="inverse") || (r.product!=null && (r.a==null || r.b==null))) {
+      return r.product ?? "—";
+    }
+    // Jeu 1 (défi) et fallback si a,b sont présents
+    if (r.a!=null && r.b!=null) {
+      return `${r.a}×${r.b}`;
+    }
+    // Dernier filet : on montre le produit si dispo
+    if (r.product!=null) return r.product;
+    return "—";
+  };
+
+  // Ce que l’élève a saisi (nombre, “a×b”, ou liste “3×8 ; 4×6”)
+  const displayUser = (r) => r.user ?? "—";
+
+  // Correction attendue
+  const displayCorr = (r) => {
+    if ((r.game==="inverse-div") || r.quotient!=null) {
+      return r.quotient ?? "—";
+    }
+    if (r.product!=null) return r.product;
+    if (r.a!=null && r.b!=null) return r.a * r.b;
+    return "—";
+  };
 
   return (
     <>
-      <div className="rounded-3xl border p-6 shadow-sm card" style={cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2>
-        <p>Score : {score} / {answers.length} ({Math.round((score/answers.length)*100)}%)</p>
+      <div className="rounded-3xl border p-6 shadow-sm card" style={cardStyle}>
+        <h2 className="text-2xl font-black">Récapitulatif</h2>
+        <p>Score : {score} / {total} ({pct}%)</p>
       </div>
+
       <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={cardStyle}>
         <table className="w-full text-left text-sm">
-          <thead><tr><th>#</th><th>Énoncé / Résultat</th><th>Réponse(s)</th><th>Correction</th><th>Statut</th></tr></thead>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Énoncé / Résultat</th>
+              <th>Réponse(s)</th>
+              <th>Correction</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
           <tbody>
             {answers.map((r,i)=>(
               <tr key={i} className="border-t">
@@ -244,6 +287,7 @@ function Summary({cardStyle,answers}){
           </tbody>
         </table>
       </div>
+
       <a className="px-5 py-3 rounded-2xl border inline-block" href="#/">Retour au menu</a>
     </>
   );
@@ -833,9 +877,7 @@ function GameInverse({acc}){
   );
 }
 
-
-
-/* APP */
+  /* APP */
 function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
