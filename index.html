@@ -22,11 +22,15 @@
   .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
   .hdr{ background:#f1f5f9; }
 
-  /* ✅ statut doit primer sur les hints (rose/vert visibles partout) */
+  /* ✅ statut prime (rose/vert) */
   .ok{ background:#dcfce7 !important; }
   .ko{ background:#fee2e2 !important; }
-  .ko-input{ color:#be185d !important; font-weight:700; }
 
+  /* Saisie faux = texte fuchsia + bordure rose */
+  .ko-input{ color:#be185d !important; font-weight:700; }
+  .ko-border{ border-color:#fda4af !important; box-shadow:0 0 0 2px rgba(244,63,94,.35) inset !important; }
+
+  /* Saisie à remplir = violet */
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
   .diag-txt { color:#8374a7 !important; font-weight:700; }
   .fill-hint { background: rgba(131,116,167,.12) !important; }
@@ -52,11 +56,9 @@
   }
   .dark-mode select:focus { border-color:#a69acc !important; box-shadow:0 0 0 2px rgba(166,154,204,.35) inset; }
   .dark-mode option:checked { background:#3f3f46 !important; color:#f8fafc !important; }
-
   .dark-mode input[type="checkbox"]{ accent-color:#a69acc; }
   label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
   .dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
-
   .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
   /* --- Bulle DogBot ------------------------------------------------------ */
@@ -243,7 +245,7 @@ function Summary({cardStyle,answers}){
   );
 }
 
-/* JEU 1 — Défi Tables */
+/* JEU 1 — Défi Tables (inchangé) */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
@@ -353,14 +355,13 @@ function GameDefi({acc}){
   );
 }
 
-/* JEU 2 — Table de Pythagore */
+/* JEU 2 — Table de Pythagore (corrigé : contour rose + diagonale) */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
   const [mode,setMode]=useState("random");      // random | table | diagonal | mirror | minimal
   const [count,setCount]=useState(10);
   const [table,setTable]=useState(6);
-
   const [feedback,setFeedback]=useState(null); // {type:'ok'|'ko', msg:string}
 
   const key=(a,b)=>`${a}x${b}`;
@@ -460,9 +461,7 @@ function GamePythagore({acc}){
               <div className={"bot-bubble "+feedback.type}>
                 <img src="dogbot.png" alt="DogBot"/>
                 <div className="msg">
-                  <div className="font-semibold" style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>
-                    {feedback.type==="ok" ? "DogBot" : "DogBot"}
-                  </div>
+                  <div className="font-semibold" style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>DogBot</div>
                   <div>{feedback.msg}</div>
                 </div>
               </div>
@@ -498,32 +497,39 @@ function GamePythagore({acc}){
 
                     const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
-                    const koClass = st==="ko" ? "ko-input" : "";
+
+                    /* Classe d'input unifiée :
+                       - avant correction : violet
+                       - faux après correction : rose (bordure + texte)
+                    */
+                    const baseInput = "border rounded px-2 py-2 w-[84px] text-center text-lg";
+                    const clsWrong  = " ko-border ko-input";
+                    const clsReady  = " violet-border diag-txt";
 
                     // Diagonale affichée figée pour miroir/minimal
                     if((mode==="mirror"||mode==="minimal") && onDiag){
                       return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
-                    // Triangle inférieur en miroir : readonly + statut sur <td>
+
+                    // Triangle inférieur en miroir : readonly + statut <td> + style d'input
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
-                      return <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}><input readOnly value={val} className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt "+koClass}/></td>;
+                      return (
+                        <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}>
+                          <input readOnly value={val} className={baseInput + (st==="ko"?clsWrong:clsReady)} />
+                        </td>
+                      );
                     }
+
                     // Diagonale des doubles : éditable
                     if(mode==="diagonal" && onDiag){
                       return (
-                        <td
-                          key={k}
-                          className={
-                            "p-1 text-center " +
-                            (needsHint ? "fill-hint " : "") +
-                            (st==="ok" ? " ok" : st==="ko" ? " ko" : "")
-                          }
-                        >
+                        <td key={k}
+                            className={"p-1 text-center " + (needsHint?"fill-hint ":"") + (st==="ok"?" ok":st==="ko"?" ko":"")}>
                           <input
                             value={getDisplayValue(a,b)}
                             onChange={e=>onChange(k,e.target.value)}
-                            className={"border rounded px-2 py-2 w-[84px] text-center text-lg diag-txt violet-border "+koClass}
+                            className={baseInput + (st==="ko"?clsWrong:clsReady)}
                           />
                         </td>
                       );
@@ -531,10 +537,16 @@ function GamePythagore({acc}){
 
                     // Cas générique (Aléatoires, Table par table, Minimal hors diagonale)
                     const content = shouldFill
-                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={"border rounded px-2 py-2 w-[84px] text-center text-lg violet-border diag-txt "+koClass}/>
+                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)}
+                               className={baseInput + (st==="ko"?clsWrong:clsReady)} />
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
 
-                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>{content}</td>;
+                    return (
+                      <td key={k}
+                          className={"p-1 text-center " + (needsHint?"fill-hint ":"") + (st==="ok"?" ok":st==="ko"?" ko":"")}>
+                        {content}
+                      </td>
+                    );
                   })}
                 </tr>
               ))}
@@ -548,7 +560,7 @@ function GamePythagore({acc}){
   );
 }
 
-/* JEU 3 — Retrouve la multiplication (avec note) */
+/* JEU 3 — Retrouve la multiplication (rappel tables 2 à 10) */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
