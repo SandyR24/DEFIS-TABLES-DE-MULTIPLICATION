@@ -81,6 +81,23 @@
         url('OpenDyslexicAlta-Regular.otf') format('opentype');
     font-display:swap;
   }
+    /* --- Correctif Jeu 2 : Table de Pythagore (dark mode) --- */
+
+/* 1) Sélecteurs "Police", "Taille", "Nombre de cases" */
+.dark-mode .card select,
+.dark-mode .card input[type="number"] {
+  background:#f8fafc !important; /* fond clair */
+  color:#111827 !important;      /* texte foncé */
+  border:1px solid #64748b !important;
+}
+
+/* 2) En-têtes du tableau (ligne du haut + colonne de gauche) */
+.dark-mode .max-w-6xl table th {
+  background:#1f2937 !important; /* fond sombre */
+  color:#f8fafc !important;      /* texte clair */
+  border-color:#334155 !important;
+}
+
 </style>
 
 </head>
