@@ -13,6 +13,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
  <style>
+  <style>
   :root{ --brand:#8374a7; }
   body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
   .hero{ background:#efe7ff; }
@@ -22,11 +23,15 @@
   .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
   .hdr{ background:#f1f5f9; }
 
+  /* ✅ statut prime (rose/vert) */
   .ok{ background:#dcfce7 !important; }
   .ko{ background:#fee2e2 !important; }
+
+  /* Saisie faux = texte fuchsia + bordure rose */
   .ko-input{ color:#be185d !important; font-weight:700; }
   .ko-border{ border-color:#fda4af !important; box-shadow:0 0 0 2px rgba(244,63,94,.35) inset !important; }
 
+  /* Saisie à remplir = violet */
   .diag-bg  { background: rgba(131,116,167,.16) !important; }
   .diag-txt { color:#8374a7 !important; font-weight:700; }
   .fill-hint { background: rgba(131,116,167,.12) !important; }
@@ -37,49 +42,27 @@
   .flash { animation: flash-red 600ms ease-in-out; }
   @keyframes flash-red { 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
 
+  /* ---- DARK MODE -------------------------------------------------------- */
   .dark-mode, .dark-mode * { color:#f8fafc !important; }
   .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
   .dark-mode .hdr{ background:#1f2937 !important; }
+  .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
+  .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
+  .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111827 !important; }
   .dark-mode .progress-wrap{ background:#0b0b0b !important; }
   .dark-mode .progress-bar{ background:#a69acc !important; }
 
-  /* Inputs et selects uniformisés (jeu 1, 2, 3) */
-  .dark-mode input,
-  .dark-mode select,
-  .dark-mode option {
-    background:#0b0b0b !important;
-    color:#f8fafc !important;
-    border:1px solid #64748b !important;
+  .dark-mode select, .dark-mode option, .dark-mode optgroup {
+    background:#0b0b0b !important; color:#f8fafc !important; border-color:#64748b !important;
   }
-  .dark-mode input::placeholder { color:#94a3b8 !important; opacity:1 !important; }
-  .dark-mode input[type=number]::-webkit-outer-spin-button,
-  .dark-mode input[type=number]::-webkit-inner-spin-button { filter: invert(1); }
-  .dark-mode select:focus,
-  .dark-mode input:focus {
-    border-color:#a69acc !important;
-    box-shadow:0 0 0 2px rgba(166,154,204,.35) inset;
-  }
-  .dark-mode option:checked {
-    background:#3f3f46 !important;
-    color:#f8fafc !important;
-  }
+  .dark-mode select:focus { border-color:#a69acc !important; box-shadow:0 0 0 2px rgba(166,154,204,.35) inset; }
+  .dark-mode option:checked { background:#3f3f46 !important; color:#f8fafc !important; }
+  .dark-mode input[type="checkbox"]{ accent-color:#a69acc; }
+  label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
+  .dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
+  .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
-  /* En-têtes de la table Pythagore (1ʳᵉ ligne et 1ʳᵉ colonne) */
-  .dark-mode table th,
-  .dark-mode table thead th,
-  .dark-mode table tbody th,
-  .dark-mode .hdr {
-    background:#0f172a !important;
-    color:#f8fafc !important;
-    border-color:#334155 !important;
-  }
-
-  /* Hints/diagonales lisibles en violet clair */
-  .dark-mode .diag-txt { color:#a69acc !important; font-weight:700; }
-  .dark-mode .diag-bg  { background:rgba(166,154,204,.25) !important; }
-  .dark-mode .fill-hint{ background:rgba(166,154,204,.20) !important; }
-
-  /* Bulle DogBot */
+  /* --- Bulle DogBot ------------------------------------------------------ */
   .bot-bubble{
     display:flex; gap:.75rem; align-items:flex-start;
     border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff;
@@ -99,27 +82,6 @@
         url('OpenDyslexicAlta-Regular.otf') format('opentype');
     font-display:swap;
   }
-  /* Correctif spécifique Jeu 2 (Table de Pythagore) en mode sombre */
-
-/* En-têtes de la table */
-.dark-mode .max-w-6xl table th {
-  background:#0f172a !important;  /* fond sombre */
-  color:#f8fafc !important;       /* texte clair */
-  border-color:#334155 !important;
-}
-
-/* Inputs de la table (cases à remplir) */
-.dark-mode .max-w-6xl table input {
-  background:#0b0b0b !important;  /* fond noir */
-  color:#f8fafc !important;       /* texte blanc */
-  border:1px solid #64748b !important;
-}
-
-/* Valeurs figées (ex: diagonale, résultats) */
-.dark-mode .max-w-6xl table span {
-  color:#a69acc !important;       /* violet clair lisible */
-}
-
 </style>
 
 </head>
