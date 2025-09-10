@@ -87,6 +87,46 @@
         url('OpenDyslexicAlta-Regular.otf') format('opentype');
     font-display:swap;
   }
+/* --- PATCH Jeu 2 : écran noir lisible --- */
+
+/* 1) En-têtes de la table de Pythagore (ligne du haut + colonne de gauche) */
+.dark-mode .hdr,
+.dark-mode thead .hdr,
+.dark-mode tbody th.hdr {
+  background:#0f172a !important;   /* fond foncé */
+  color:#e5e7eb !important;         /* texte clair */
+  border-color:#334155 !important;
+}
+
+/* 2) Inputs + selects dans les cartes (y compris "Nombre de cases") */
+.dark-mode .card input,
+.dark-mode .card select,
+.dark-mode input,
+.dark-mode select {
+  background:#0b0b0b !important;   /* fond noir */
+  color:#f8fafc !important;         /* texte blanc */
+  border-color:#64748b !important;  /* bord gris bleuté */
+  opacity:1 !important;             /* évite l'effet "désactivé" visuel */
+}
+
+/* Placeholders lisibles */
+.dark-mode input::placeholder { color:#cbd5e1 !important; opacity:.9; }
+
+/* Spinners des <input type="number"> visibles sur WebKit */
+.dark-mode input[type=number]::-webkit-outer-spin-button,
+.dark-mode input[type=number]::-webkit-inner-spin-button { filter: invert(1); }
+
+/* 3) Menu déroulant des <select> (selon navigateur) */
+.dark-mode select option,
+.dark-mode select optgroup {
+  background:#0b0b0b !important;
+  color:#f8fafc !important;
+}
+
+/* Hints/diagonales déjà violets mais on renforce la lisibilité */
+.dark-mode .diag-txt { color:#a69acc !important; font-weight:700; }
+.dark-mode .diag-bg  { background:rgba(166,154,204,.25) !important; }
+.dark-mode .fill-hint{ background:rgba(166,154,204,.20) !important; }
 </style>
 
 </head>
