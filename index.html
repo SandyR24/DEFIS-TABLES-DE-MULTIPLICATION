@@ -127,6 +127,41 @@
 .dark-mode .diag-txt { color:#a69acc !important; font-weight:700; }
 .dark-mode .diag-bg  { background:rgba(166,154,204,.25) !important; }
 .dark-mode .fill-hint{ background:rgba(166,154,204,.20) !important; }
+    /* --- Patch spécifique Jeu 2 (Table de Pythagore) --- */
+
+/* Forcer fond sombre + texte clair sur en-têtes (ligne du haut et colonne de gauche) */
+.dark-mode table th,
+.dark-mode table thead th,
+.dark-mode table tbody th {
+  background:#0f172a !important;
+  color:#f8fafc !important;
+  border-color:#334155 !important;
+}
+
+/* Forcer aussi sur les cases de type "hdr" */
+.dark-mode .hdr {
+  background:#0f172a !important;
+  color:#f8fafc !important;
+  border-color:#334155 !important;
+}
+
+/* Inputs et selects dans les cartes */
+.dark-mode .card input,
+.dark-mode .card select {
+  background:#0b0b0b !important;
+  color:#f8fafc !important;
+  border:1px solid #64748b !important;
+}
+
+/* Placeholder dans inputs */
+.dark-mode input::placeholder { color:#94a3b8 !important; opacity:1 !important; }
+
+/* Options de select */
+.dark-mode option {
+  background:#0b0b0b !important;
+  color:#f8fafc !important;
+}
+
 </style>
 
 </head>
