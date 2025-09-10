@@ -769,7 +769,7 @@ function GameInverse({acc}){
               <div className="font-bold mb-2">Mode</div>
               <div className="grid gap-2">
                 <label><input type="radio" name="m3" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label>
-                <label><input type="radio" name="m3" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Trouve les doublons ! </label>
+                <label><input type="radio" name="m3" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Mémorise les doublons </label>
                 <label><input type="radio" name="m3" checked={mode==="divisions"} onChange={()=>setMode("divisions")}/> Multiplications inversées</label>
                 {mode==="divisions" && (
                   <div className="ml-6">
