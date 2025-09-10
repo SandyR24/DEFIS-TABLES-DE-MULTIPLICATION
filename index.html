@@ -99,6 +99,27 @@
         url('OpenDyslexicAlta-Regular.otf') format('opentype');
     font-display:swap;
   }
+  /* Correctif spécifique Jeu 2 (Table de Pythagore) en mode sombre */
+
+/* En-têtes de la table */
+.dark-mode .max-w-6xl table th {
+  background:#0f172a !important;  /* fond sombre */
+  color:#f8fafc !important;       /* texte clair */
+  border-color:#334155 !important;
+}
+
+/* Inputs de la table (cases à remplir) */
+.dark-mode .max-w-6xl table input {
+  background:#0b0b0b !important;  /* fond noir */
+  color:#f8fafc !important;       /* texte blanc */
+  border:1px solid #64748b !important;
+}
+
+/* Valeurs figées (ex: diagonale, résultats) */
+.dark-mode .max-w-6xl table span {
+  color:#a69acc !important;       /* violet clair lisible */
+}
+
 </style>
 
 </head>
