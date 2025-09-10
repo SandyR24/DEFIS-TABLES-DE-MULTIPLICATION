@@ -206,36 +206,30 @@ function useAccessibility(){
   return {font,setFont,size,setSize,yellow,setYellow,black,setBlack,audio,setAudio,rootBg,cardStyle,rootText,fontFamily,speak};
 }
 function AccessibilityCard({acc}){
+  // style lisible en mode sombre (fond clair + texte foncé)
+  const lightSelect = acc.black
+    ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' }
+    : {};
+
   return (
     <div className="card rounded-2xl p-4" style={acc.cardStyle}>
       <div className="font-bold mb-2">Accessibilité</div>
       <div className="flex gap-2 flex-wrap mb-2">
-        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1">
-          <option>Arial</option>
-          <option>Verdana</option>
-          <option>OpenDyslexic</option>
-          <option>Comic</option>
-          <option>SansSerif</option>
+        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
+          <option>Arial</option><option>Verdana</option><option>OpenDyslexic</option>
+          {/* si tu as ajouté Comic et SansSerif, garde-les ici */}
         </select>
-        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1">
+        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
           {[16,18,20,22,24].map(s=><option key={s} value={s}>{s}px</option>)}
         </select>
       </div>
-      <label className="block">
-        <input type="checkbox" checked={acc.yellow} onChange={e=>acc.setYellow(e.target.checked)}/>
-        <span> Fond jaune</span>
-      </label>
-      <label className="block">
-        <input type="checkbox" checked={acc.black} onChange={e=>acc.setBlack(e.target.checked)}/>
-        <span> Écran noir</span>
-      </label>
-      <div className="mt-2 flex items-center gap-2">
-        <input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/>
-        <span>Audio (TTS)</span>
-      </div>
+      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.setYellow(e.target.checked)}/> Fond jaune</label>
+      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.setBlack(e.target.checked)}/> Écran noir</label>
+      <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/><label>Audio (TTS)</label></div>
     </div>
   );
 }
+
 
 /* UTIL */
 function Progress({remaining, total}) {
