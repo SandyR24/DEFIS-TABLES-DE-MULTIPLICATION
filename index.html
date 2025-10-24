@@ -495,7 +495,7 @@ function GamePythagore({acc}){
   const tip =
     mode==="random"   ? "Complète les cases violettes (au hasard)."
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
-  : mode==="diagonal" ? "Complète seulement la diagonale (les doubles). Ex : 6×6."
+  : mode==="diagonal" ? "Complète seulement la diagonale (les carrés). Ex : 6×6."
   : mode==="mirror"   ? "Complète le triangle du haut ; l’autre moitié est identique (a×b = b×a). Ex : 3×7 = 7×3."
   : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
 
@@ -526,7 +526,7 @@ function GamePythagore({acc}){
                   </select>
                 </div>
               )}
-              <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des doubles</label>
+              <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des carrés</label>
               <label><input type="radio" name="m" checked={mode==="mirror"} onChange={()=>setMode("mirror")}/> Miroir de la diagonale</label>
               <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6 cases)</label>
             </div>
@@ -598,7 +598,7 @@ function GamePythagore({acc}){
                       );
                     }
 
-                    // Diagonale des doubles : éditable
+                    // Diagonale des carrés : éditable
                     if(mode==="diagonal" && onDiag){
                       return (
                         <td key={k}
