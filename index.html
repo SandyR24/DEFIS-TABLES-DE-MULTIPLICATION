@@ -496,7 +496,7 @@ function GamePythagore({acc}){
     mode==="random"   ? "Complète les cases violettes (au hasard)."
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
   : mode==="diagonal" ? "Complète seulement la diagonale (les carrés). Ex : 6×6."
-  : mode==="mirror"   ? "Complète le triangle du haut ; l’autre moitié est identique (a×b = b×a). Ex : 3×7 = 7×3."
+  : mode==="mirror"   ? "Complète UNIQUEMENT la partie du haut ; l’autre moitié est identique (a×b = b×a). Ex : 3×7 = 7×3."
   : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
 
   return (
