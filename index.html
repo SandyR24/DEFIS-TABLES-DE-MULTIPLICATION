@@ -474,7 +474,7 @@ function GamePythagore({acc}){
     }
   };
 
-  /* ✅ Bouton Réinitialiser demandé */
+  {/* ✅ Bouton réinitialiser */}
   const resetAll=()=>{ setValues({}); setChecked({}); setFeedback(null); };
 
   const tip =
@@ -519,7 +519,7 @@ function GamePythagore({acc}){
           <div className="card rounded-2xl p-4 space-y-3" style={cardStyle}>
             <div className="font-bold mb-2">Actions</div>
             <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
-            <!-- ✅ Bouton réinitialiser -->
+            {/* ✅ Bouton réinitialiser */}
             <button onClick={resetAll} className="px-4 py-2 rounded-2xl border">Réinitialiser</button>
             {feedback && (
               <div className={"bot-bubble "+feedback.type}>
@@ -882,7 +882,8 @@ function GameInverse({acc}){
 
         {finished && <Summary cardStyle={cardStyle} answers={answers} />}
 
-        <!-- ✅ Bouton Retour demandé -->
+        {/* ✅ Bouton retour deamndé */}
+
         <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">⬅ Retour au menu</a></div>
       </div>
     </div>
