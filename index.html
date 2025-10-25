@@ -473,6 +473,32 @@ function GamePythagore({acc}){
       setFeedback(null);
     }
   };
+/* --- Correctif final : chiffres visibles en mode écran noir (Jeu 2) --- */
+
+/* cellules non éditables = texte noir sur fond clair */
+.dark-mode td span:not(.diag-txt),
+.dark-mode td:not(:has(input)) {
+  color: #000 !important;
+  background: #f8fafc !important;
+}
+
+/* cellules d'entêtes */
+.dark-mode th.hdr {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+/* cellules éditables (cases violettes) gardent un contraste correct */
+.dark-mode input {
+  background: #fff !important;
+  color: #111 !important;
+  border-color: #a69acc !important;
+}
+
+/* diagonale violette reste visible */
+.dark-mode .diag-bg span {
+  color: #000 !important;
+}
 
   {/* ✅ Bouton réinitialiser */}
   const resetAll=()=>{ setValues({}); setChecked({}); setFeedback(null); };
