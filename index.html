@@ -90,12 +90,12 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
 }
 .dark-mode .diag-bg span { color:#000 !important; }
 
-/* --- ✅ Correctif final complet du jeu 2 (mode noir) --- */
+/* --- ✅ Version finale lisible enfants — Jeu 2 (Table de Pythagore) --- */
 
-/* 1. En-têtes (haut + gauche) : fond clair, texte noir */
+/* En-têtes haut et gauche */
 .dark-mode .max-w-6xl table th {
-  background: #f8fafc !important;
-  color: #000 !important;
+  background: #f8fafc !important; /* fond clair */
+  color: #000 !important;          /* texte noir lisible */
   border-color: #334155 !important;
 }
 .dark-mode .max-w-6xl table th:first-child {
@@ -103,27 +103,38 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
   color: #000 !important;
 }
 
-/* 2. Cellules fixes (sans input, les produits déjà remplis) */
+/* Cellules fixes (non éditables, les produits déjà remplis) */
 .dark-mode td span {
-  color: #f8fafc !important;      /* texte clair */
-  background: #1e1e1e !important; /* fond sombre cohérent */
-  border-radius: 4px;
+  background: #2b2b2b !important; /* fond gris foncé légèrement clair */
+  color: #ffffff !important;       /* texte blanc net et fort contraste */
+  font-weight: 600 !important;     /* chiffres plus épais */
+  border-radius: 6px;
   display: inline-block;
   min-width: 60px;
   text-align: center;
+  padding: 4px 0;
 }
 
-/* 3. Cellules à compléter (avec input) — fond blanc pour le contraste */
+/* Cellules éditables (input) — restent blanches pour bon contraste */
 .dark-mode td input {
   background: #ffffff !important;
   color: #111111 !important;
-  border-color: #a69acc !important;
+  border: 2px solid #a69acc !important;
+  font-weight: 600 !important;
 }
 
-/* 4. Diagonale violette reste bien visible */
+/* Diagonale violette : chiffre blanc légèrement teinté */
 .dark-mode .diag-bg span {
-  color: #a69acc !important;
+  color: #d9d2ff !important; /* violet clair lisible */
+  background: #3a2f4f !important; /* fond violet plus soutenu */
+  font-weight: 700 !important;
 }
+
+/* Bordures du tableau légèrement visibles */
+.dark-mode td, .dark-mode th {
+  border-color: #555 !important;
+}
+
   
 </style>
 </head>
