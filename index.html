@@ -74,6 +74,34 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-
 }
 .yellow-mode .diag-bg{ background:rgba(131,116,167,.16) !important; }
 
+  function AccessibilityCard({acc}){
+  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
+  return (
+    <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+      <div className="font-bold mb-2">Accessibilité</div>
+
+      <div className="flex gap-2 flex-wrap mb-2">
+        {/* ✅ Choix de la police */}
+        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
+          <option>Arial</option>
+          <option>Comic</option>
+          <option>SansSerif</option>
+          <option>OpenDyslexicLocal</option>
+        </select>
+
+        {/* ✅ Choix de la taille */}
+        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
+          {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
+        </select>
+      </div>
+
+      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
+      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
+      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
+    </div>
+  );
+}
+
 /* DogBot bubble */
 .bot-bubble{ display:flex; gap:.75rem; align-items:flex-start; border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.05); }
 .bot-bubble.ok{ border-color:#22c55e; }
