@@ -22,15 +22,12 @@ body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI
 .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
 .hdr{ background:#f1f5f9; }
 
-/* ✅ statut prime (rose/vert) */
 .ok{ background:#dcfce7 !important; }
 .ko{ background:#fee2e2 !important; }
 
-/* Saisie faux = texte fuchsia + bordure rose */
 .ko-input{ color:#be185d !important; font-weight:700; }
 .ko-border{ border-color:#fda4af !important; box-shadow:0 0 0 2px rgba(244,63,94,.35) inset !important; }
 
-/* Saisie à remplir = violet */
 .diag-bg  { background: rgba(131,116,167,.16) !important; }
 .diag-txt { color:#8374a7 !important; font-weight:700; }
 .fill-hint { background: rgba(131,116,167,.12) !important; }
@@ -38,6 +35,7 @@ body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI
 
 .progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
 .progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
+
 .flash { animation: flash-red 600ms ease-in-out; }
 @keyframes flash-red { 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
 
@@ -69,55 +67,37 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
 }
 .bot-bubble.ok{ border-color:#22c55e; }
 .bot-bubble.ko{ border-color:#ef4444; }
-.bot-bubble .msg{ line-height:1.25; }
 .bot-bubble img{ width:36px; height:36px; border-radius:9999px; background:#fff; padding:2px; border:1px solid #e5e7eb; }
 .dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
 .dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
 .dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
 
-@font-face{
-  font-family:'OpenDyslexicLocal';
-  src:url('OpenDyslexic-Regular.otf') format('opentype'),
-      url('OpenDyslexicAlta-Regular.otf') format('opentype');
-  font-display:swap;
-}
-
-/* --- ✅ Correctif complet pour le jeu 2 en mode écran noir --- */
-
-/* 1) En-têtes visibles (haut + gauche) */
+/* --- Correctif complet pour le jeu 2 en mode écran noir --- */
 .dark-mode .max-w-6xl table th {
   background:#f8fafc !important;
   color:#000 !important;
   border-color:#334155 !important;
 }
-
-/* 2) Coin supérieur gauche "×" distinct */
 .dark-mode .max-w-6xl table th:first-child {
   background:#f1f5f9 !important;
   color:#000 !important;
 }
-
-/* 3) Chiffres fixes (non éditables) visibles */
-.dark-mode td span:not(.diag-txt) {
-  color:#000 !important;
-}
-
-/* 4) Inputs lisibles */
+.dark-mode td span:not(.diag-txt) { color:#000 !important; }
 .dark-mode input {
   background:#fff !important;
   color:#111 !important;
   border-color:#a69acc !important;
 }
-
-/* 5) Diagonale violette lisible */
-.dark-mode .diag-bg span {
-  color:#000 !important;
-}
+.dark-mode .diag-bg span { color:#000 !important; }
 </style>
 </head>
 
 <body>
 <div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+/* ici ton code React complet (GameDefi, GamePythagore, GameInverse, App, etc.) */
+</script>
 
 <script type="text/babel" data-presets="env,react">
 const {useState,useEffect,useRef} = React;
@@ -916,5 +896,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
-
-
