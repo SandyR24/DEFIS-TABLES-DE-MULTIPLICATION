@@ -59,6 +59,24 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
 .dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
 .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
+/* --- Correctif final : affichage des cases non éditables visibles en mode écran noir --- */
+
+/* Les cellules fixes (non éditables) doivent être claires et visibles */
+.dark-mode td:not(:has(input)) {
+  background: #1e1e1e !important; /* même fond que le reste du tableau */
+  color: #f8fafc !important;      /* texte clair */
+}
+
+/* Les cellules à compléter (avec input) restent sur fond blanc pour contraste */
+.dark-mode td:has(input) {
+  background: #000 !important;
+}
+
+/* Diagonale violette : texte clair aussi */
+.dark-mode .diag-bg span {
+  color: #f8fafc !important;
+}
+
 /* --- Bulle DogBot ------------------------------------------------------ */
 .bot-bubble{
   display:flex; gap:.75rem; align-items:flex-start;
