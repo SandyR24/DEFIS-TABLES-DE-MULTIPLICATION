@@ -241,6 +241,44 @@ body:has(input[type="checkbox"]:checked) .max-w-6xl table td input {
   color: #111 !important;
   font-weight: 600 !important;
 }
+/* === MODE FOND JAUNE — harmonisation du jeu de la table de Pythagore === */
+
+/* Couleur de fond pour la zone de jeu uniquement */
+body.fond-jaune .max-w-6xl table tbody td {
+  background: #fff6c2 !important; /* jaune clair proche du fond général */
+}
+
+/* En-têtes du haut et de gauche : on garde leur fond bleu clair */
+body.fond-jaune .max-w-6xl table th {
+  background: #f1f5f9 !important; /* bleu très clair inchangé */
+  color: #000 !important;
+}
+
+/* Chiffres fixes (non éditables) sur fond jaune : plus lisibles */
+body.fond-jaune .max-w-6xl table td > span:not(.diag-txt) {
+  color: #111 !important;
+  font-weight: 600 !important;
+}
+
+/* Cases à compléter : fond légèrement crème pour contraste doux */
+body.fond-jaune .max-w-6xl table td input {
+  background: #fffef3 !important;
+  color: #000 !important;
+  border: 2px solid #a69acc !important;
+  box-shadow: 0 0 3px rgba(131,116,167,0.2);
+}
+
+/* Bordures du tableau : adoucies mais visibles */
+body.fond-jaune .max-w-6xl table td,
+body.fond-jaune .max-w-6xl table th {
+  border-color: #e8dc9f !important;
+}
+
+/* Diagonale violette reste lisible */
+body.fond-jaune .diag-bg {
+  background: rgba(131,116,167,0.15) !important;
+}
+
   
 </style>
 </head>
