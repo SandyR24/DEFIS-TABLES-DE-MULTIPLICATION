@@ -213,7 +213,34 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
   border-color: #777 !important;
 }
 
+  /* === Mode "Fond jaune" — uniformisation du fond du tableau de Pythagore === */
 
+/* Fond général du tableau */
+body:has(input[type="checkbox"]:checked) .max-w-6xl table,
+body:has(input[type="checkbox"]:checked) .max-w-6xl table th,
+body:has(input[type="checkbox"]:checked) .max-w-6xl table td {
+  background: #fff7cc !important; /* même jaune que le reste de la page */
+}
+
+/* Bordures plus douces sur fond jaune */
+body:has(input[type="checkbox"]:checked) .max-w-6xl table th,
+body:has(input[type="checkbox"]:checked) .max-w-6xl table td {
+  border-color: #e6db91 !important;
+}
+
+/* Chiffres fixes : texte bien lisible sur ce fond */
+body:has(input[type="checkbox"]:checked) .max-w-6xl table td span {
+  color: #111 !important;
+  font-weight: 600 !important;
+}
+
+/* Cases à compléter : bordure violette douce mais visible */
+body:has(input[type="checkbox"]:checked) .max-w-6xl table td input {
+  background: #fffef0 !important; /* légèrement plus clair que le fond général */
+  border: 2px solid #a69acc !important;
+  color: #111 !important;
+  font-weight: 600 !important;
+}
   
 </style>
 </head>
