@@ -6,73 +6,42 @@
 <meta http-equiv="Cache-Control" content="no-store"/>
 <title>Sacado Académie — Atelier d’automatismes</title>
 
-<!-- React, ReactDOM, Babel, Tailwind -->
+<!-- Librairies React / Babel / Tailwind -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-:root{ --brand:#8374a7; }
-body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-.hero{ background:#efe7ff; }
-.card{ background:#fff; border:1px solid #e5e7eb; }
-.btn{ background:var(--brand); color:#fff; }
-.pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
-.pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
-.hdr{ background:#f1f5f9; }
+:root {
+  --brand:#8374a7;
+}
+body {
+  margin:0;
+  background:#f8fafc;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
 
+/* Cartes, boutons, etc. */
+.card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:1rem; }
+.hdr { background:#f1f5f9; }
+.pill { padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
+.pill.active { background:var(--brand); border-color:var(--brand); color:#fff; }
+
+/* Statuts */
 .ok{ background:#dcfce7 !important; }
 .ko{ background:#fee2e2 !important; }
 
-.ko-input{ color:#be185d !important; font-weight:700; }
-.ko-border{ border-color:#fda4af !important; box-shadow:0 0 0 2px rgba(244,63,94,.35) inset !important; }
-
-.diag-bg  { background: rgba(131,116,167,.16) !important; }
-.diag-txt { color:#8374a7 !important; font-weight:700; }
-.fill-hint { background: rgba(131,116,167,.12) !important; }
-.violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
-
-.progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
-.progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
-
-.flash { animation: flash-red 600ms ease-in-out; }
-@keyframes flash-red { 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
-
-/* ---- DARK MODE -------------------------------------------------------- */
+/* Mode sombre */
 .dark-mode, .dark-mode * { color:#f8fafc !important; }
 .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
 .dark-mode .hdr{ background:#1f2937 !important; }
 .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
-.dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
 .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111827 !important; }
-.dark-mode .progress-wrap{ background:#0b0b0b !important; }
 .dark-mode .progress-bar{ background:#a69acc !important; }
-
-.dark-mode select, .dark-mode option, .dark-mode optgroup {
-  background:#0b0b0b !important; color:#f8fafc !important; border-color:#64748b !important;
-}
-.dark-mode select:focus { border-color:#a69acc !important; box-shadow:0 0 0 2px rgba(166,154,204,.35) inset; }
-.dark-mode option:checked { background:#3f3f46 !important; color:#f8fafc !important; }
 .dark-mode input[type="checkbox"]{ accent-color:#a69acc; }
-label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
-.dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
-.dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
-/* --- Bulle DogBot ------------------------------------------------------ */
-.bot-bubble{
-  display:flex; gap:.75rem; align-items:flex-start;
-  border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
-.bot-bubble.ok{ border-color:#22c55e; }
-.bot-bubble.ko{ border-color:#ef4444; }
-.bot-bubble img{ width:36px; height:36px; border-radius:9999px; background:#fff; padding:2px; border:1px solid #e5e7eb; }
-.dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
-.dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
-.dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
-
-/* --- Correctif complet pour le jeu 2 en mode écran noir --- */
+/* === Jeu 2 : Table de Pythagore (mode sombre lisible enfants) === */
 .dark-mode .max-w-6xl table th {
   background:#f8fafc !important;
   color:#000 !important;
@@ -82,243 +51,56 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
   background:#f1f5f9 !important;
   color:#000 !important;
 }
-.dark-mode td span:not(.diag-txt) { color:#000 !important; }
-.dark-mode input {
-  background:#fff !important;
-  color:#111 !important;
-  border-color:#a69acc !important;
-}
-.dark-mode .diag-bg span { color:#000 !important; }
-
-/* --- ✅ Version finale lisible enfants — Jeu 2 (Table de Pythagore) --- */
-
-/* En-têtes haut et gauche */
-.dark-mode .max-w-6xl table th {
-  background: #f8fafc !important; /* fond clair */
-  color: #000 !important;          /* texte noir lisible */
-  border-color: #334155 !important;
-}
-.dark-mode .max-w-6xl table th:first-child {
-  background: #f1f5f9 !important;
-  color: #000 !important;
-}
-
-/* Cellules fixes (non éditables, les produits déjà remplis) */
-.dark-mode td span {
-  background: #2b2b2b !important; /* fond gris foncé légèrement clair */
-  color: #ffffff !important;       /* texte blanc net et fort contraste */
-  font-weight: 600 !important;     /* chiffres plus épais */
-  border-radius: 6px;
-  display: inline-block;
-  min-width: 60px;
-  text-align: center;
-  padding: 4px 0;
-}
-
-/* Cellules éditables (input) — restent blanches pour bon contraste */
-.dark-mode td input {
-  background: #ffffff !important;
-  color: #111111 !important;
-  border: 2px solid #a69acc !important;
-  font-weight: 600 !important;
-}
-
-/* Diagonale violette : chiffre blanc légèrement teinté */
-.dark-mode .diag-bg span {
-  color: #d9d2ff !important; /* violet clair lisible */
-  background: #3a2f4f !important; /* fond violet plus soutenu */
-  font-weight: 700 !important;
-}
-
-/* Bordures du tableau légèrement visibles */
-.dark-mode td, .dark-mode th {
-  border-color: #555 !important;
-}
-
-  /* === Lisibilité nette Jeu 2 en mode écran noir === */
-
-/* Fond uniforme des cellules du tableau (corps) */
-.dark-mode .max-w-6xl table tbody td {
-  background: #0f0f0f !important;   /* très sombre, sans voile */
-  border-color: #444 !important;
-}
-
-/* Chiffres fixes (cellules NON éditables) visibles et sans “pastille” */
+.dark-mode .max-w-6xl table tbody td { background:#0f0f0f !important; border-color:#444 !important; }
 .dark-mode .max-w-6xl table tbody td > span:not(.diag-txt) {
-  background: transparent !important;  /* retire la pastille */
-  color: #ffffff !important;           /* blanc franc */
-  font-weight: 700 !important;
-  opacity: 1 !important;               /* aucune transparence résiduelle */
-  filter: none !important;
-  mix-blend-mode: normal !important;
+  background:transparent !important;
+  color:#ffffff !important;
+  font-weight:700 !important;
+  text-shadow:0 0 3px rgba(255,255,255,.5);
 }
-
-/* Cases à compléter : restent blanches et bien contrastées */
 .dark-mode .max-w-6xl table tbody td input {
-  background: #ffffff !important;
-  color: #111111 !important;
-  border: 2px solid #a69acc !important;
-  font-weight: 600 !important;
+  background:#ffffff !important;
+  color:#000 !important;
+  border:3px solid #c6b8ff !important;
+  box-shadow:0 0 6px rgba(198,184,255,.9) !important;
+  border-radius:8px !important;
+  font-weight:700 !important;
 }
-
-/* Diagonale d’aide (si utilisée) : fond violet un peu plus net + texte clair */
-.dark-mode .diag-bg {
-  background: #33284a !important;
-}
-.dark-mode .diag-bg span {
-  color: #ffffff !important;
-}
-
-/* En-têtes haut et gauche : fond clair / texte noir (déjà OK, je remets ici pour cohérence) */
-.dark-mode .max-w-6xl table th {
-  background: #f8fafc !important;
-  color: #000 !important;
-  border-color: #334155 !important;
-}
-.dark-mode .max-w-6xl table th:first-child {
-  background: #f1f5f9 !important;
-  color: #000 !important;
-}
-
-/* === Amélioration accessibilité visuelle (mode écran noir, jeu 2) === */
-
-/* 1. Mieux distinguer les cases à compléter (inputs) */
-.dark-mode .max-w-6xl table tbody td input {
-  background: #ffffff !important;         /* blanc pur pour contraste maximal */
-  color: #000000 !important;              /* texte noir net */
-  border: 3px solid #c6b8ff !important;   /* bordure violette claire + épaisse */
-  box-shadow: 0 0 6px rgba(198,184,255,0.9) !important; /* halo violet lumineux */
-  border-radius: 8px !important;
-  font-weight: 700 !important;
-  transition: all 0.15s ease-in-out;
-}
-
-/* 2. Focus visible et doux (important pour navigation clavier) */
 .dark-mode .max-w-6xl table tbody td input:focus {
-  outline: none !important;
-  border-color: #ffffff !important;
-  box-shadow: 0 0 10px 2px rgba(255,255,255,0.9) !important;
-  background: #fdfdfd !important;
+  outline:none !important;
+  border-color:#fff !important;
+  box-shadow:0 0 10px 2px rgba(255,255,255,.9) !important;
 }
+.dark-mode .diag-bg { background:#33284a !important; }
+.dark-mode .diag-bg span { color:#fff !important; }
 
-/* 3. Chiffres fixes restent stables et nets */
-.dark-mode .max-w-6xl table tbody td > span:not(.diag-txt) {
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  text-shadow: 0 0 3px rgba(255,255,255,0.5); /* légère brillance blanche */
-}
-
-/* 4. Bordures du tableau renforcées */
-.dark-mode td, .dark-mode th {
-  border-color: #777 !important;
-}
-
-  /* === Mode "Fond jaune" — uniformisation du fond du tableau de Pythagore === */
-
-/* Fond général du tableau */
-body:has(input[type="checkbox"]:checked) .max-w-6xl table,
-body:has(input[type="checkbox"]:checked) .max-w-6xl table th,
-body:has(input[type="checkbox"]:checked) .max-w-6xl table td {
-  background: #fff7cc !important; /* même jaune que le reste de la page */
-}
-
-/* Bordures plus douces sur fond jaune */
-body:has(input[type="checkbox"]:checked) .max-w-6xl table th,
-body:has(input[type="checkbox"]:checked) .max-w-6xl table td {
-  border-color: #e6db91 !important;
-}
-
-/* Chiffres fixes : texte bien lisible sur ce fond */
-body:has(input[type="checkbox"]:checked) .max-w-6xl table td span {
-  color: #111 !important;
-  font-weight: 600 !important;
-}
-
-/* Cases à compléter : bordure violette douce mais visible */
-body:has(input[type="checkbox"]:checked) .max-w-6xl table td input {
-  background: #fffef0 !important; /* légèrement plus clair que le fond général */
-  border: 2px solid #a69acc !important;
-  color: #111 !important;
-  font-weight: 600 !important;
-}
-/* === MODE FOND JAUNE — harmonisation du jeu de la table de Pythagore === */
-
-/* Couleur de fond pour la zone de jeu uniquement */
-body.fond-jaune .max-w-6xl table tbody td {
-  background: #fff6c2 !important; /* jaune clair proche du fond général */
-}
-
-/* En-têtes du haut et de gauche : on garde leur fond bleu clair */
-body.fond-jaune .max-w-6xl table th {
-  background: #f1f5f9 !important; /* bleu très clair inchangé */
-  color: #000 !important;
-}
-
-/* Chiffres fixes (non éditables) sur fond jaune : plus lisibles */
-body.fond-jaune .max-w-6xl table td > span:not(.diag-txt) {
-  color: #111 !important;
-  font-weight: 600 !important;
-}
-
-/* Cases à compléter : fond légèrement crème pour contraste doux */
-body.fond-jaune .max-w-6xl table td input {
-  background: #fffef3 !important;
-  color: #000 !important;
-  border: 2px solid #a69acc !important;
-  box-shadow: 0 0 3px rgba(131,116,167,0.2);
-}
-
-/* Bordures du tableau : adoucies mais visibles */
-body.fond-jaune .max-w-6xl table td,
-body.fond-jaune .max-w-6xl table th {
-  border-color: #e8dc9f !important;
-}
-
-/* Diagonale violette reste lisible */
-body.fond-jaune .diag-bg {
-  background: rgba(131,116,167,0.15) !important;
-}
-
-  /* === Fond jaune harmonisé pour le JEU 2, sans toucher à l'écran noir === */
-/* S'active quand le conteneur a la classe .yellow-mode (quand Fond jaune = true et Écran noir = false) */
-
-/* Corps du tableau = le même jaune que les cartes */
+/* === Mode FOND JAUNE (harmonisé, repères conservés) === */
 .yellow-mode .max-w-6xl table tbody td {
-  background: #fff7cc !important;            /* même jaune que les cartes/consignes */
-  border-color: #e8dc9f !important;          /* bordure douce */
+  background:#fff7cc !important; /* même jaune que les cartes */
+  border-color:#e8dc9f !important;
 }
-
-/* En-têtes haut/gauche = repères conservés (bleu clair inchangé) */
 .yellow-mode .max-w-6xl table th {
-  background: #f1f5f9 !important;            /* bleu clair d'origine */
-  color: #000 !important;
-  border-color: #cfd7e3 !important;
+  background:#f1f5f9 !important; /* bleu clair d'origine pour repère */
+  color:#000 !important;
+  border-color:#cfd7e3 !important;
 }
-
-/* Chiffres fixes sur fond jaune : lisibles */
 .yellow-mode .max-w-6xl table td > span:not(.diag-txt) {
-  color: #111 !important;
-  font-weight: 600 !important;
-  background: transparent !important;        /* pas de pastille */
+  color:#111 !important;
+  font-weight:600 !important;
 }
-
-/* Inputs sur fond jaune : crème léger pour mieux les repérer */
 .yellow-mode .max-w-6xl table td input {
-  background: #fffef3 !important;            /* très léger par rapport au jaune */
-  color: #000 !important;
-  border: 2px solid #a69acc !important;      /* violet doux */
-  box-shadow: 0 0 3px rgba(131,116,167,.2);
+  background:#fffef3 !important;
+  color:#000 !important;
+  border:2px solid #a69acc !important;
+  box-shadow:0 0 3px rgba(131,116,167,.2);
 }
-
-/* Diagonale violet : reste lisible sur jaune */
 .yellow-mode .diag-bg {
-  background: rgba(131,116,167,.16) !important;
+  background:rgba(131,116,167,.16) !important;
 }
-
-  
 </style>
+  
 </head>
-
+  
 <body>
 <div id="root"></div>
 
