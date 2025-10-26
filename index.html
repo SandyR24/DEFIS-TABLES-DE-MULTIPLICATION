@@ -235,7 +235,11 @@ function AccessibilityCard({acc}){
     </div>
   );
 }
-
+useEffect(()=>{ 
+  document.body.style.fontFamily = acc.font === "OpenDyslexicLocal"
+    ? "'OpenDyslexicLocal', Arial, sans-serif"
+    : acc.font + ", sans-serif";
+}, [acc.font]); 
 
 /* ---------- Progress + Summary ---------- */
 function Progress({remaining, total}) {
