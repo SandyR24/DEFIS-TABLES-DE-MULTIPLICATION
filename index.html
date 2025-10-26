@@ -179,6 +179,41 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
   background: #f1f5f9 !important;
   color: #000 !important;
 }
+
+/* === Amélioration accessibilité visuelle (mode écran noir, jeu 2) === */
+
+/* 1. Mieux distinguer les cases à compléter (inputs) */
+.dark-mode .max-w-6xl table tbody td input {
+  background: #ffffff !important;         /* blanc pur pour contraste maximal */
+  color: #000000 !important;              /* texte noir net */
+  border: 3px solid #c6b8ff !important;   /* bordure violette claire + épaisse */
+  box-shadow: 0 0 6px rgba(198,184,255,0.9) !important; /* halo violet lumineux */
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  transition: all 0.15s ease-in-out;
+}
+
+/* 2. Focus visible et doux (important pour navigation clavier) */
+.dark-mode .max-w-6xl table tbody td input:focus {
+  outline: none !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 10px 2px rgba(255,255,255,0.9) !important;
+  background: #fdfdfd !important;
+}
+
+/* 3. Chiffres fixes restent stables et nets */
+.dark-mode .max-w-6xl table tbody td > span:not(.diag-txt) {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 3px rgba(255,255,255,0.5); /* légère brillance blanche */
+}
+
+/* 4. Bordures du tableau renforcées */
+.dark-mode td, .dark-mode th {
+  border-color: #777 !important;
+}
+
+
   
 </style>
 </head>
