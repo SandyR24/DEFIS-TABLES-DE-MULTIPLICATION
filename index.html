@@ -90,22 +90,39 @@ label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
 }
 .dark-mode .diag-bg span { color:#000 !important; }
 
-/* --- Correctif final : affichage des cases non éditables visibles en mode écran noir --- */
+/* --- ✅ Correctif final complet du jeu 2 (mode noir) --- */
 
-/* Les cellules fixes (non éditables) doivent être claires et visibles */
-.dark-mode td:not(:has(input)) {
-  background: #1e1e1e !important; /* même fond que le reste du tableau */
+/* 1. En-têtes (haut + gauche) : fond clair, texte noir */
+.dark-mode .max-w-6xl table th {
+  background: #f8fafc !important;
+  color: #000 !important;
+  border-color: #334155 !important;
+}
+.dark-mode .max-w-6xl table th:first-child {
+  background: #f1f5f9 !important;
+  color: #000 !important;
+}
+
+/* 2. Cellules fixes (sans input, les produits déjà remplis) */
+.dark-mode td span {
   color: #f8fafc !important;      /* texte clair */
+  background: #1e1e1e !important; /* fond sombre cohérent */
+  border-radius: 4px;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
 }
 
-/* Les cellules à compléter (avec input) restent sur fond blanc pour contraste */
-.dark-mode td:has(input) {
-  background: #000 !important;
+/* 3. Cellules à compléter (avec input) — fond blanc pour le contraste */
+.dark-mode td input {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-color: #a69acc !important;
 }
 
-/* Diagonale violette : texte clair aussi */
+/* 4. Diagonale violette reste bien visible */
 .dark-mode .diag-bg span {
-  color: #f8fafc !important;
+  color: #a69acc !important;
 }
   
 </style>
