@@ -141,7 +141,13 @@ function useAccessibility(){
   const toggleYellow = (v)=>{ setYellow(v); if(v) setBlack(false); };
   const toggleBlack  = (v)=>{ setBlack(v); if(v) setYellow(false); };
 
-  useEffect(()=>{ document.body.style.fontSize=`${size}px`; },[size]);
+  useEffect(()=>{
+  document.body.style.fontSize=`${size}px`;
+  document.body.style.fontFamily = font === "OpenDyslexicLocal"
+    ? "'OpenDyslexicLocal', Arial, sans-serif"
+    : font + ", sans-serif";
+},[size,font]);
+
 
   const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
   const rootText= black ? "#f8fafc" : "#111";
