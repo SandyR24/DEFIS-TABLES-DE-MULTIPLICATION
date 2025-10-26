@@ -12,131 +12,113 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-  :root{ --brand:#8374a7; }
-  body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-  .hero{ background:#efe7ff; }
-  .card{ background:#fff; border:1px solid #e5e7eb; }
-  .btn{ background:var(--brand); color:#fff; }
-  .pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
-  .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
-  .hdr{ background:#f1f5f9; }
+<style>
+:root{ --brand:#8374a7; }
+body{ margin:0; background:#f8fafc; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+.hero{ background:#efe7ff; }
+.card{ background:#fff; border:1px solid #e5e7eb; }
+.btn{ background:var(--brand); color:#fff; }
+.pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
+.pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
+.hdr{ background:#f1f5f9; }
 
-  /* ✅ statut prime (rose/vert) */
-  .ok{ background:#dcfce7 !important; }
-  .ko{ background:#fee2e2 !important; }
+/* ✅ statut prime (rose/vert) */
+.ok{ background:#dcfce7 !important; }
+.ko{ background:#fee2e2 !important; }
 
-  /* Saisie faux = texte fuchsia + bordure rose */
-  .ko-input{ color:#be185d !important; font-weight:700; }
-  .ko-border{ border-color:#fda4af !important; box-shadow:0 0 0 2px rgba(244,63,94,.35) inset !important; }
+/* Saisie faux = texte fuchsia + bordure rose */
+.ko-input{ color:#be185d !important; font-weight:700; }
+.ko-border{ border-color:#fda4af !important; box-shadow:0 0 0 2px rgba(244,63,94,.35) inset !important; }
 
-  /* Saisie à remplir = violet */
-  .diag-bg  { background: rgba(131,116,167,.16) !important; }
-  .diag-txt { color:#8374a7 !important; font-weight:700; }
-  .fill-hint { background: rgba(131,116,167,.12) !important; }
-  .violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
+/* Saisie à remplir = violet */
+.diag-bg  { background: rgba(131,116,167,.16) !important; }
+.diag-txt { color:#8374a7 !important; font-weight:700; }
+.fill-hint { background: rgba(131,116,167,.12) !important; }
+.violet-border { border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
 
-  .progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
-  .progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
-  .flash { animation: flash-red 600ms ease-in-out; }
-  @keyframes flash-red { 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
+.progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
+.progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
+.flash { animation: flash-red 600ms ease-in-out; }
+@keyframes flash-red { 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
 
-  /* ---- DARK MODE -------------------------------------------------------- */
-  .dark-mode, .dark-mode * { color:#f8fafc !important; }
-  .dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
-  .dark-mode .hdr{ background:#1f2937 !important; }
-  .dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
-  .dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
-  .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111827 !important; }
-  .dark-mode .progress-wrap{ background:#0b0b0b !important; }
-  .dark-mode .progress-bar{ background:#a69acc !important; }
+/* ---- DARK MODE -------------------------------------------------------- */
+.dark-mode, .dark-mode * { color:#f8fafc !important; }
+.dark-mode .card{ background:#111111 !important; border-color:#334155 !important; }
+.dark-mode .hdr{ background:#1f2937 !important; }
+.dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#64748b !important; }
+.dark-mode .pill{ background:#fff !important; color:#111827 !important; border-color:#e5e7eb !important; }
+.dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111827 !important; }
+.dark-mode .progress-wrap{ background:#0b0b0b !important; }
+.dark-mode .progress-bar{ background:#a69acc !important; }
 
-  .dark-mode select, .dark-mode option, .dark-mode optgroup {
-    background:#0b0b0b !important; color:#f8fafc !important; border-color:#64748b !important;
-  }
-  .dark-mode select:focus { border-color:#a69acc !important; box-shadow:0 0 0 2px rgba(166,154,204,.35) inset; }
-  .dark-mode option:checked { background:#3f3f46 !important; color:#f8fafc !important; }
-  .dark-mode input[type="checkbox"]{ accent-color:#a69acc; }
-  label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
-  .dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
-  .dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
+.dark-mode select, .dark-mode option, .dark-mode optgroup {
+  background:#0b0b0b !important; color:#f8fafc !important; border-color:#64748b !important;
+}
+.dark-mode select:focus { border-color:#a69acc !important; box-shadow:0 0 0 2px rgba(166,154,204,.35) inset; }
+.dark-mode option:checked { background:#3f3f46 !important; color:#f8fafc !important; }
+.dark-mode input[type="checkbox"]{ accent-color:#a69acc; }
+label>input[type="checkbox"]:checked+span{ color:#8374a7; font-weight:700; }
+.dark-mode label>input[type="checkbox"]:checked+span{ color:#a69acc; font-weight:700; }
+.dark-mode .fill-hint{ background: rgba(166,154,204,.22) !important; }
 
-  /* --- Bulle DogBot ------------------------------------------------------ */
-  .bot-bubble{
-    display:flex; gap:.75rem; align-items:flex-start;
-    border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,.05);
-  }
-  .bot-bubble.ok{ border-color:#22c55e; }
-  .bot-bubble.ko{ border-color:#ef4444; }
-  .bot-bubble .msg{ line-height:1.25; }
-  .bot-bubble img{ width:36px; height:36px; border-radius:9999px; background:#fff; padding:2px; border:1px solid #e5e7eb; }
-  .dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
-  .dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
-  .dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
+/* --- Bulle DogBot ------------------------------------------------------ */
+.bot-bubble{
+  display:flex; gap:.75rem; align-items:flex-start;
+  border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.bot-bubble.ok{ border-color:#22c55e; }
+.bot-bubble.ko{ border-color:#ef4444; }
+.bot-bubble .msg{ line-height:1.25; }
+.bot-bubble img{ width:36px; height:36px; border-radius:9999px; background:#fff; padding:2px; border:1px solid #e5e7eb; }
+.dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
+.dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
+.dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
 
-  @font-face{
-    font-family:'OpenDyslexicLocal';
-    src:url('OpenDyslexic-Regular.otf') format('opentype'),
-        url('OpenDyslexicAlta-Regular.otf') format('opentype');
-    font-display:swap;
-  }
+@font-face{
+  font-family:'OpenDyslexicLocal';
+  src:url('OpenDyslexic-Regular.otf') format('opentype'),
+      url('OpenDyslexicAlta-Regular.otf') format('opentype');
+  font-display:swap;
+}
 
-  /* --- Correctif Jeu 2 : Table de Pythagore (dark mode) --- */
-  .dark-mode .pyth-cell,
-  .dark-mode .fill-hint,
-  .dark-mode .diag-bg {
-    background:#1e1e1e !important;   /* fond sombre uniforme */
-    color:#f8fafc !important;        /* texte clair par défaut */
-  }
-
-  .dark-mode .hdr {
-    background:#111827 !important;
-    color:#f8fafc !important;
-    font-weight:600;
-  }
-
-  .dark-mode .diag-txt {
-    color:#a69acc !important;
-  }
-   
 /* --- ✅ Correctif complet pour le jeu 2 en mode écran noir --- */
 
-/* 1. En-têtes du tableau (ligne du haut + colonne de gauche) */
+/* 1) En-têtes visibles (haut + gauche) */
 .dark-mode .max-w-6xl table th {
-  background: #f8fafc !important; /* fond clair */
-  color: #000 !important;          /* texte noir lisible */
-  border-color: #334155 !important;
+  background:#f8fafc !important;
+  color:#000 !important;
+  border-color:#334155 !important;
 }
 
-/* 2. Coin supérieur gauche ("×") */
+/* 2) Coin supérieur gauche "×" distinct */
 .dark-mode .max-w-6xl table th:first-child {
-  background: #f1f5f9 !important;
-  color: #000 !important;
+  background:#f1f5f9 !important;
+  color:#000 !important;
 }
 
-/* 3. Cellules non éditables (chiffres fixes dans le tableau) */
+/* 3) Chiffres fixes (non éditables) visibles */
 .dark-mode td span:not(.diag-txt) {
-  color: #000 !important; /* texte noir pour rester visible */
+  color:#000 !important;
 }
 
-/* 4. Cellules éditables (input) conservent contraste clair */
+/* 4) Inputs lisibles */
 .dark-mode input {
-  background: #fff !important;
-  color: #111 !important;
-  border-color: #a69acc !important;
+  background:#fff !important;
+  color:#111 !important;
+  border-color:#a69acc !important;
 }
 
-/* 5. Diagonale violette reste visible */
+/* 5) Diagonale violette lisible */
 .dark-mode .diag-bg span {
-  color: #000 !important;
+  color:#000 !important;
 }
-  </style>
+</style>
 </head>
+
 <body>
 <div id="root"></div>
 
-  
 <script type="text/babel" data-presets="env,react">
 const {useState,useEffect,useRef} = React;
 const BRAND = "#8374a7";
@@ -222,11 +204,7 @@ function useAccessibility(){
   return {font,setFont,size,setSize,yellow,setYellow,black,setBlack,audio,setAudio,rootBg,cardStyle,rootText,fontFamily,speak};
 }
 function AccessibilityCard({acc}){
-  // style lisible en mode sombre (fond clair + texte foncé)
-  const lightSelect = acc.black
-    ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' }
-    : {};
-
+  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
   return (
     <div className="card rounded-2xl p-4" style={acc.cardStyle}>
       <div className="font-bold mb-2">Accessibilité</div>
@@ -331,7 +309,7 @@ function Summary({cardStyle,answers}){
   );
 }
 
-/* JEU 1 — Défi Tables (inchangé) */
+/* JEU 1 — Défi Tables */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
   const [selectedTables,setSelectedTables]=useState(range(2,10));
@@ -348,7 +326,7 @@ function GameDefi({acc}){
   useEffect(()=>{ if(started && !finished && questions[index]){ const q=questions[index]; acc.audio && speak(`${q.a} multiplié par ${q.b}`);} },[index,started,finished]);
 
   const start=()=>{
-    const list=[]; 
+    const list=[];
     for(let i=0;i<questionCount;i++){
       const a=selectedTables[Math.floor(Math.random()*selectedTables.length)];
       const b=Math.floor(Math.random()*9)+2;
@@ -441,7 +419,7 @@ function GameDefi({acc}){
   );
 }
 
-/* JEU 2 — Table de Pythagore (corrigé : bouton réinitialiser + chiffres noirs en dark mode) */
+/* JEU 2 — Table de Pythagore */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
@@ -500,34 +478,8 @@ function GamePythagore({acc}){
       setFeedback(null);
     }
   };
-/* --- Correctif final : chiffres visibles en mode écran noir (Jeu 2) --- */
 
-/* cellules non éditables = texte noir sur fond clair */
-.dark-mode td span:not(.diag-txt),
-.dark-mode td:not(:has(input)) {
-  color: #000 !important;
-  background: #f8fafc !important;
-}
-
-/* cellules d'entêtes */
-.dark-mode th.hdr {
-  background: #1f2937 !important;
-  color: #f8fafc !important;
-}
-
-/* cellules éditables (cases violettes) gardent un contraste correct */
-.dark-mode input {
-  background: #fff !important;
-  color: #111 !important;
-  border-color: #a69acc !important;
-}
-
-/* diagonale violette reste visible */
-.dark-mode .diag-bg span {
-  color: #000 !important;
-}
-
-  {/* ✅ Bouton réinitialiser */}
+  /* ✅ Bouton réinitialiser */
   const resetAll=()=>{ setValues({}); setChecked({}); setFeedback(null); };
 
   const tip =
@@ -535,10 +487,10 @@ function GamePythagore({acc}){
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
   : mode==="diagonal" ? "Complète seulement la diagonale (les carrés). Ex : 6×6."
   : mode==="mirror"   ? "Complète UNIQUEMENT la partie du haut, l’autre moitié se remplira automatiquement par miroir - Ex : 3×7 = 7×3."
-  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. Si tu connais tes tables jusqu'à 6 et la diagonale, il ne te reste que si 6 résultats à apprendre." 
+  : /* minimal */       "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9. Si tu connais tes tables jusqu'à 6 et la diagonale, il ne te reste que 6 résultats à apprendre." 
 
   return (
-    <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
+    <div className={(acc.black?"dark-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
       <TopNav route="/pythagore" go={(k)=>location.hash="#"+k}/>
       <div className="max-w-6xl mx-auto">
         <div className="grid xl:grid-cols-3 gap-4 mb-4">
@@ -620,8 +572,7 @@ function GamePythagore({acc}){
                     const clsReady  = " violet-border diag-txt";
 
                     if((mode==="mirror"||mode==="minimal") && onDiag){
-                      /* ✅ classe pyth-static pour forcer le noir en dark-mode sur chiffres fixes */
-                      return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt pyth-static">{a*b}</span></td>;
+                      return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
                     }
 
                     if(mode==="mirror" && a>b){
@@ -649,7 +600,7 @@ function GamePythagore({acc}){
                     const content = shouldFill
                       ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)}
                                className={baseInput + (st==="ko"?clsWrong:clsReady)} />
-                      : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt ":"")+"pyth-static"}>{a*b}</span>;
+                      : <span className="inline-block min-w-[84px] text-lg">{a*b}</span>;
 
                     return (
                       <td key={k}
@@ -670,7 +621,7 @@ function GamePythagore({acc}){
   );
 }
 
-  /* JEU 3 — Retrouve la multiplication avec 3 modes (inchangé + bouton Retour) */
+/* JEU 3 — Retrouve la multiplication */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
@@ -936,14 +887,13 @@ function GameInverse({acc}){
         {finished && <Summary cardStyle={cardStyle} answers={answers} />}
 
         {/* ✅ Bouton retour demandé */}
-
         <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">⬅ Retour au menu</a></div>
       </div>
     </div>
   );
 }
 
-  /* APP */
+/* APP */
 function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
@@ -966,3 +916,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
