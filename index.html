@@ -95,12 +95,14 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-
         </select>
       </div>
 
-        useEffect(()=>{ 
-  document.body.style.fontFamily = acc.font === "OpenDyslexicLocal"
+// ✅ Met à jour automatiquement la police ET la taille
+useEffect(() => {
+  document.body.style.fontSize = `${size}px`;
+  document.body.style.fontFamily = font === "OpenDyslexicLocal"
     ? "'OpenDyslexicLocal', Arial, sans-serif"
-    : acc.font + ", sans-serif";
-}, [acc.font]);
-                                                           
+    : font + ", sans-serif";
+}, [size, font]);
+                                                          
 
       <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
       <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
