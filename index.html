@@ -279,6 +279,42 @@ body.fond-jaune .diag-bg {
   background: rgba(131,116,167,0.15) !important;
 }
 
+  /* === Fond jaune harmonisé pour le JEU 2, sans toucher à l'écran noir === */
+/* S'active quand le conteneur a la classe .yellow-mode (quand Fond jaune = true et Écran noir = false) */
+
+/* Corps du tableau = le même jaune que les cartes */
+.yellow-mode .max-w-6xl table tbody td {
+  background: #fff7cc !important;            /* même jaune que les cartes/consignes */
+  border-color: #e8dc9f !important;          /* bordure douce */
+}
+
+/* En-têtes haut/gauche = repères conservés (bleu clair inchangé) */
+.yellow-mode .max-w-6xl table th {
+  background: #f1f5f9 !important;            /* bleu clair d'origine */
+  color: #000 !important;
+  border-color: #cfd7e3 !important;
+}
+
+/* Chiffres fixes sur fond jaune : lisibles */
+.yellow-mode .max-w-6xl table td > span:not(.diag-txt) {
+  color: #111 !important;
+  font-weight: 600 !important;
+  background: transparent !important;        /* pas de pastille */
+}
+
+/* Inputs sur fond jaune : crème léger pour mieux les repérer */
+.yellow-mode .max-w-6xl table td input {
+  background: #fffef3 !important;            /* très léger par rapport au jaune */
+  color: #000 !important;
+  border: 2px solid #a69acc !important;      /* violet doux */
+  box-shadow: 0 0 3px rgba(131,116,167,.2);
+}
+
+/* Diagonale violet : reste lisible sur jaune */
+.yellow-mode .diag-bg {
+  background: rgba(131,116,167,.16) !important;
+}
+
   
 </style>
 </head>
