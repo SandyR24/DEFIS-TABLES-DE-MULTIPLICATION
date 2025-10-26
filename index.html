@@ -1,3 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Cache-Control" content="no-store"/>
+<title>Sacado Académie — Atelier d’automatismes</title>
+
+<!-- Librairies -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root { --brand:#8374a7; }
+body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f8fafc; color:#111; }
+
+/* UI de base */
+.card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; }
+.btn{ background:var(--brand); color:#fff; border-radius:16px; padding:.6rem 1rem; }
+.pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
+.pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
+.hdr{ background:#f1f5f9; }
+.ok{ background:#dcfce7 !important; }
+.ko{ background:#fee2e2 !important; }
+.diag-bg{ background:rgba(131,116,167,.16) !important; }
+.diag-txt{ color:#8374a7 !important; font-weight:700; }
+.fill-hint{ background:rgba(131,116,167,.12) !important; }
+.violet-border{ border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
+
+/* Progress bar */
+.progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
+.progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
+.flash{ animation: flash-red 600ms ease-in-out; }
+@keyframes flash-red{ 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
+
+/* ------------------------- MODE NOIR (écran noir) ------------------------- */
+.dark-mode, .dark-mode * { color:#f8fafc !important; }
+.dark-mode { background:#000 !important; }
+.dark-mode .card{ background:#111 !important; border-color:#333 !important; }
+.dark-mode .hdr{ background:#1f2937 !important; }
+.dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#555 !important; }
+.dark-mode .pill{ background:#fff !important; color:#111 !important; }
+.dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111 !important; }
+.dark-mode .progress-bar{ background:#a69acc !important; }
+
+/* Jeu 2 en mode noir : lisible enfants DYS */
+.dark-mode .max-w-6xl table th{
+  background:#f8fafc !important; color:#000 !important; border-color:#333 !important;
+}
+.dark-mode .max-w-6xl table th:first-child{ background:#f1f5f9 !important; }
+.dark-mode .max-w-6xl table td{ background:#111 !important; border-color:#333 !important; }
+.dark-mode .max-w-6xl table td span:not(.diag-txt){ color:#fff !important; font-weight:700 !important; }
+.dark-mode .max-w-6xl table td input{
+  background:#fff !important; color:#000 !important; border:3px solid #c6b8ff !important;
+  border-radius:8px !important; font-weight:700 !important; box-shadow:0 0 6px rgba(198,184,255,.8);
+}
+.dark-mode .diag-bg{ background:#33284a !important; }
+
+/* ------------------------- MODE JAUNE (fond jaune) ------------------------ */
+/* S’active via la classe .yellow-mode sur le conteneur du jeu (mutuellement exclusif avec dark-mode) */
+.yellow-mode{ background:#fff7cc !important; color:#111 !important; }
+.yellow-mode .card{ background:#fff7cc !important; border-color:#e6db91 !important; }
+.yellow-mode .hdr{ background:#fff3b0 !important; }
+
+.yellow-mode .max-w-6xl table td{ background:#fff7cc !important; border-color:#e8dc9f !important; }
+.yellow-mode .max-w-6xl table th{
+  background:#f1f5f9 !important; color:#000 !important; border-color:#cfd7e3 !important;
+}
+.yellow-mode .max-w-6xl table td span:not(.diag-txt){ color:#111 !important; font-weight:600 !important; background:transparent !important; }
+.yellow-mode .max-w-6xl table td input{
+  background:#fffef3 !important; color:#000 !important; border:2px solid #a69acc !important; box-shadow:0 0 3px rgba(131,116,167,.2);
+}
+.yellow-mode .diag-bg{ background:rgba(131,116,167,.16) !important; }
+
+/* DogBot bubble */
+.bot-bubble{ display:flex; gap:.75rem; align-items:flex-start; border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.bot-bubble.ok{ border-color:#22c55e; }
+.bot-bubble.ko{ border-color:#ef4444; }
+.dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
+.dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
+.dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<!-- ======================= PARTIE 2/3 : JS (communs + Jeu 1) ======================= -->
+<script type="text/babel" data-presets="env,react">
+/* Utils + accessibilité + UI communes */
+const {useState,useEffect,useRef} = React;
+const BRAND = "#8374a7";
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+
+/* ---------- Accessibilité (exclusivité Jaune/Noir) ---------- */
+function useAccessibility(){
+  const [font,setFont]=useState("Arial");
+  const [size,setSize]=useState(16);
+  const [yellow,setYellow]=useState(false);
+  const [black,setBlack]=useState(false);
+  const [audio,setAudio]=useState(false);
+
+  // Exclusivité : si on coche l’un, l’autre se décoche
+  const toggleYellow = (v)=>{ setYellow(v); if(v) setBlack(false); };
+  const toggleBlack  = (v)=>{ setBlack(v); if(v) setYellow(false); };
+
+  useEffect(()=>{ document.body.style.fontSize=`${size}px`; },[size]);
+
+  const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
+  const rootText= black ? "#f8fafc" : "#111";
+  const cardStyle = { backgroundColor: yellow ? "#fff7cc" : (black ? "#111" : "#fff"), color: rootText };
+
+  const speak=(txt)=>{ try{ if(!audio) return; const u=new SpeechSynthesisUtterance(txt); u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} };
+
+  return {
+    font,setFont,size,setSize,yellow,black,audio,setAudio,
+    toggleYellow,toggleBlack,
+    rootBg,rootText,cardStyle,speak
+  };
+}
+
+/* ---------- TopNav + Hub ---------- */
+function TopNav({route,go}){
+  return (
+    <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
+      <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
+        <div className="flex items-center gap-3">
+          <img src="dogbot.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
+          <div>
+            <div className="font-black leading-tight">Sacado Académie</div>
+            <div className="text-xs opacity-90">Atelier d’automatismes</div>
+          </div>
+        </div>
+        <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
+      </div>
+      <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
+        {[
+          {k:"/", label:"Accueil"},
+          {k:"/defi", label:"Jeu n°1 – Défi Tables"},
+          {k:"/pythagore", label:"Jeu n°2 – Table de Pythagore"},
+          {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
+        ].map(tab=>(
+          <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+function Hero(){
+  return (
+    <header className="p-6 md:p-10 text-center rounded-3xl card" style={{background:"#efe7ff"}}>
+      <h1 className="text-3xl md:text-5xl font-extrabold" style={{color:"var(--brand)"}}>Atelier d’automatismes</h1>
+      <p className="mt-1 text-xl font-semibold" style={{color:"var(--brand)"}}>Sacado Académie</p>
+      <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
+      <img src="dogbot.png" className="mx-auto mt-4 h-28 w-28 rounded-full bg-white p-1 shadow" alt="DogBot"/>
+    </header>
+  );
+}
+function Hub(){
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-8">
+      <Hero/>
+      <h2 className="text-center text-2xl md:text-3xl font-extrabold my-4" style={{color:"var(--brand)"}}>Choisis ton activité</h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°1 — Défi Tables</h3><a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a></article>
+      </div>
+    </main>
+  );
+}
+
+/* ---------- Accessibilité Card ---------- */
+function AccessibilityCard({acc}){
+  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
+  return (
+    <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+      <div className="font-bold mb-2">Accessibilité</div>
+      <div className="flex gap-2 flex-wrap mb-2">
+        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
+          {[16,18,20,22,24].map(s=><option key={s} value={s}>{s}px</option>)}
+        </select>
+      </div>
+      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
+      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
+      <div className="mt-2 flex items-center gap-2"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/><label>Audio (TTS)</label></div>
+    </div>
+  );
+}
+
+/* ---------- Progress + Summary ---------- */
+function Progress({remaining, total}) {
+  if (total==null) return null;
+  const pct = Math.max(0, Math.min(100, (remaining/total)*100));
+  return <div className="progress-wrap mt-2"><div className="progress-bar" style={{width:`${pct}%`}}></div></div>;
+}
+function Summary({cardStyle,answers}){
+  const total = answers.length;
+  const score = answers.filter(a => a.correct).length;
+  const pct = total ? Math.round((score/total)*100) : 0;
+  const statusText = (r) => r.timeout ? "⏱ Hors délai" : (r.user==null ? "— Pas de réponse" : (r.correct ? "✔ Vrai" : "✘ Faux"));
+  const displayPrompt = (r) => (r.game==="inverse-div") ? `${r.dividend} ÷ ${r.divisor}` : (r.product!=null && (r.a==null||r.b==null)) ? r.product : (r.a!=null && r.b!=null) ? `${r.a}×${r.b}` : (r.product??"—");
+  const displayUser   = (r) => r.user ?? "—";
+  const displayCorr   = (r) => (r.game==="inverse-div") ? (r.quotient ?? "—") : (r.product ?? (r.a*r.b ?? "—"));
+  return (
+    <>
+      <div className="rounded-3xl border p-6 shadow-sm card" style={cardStyle}><h2 className="text-2xl font-black">Récapitulatif</h2><p>Score : {score} / {total} ({pct}%)</p></div>
+      <div className="rounded-3xl border p-4 shadow-sm overflow-x-auto card" style={cardStyle}>
+        <table className="w-full text-left text-sm">
+          <thead><tr><th>#</th><th>Énoncé / Résultat</th><th>Réponse(s)</th><th>Correction</th><th>Statut</th></tr></thead>
+          <tbody>{answers.map((r,i)=>(<tr key={i} className="border-t"><td>{i+1}</td><td>{displayPrompt(r)}</td><td>{displayUser(r)}</td><td>{displayCorr(r)}</td><td>{statusText(r)}</td></tr>))}</tbody>
+        </table>
+      </div>
+      <a className="px-5 py-3 rounded-2xl border inline-block" href="#/">Retour au menu</a>
+    </>
+  );
+}
+
+/* ========================== JEU 1 — Défi Tables ========================== */
+function GameDefi({acc}){
+  const {rootBg,rootText,speak}=acc;
+  const [selectedTables,setSelectedTables]=useState(range(2,10));
+  const [questionCount,setQuestionCount]=useState(10);
+  const [timeLimit,setTimeLimit]=useState(5);
+  const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
+  const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
+  const [input,setInput]=useState(""), [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
+  const [flash,setFlash]=useState(false);
+  const inputRef=useRef(null);
+
+  useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
+  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit){ setFlash(true); setTimeout(()=>setFlash(false),650); handleSubmit(true);} },[tick]);
+  useEffect(()=>{ if(started && !finished && questions[index]){ const q=questions[index]; acc.audio && speak(`${q.a} multiplié par ${q.b}`);} },[index,started,finished]);
+
+  const start=()=>{ const list=[]; for(let i=0;i<questionCount;i++){ const a=selectedTables[Math.floor(Math.random()*selectedTables.length)]; const b=Math.floor(Math.random()*9)+2; list.push({a,b,product:a*b}); } setQuestions(list); setIndex(0); setAnswers([]); setInput(""); setTick(0); setStarted(true); setFinished(false); setTimeout(()=>inputRef.current?.focus(),0); };
+  const current=questions[index];
+
+  const handleSubmit=(timeout=false)=>{ if(!current) return; const userNum = Number(input); const userProvided = input !== ""; const correct = !timeout && userProvided && userNum===current.product;
+    const record = {game:"defi",a:current.a,b:current.b,product:current.product,user:timeout?null:(userProvided?userNum:null),correct,timeout};
+    setAnswers(p=>[...p,record]); if(index+1>=questions.length){ setFinished(true); setStarted(false); } else { setIndex(i=>i+1); setTick(0); setInput(""); } };
+
+  const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
+  return (
+    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
+      <TopNav route="/defi" go={k=>location.hash="#"+k}/>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {!started && !finished && (
+          <div className="grid md:grid-cols-3 gap-4">
+            <AccessibilityCard acc={acc}/>
+            <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+              <div className="font-bold mb-2">Réglages</div>
+              <div className="mb-2"><div className="text-sm mb-1">Tables</div><div className="flex flex-wrap gap-2">{range(2,10).map(n=>(<button key={n} onClick={()=>setSelectedTables(p=>p.includes(n)?p.filter(x=>x!==n):[...p,n])} className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>))}</div></div>
+              <div className="mb-2"><div className="text-sm mb-1">Nombre de questions</div><div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}</div></div>
+              <div><div className="text-sm mb-1">Temps par question</div><div className="flex gap-2 flex-wrap">{[3,5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}<button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button></div></div>
+            </div>
+            <div className="card rounded-2xl p-4" style={acc.cardStyle}><div className="font-bold mb-2">Action</div><button onClick={start} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Lancer le défi</button></div>
+          </div>
+        )}
+        {started && current && (
+          <div className="space-y-6">
+            <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={acc.cardStyle}><div className="flex items-center justify-between"><div><strong>Question :</strong> {index+1} / {questions.length}</div><div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div></div><Progress remaining={remaining??0} total={timeLimit}/></div>
+            <div className="rounded-3xl border p-6 text-center shadow-sm card" style={acc.cardStyle}>
+              <div className="font-black text-5xl mb-4">{current.a} × {current.b} = ?</div>
+              <div className="flex gap-3 justify-center">
+                <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value.replace(/\D/g,""))} onKeyDown={e=>{ if(e.key==='Enter') { e.preventDefault(); handleSubmit(false);} }} inputMode="numeric" type="tel" autoComplete="off" spellCheck="false" className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
+                <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {finished && <Summary cardStyle={acc.cardStyle} answers={answers} />}
+      </div>
+    </div>
+  );
+}
+
+
 /* ===================== JEU 2 — Table de Pythagore ===================== */
 function GamePythagore({acc}){
   const {rootBg,rootText,cardStyle}=acc;
