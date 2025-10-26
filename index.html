@@ -102,8 +102,24 @@
 
   /* ✅ CORRECTIF DEMANDÉ : chiffres fixes en NOIR en mode écran noir (jeu 2) */
   .dark-mode .pyth-static {
-    color:#000 !important;
-  }
+    color:#000 !important
+ }
+    
+/* --- Correctif en-têtes invisibles en mode écran noir (Jeu 2) --- */
+
+/* En-têtes du haut (1re ligne) et de gauche (1re colonne) */
+.dark-mode .max-w-6xl table th {
+  background: #f8fafc !important; /* fond clair */
+  color: #000 !important;          /* texte noir lisible */
+  border-color: #334155 !important;
+}
+
+/* Correction pour le coin supérieur gauche "×" */
+.dark-mode .max-w-6xl table th:first-child {
+  background: #f1f5f9 !important;
+  color: #000 !important;
+}
+    
   </style>
 
 </head>
