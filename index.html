@@ -100,18 +100,35 @@
     color:#a69acc !important;
   }
    
-/* --- Correctif en-têtes invisibles en mode écran noir (Jeu 2) --- */
+/* --- ✅ Correctif complet pour le jeu 2 en mode écran noir --- */
 
-/* En-têtes du haut (1re ligne) et de gauche (1re colonne) */
+/* 1. En-têtes du tableau (ligne du haut + colonne de gauche) */
 .dark-mode .max-w-6xl table th {
   background: #f8fafc !important; /* fond clair */
   color: #000 !important;          /* texte noir lisible */
   border-color: #334155 !important;
 }
 
-/* Correction pour le coin supérieur gauche "×" */
+/* 2. Coin supérieur gauche ("×") */
 .dark-mode .max-w-6xl table th:first-child {
   background: #f1f5f9 !important;
+  color: #000 !important;
+}
+
+/* 3. Cellules non éditables (chiffres fixes dans le tableau) */
+.dark-mode td span:not(.diag-txt) {
+  color: #000 !important; /* texte noir pour rester visible */
+}
+
+/* 4. Cellules éditables (input) conservent contraste clair */
+.dark-mode input {
+  background: #fff !important;
+  color: #111 !important;
+  border-color: #a69acc !important;
+}
+
+/* 5. Diagonale violette reste visible */
+.dark-mode .diag-bg span {
   color: #000 !important;
 }
     
