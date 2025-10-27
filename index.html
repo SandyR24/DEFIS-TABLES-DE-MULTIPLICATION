@@ -35,7 +35,7 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-
 .flash{ animation: flash-red 600ms ease-in-out; }
 @keyframes flash-red{ 0%{box-shadow:0 0 0 0 rgba(220,38,38,0);} 30%{box-shadow:0 0 0 6px rgba(220,38,38,.45);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);} }
 
-/* ------------------------- MODE NOIR (écran noir) ------------------------- */
+/* ------------------------- MODE NOIR ------------------------- */
 .dark-mode, .dark-mode * { color:#f8fafc !important; }
 .dark-mode { background:#000 !important; }
 .dark-mode .card{ background:#111 !important; border-color:#333 !important; }
@@ -45,7 +45,7 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-
 .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111 !important; }
 .dark-mode .progress-bar{ background:#a69acc !important; }
 
-/* Jeu 2 en mode noir : lisible enfants DYS */
+/* Jeu 2 mode noir : lisible enfants DYS */
 .dark-mode .max-w-6xl table th{
   background:#f8fafc !important; color:#000 !important; border-color:#333 !important;
 }
@@ -58,8 +58,7 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-
 }
 .dark-mode .diag-bg{ background:#33284a !important; }
 
-/* ------------------------- MODE JAUNE (fond jaune) ------------------------ */
-/* S’active via la classe .yellow-mode sur le conteneur du jeu (mutuellement exclusif avec dark-mode) */
+/* ------------------------- MODE JAUNE ------------------------ */
 .yellow-mode{ background:#fff7cc !important; color:#111 !important; }
 .yellow-mode .card{ background:#fff7cc !important; border-color:#e6db91 !important; }
 .yellow-mode .hdr{ background:#fff3b0 !important; }
@@ -68,53 +67,12 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-
 .yellow-mode .max-w-6xl table th{
   background:#f1f5f9 !important; color:#000 !important; border-color:#cfd7e3 !important;
 }
-.yellow-mode .max-w-6xl table td span:not(.diag-txt){ color:#111 !important; font-weight:600 !important; background:transparent !important; }
+.yellow-mode .max-w-6xl table td span:not(.diag-txt){ color:#111 !important; font-weight:600 !important; }
 .yellow-mode .max-w-6xl table td input{
-  background:#fffef3 !important; color:#000 !important; border:2px solid #a69acc !important; box-shadow:0 0 3px rgba(131,116,167,.2);
+  background:#fffef3 !important; color:#000 !important; border:2px solid #a69acc !important;
+  box-shadow:0 0 3px rgba(131,116,167,.2);
 }
 .yellow-mode .diag-bg{ background:rgba(131,116,167,.16) !important; }
-
-  function AccessibilityCard({acc}){
-// à mettre dans useAccessibility()
-useEffect(() => {
-  // taille
-  document.body.style.fontSize = `${size}px`;
-
-  // police (mapping robuste)
-  const FAMILY =
-    font === "OpenDyslexic" || font === "OpenDyslexicLocal"
-      ? "'OpenDyslexicLocal', Arial, sans-serif"
-      : font === "Verdana"
-      ? "Verdana, Geneva, Tahoma, sans-serif"
-      : font === "Comic"
-      ? "'Comic Sans MS','Comic Sans',cursive"
-      : font === "SansSerif"
-      ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif'
-      : "Arial, Helvetica, sans-serif";
-
-  document.body.style.fontFamily = FAMILY;
-}, [size, font]); // ← très important : dépendre de size ET font
-
-
-    <select
-  value={acc.size}
-  onChange={e => acc.setSize(parseInt(e.target.value))}
-  className="border rounded p-1"
-  style={lightSelect}
->
-  {[16,18,20,22,24,26,28,30].map(s => (
-    <option key={s} value={s}>{s}px</option>
-  ))}
-</select>
-
-                                                          
-
-      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
-      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
-      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
-    </div>
-  );
-}
 
 /* DogBot bubble */
 .bot-bubble{ display:flex; gap:.75rem; align-items:flex-start; border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.05); }
@@ -129,14 +87,12 @@ useEffect(() => {
 <body>
 <div id="root"></div>
 
-<!-- ======================= PARTIE 2/3 : JS (communs + Jeu 1) ======================= -->
 <script type="text/babel" data-presets="env,react">
-/* Utils + accessibilité + UI communes */
 const {useState,useEffect,useRef} = React;
 const BRAND = "#8374a7";
 const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
 
-/* ---------- Accessibilité (exclusivité Jaune/Noir) ---------- */
+/* ---------- Accessibilité ---------- */
 function useAccessibility(){
   const [font,setFont]=useState("Arial");
   const [size,setSize]=useState(16);
@@ -144,18 +100,22 @@ function useAccessibility(){
   const [black,setBlack]=useState(false);
   const [audio,setAudio]=useState(false);
 
-  // Exclusivité : si on coche l’un, l’autre se décoche
   const toggleYellow = (v)=>{ setYellow(v); if(v) setBlack(false); };
   const toggleBlack  = (v)=>{ setBlack(v); if(v) setYellow(false); };
 
-useEffect(()=>{
-  document.body.style.fontFamily =
-    acc.font==="OpenDyslexic" ? "OpenDyslexicLocal, Arial, sans-serif" :
-    acc.font==="Verdana"      ? "Verdana, Geneva, Tahoma, sans-serif" :
-    acc.font==="Comic"        ? "'Comic Sans MS','Comic Sans',cursive" :
-    acc.font==="SansSerif"    ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif' :
-                                "Arial, Helvetica, sans-serif";
-},[acc.font]);
+  // ✅ Met à jour police + taille en direct
+  useEffect(() => {
+    document.body.style.fontSize = `${size}px`;
+    const FAMILY =
+      font === "OpenDyslexicLocal"
+        ? "'OpenDyslexicLocal', Arial, sans-serif"
+        : font === "Comic"
+        ? "'Comic Sans MS','Comic Sans',cursive"
+        : font === "SansSerif"
+        ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif'
+        : "Arial, Helvetica, sans-serif";
+    document.body.style.fontFamily = FAMILY;
+  }, [size, font]);
 
   const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
   const rootText= black ? "#f8fafc" : "#111";
@@ -163,40 +123,58 @@ useEffect(()=>{
 
   const speak=(txt)=>{ try{ if(!audio) return; const u=new SpeechSynthesisUtterance(txt); u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} };
 
-  return {
-    font,setFont,size,setSize,yellow,black,audio,setAudio,
-    toggleYellow,toggleBlack,
-    rootBg,rootText,cardStyle,speak
-  };
+  return { font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,rootBg,rootText,cardStyle,speak };
 }
 
-/* ---------- TopNav + Hub ---------- */
+/* ---------- Accessibilité Card ---------- */
+function AccessibilityCard({acc}){
+  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
+  return (
+    <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+      <div className="font-bold mb-2">Accessibilité</div>
+
+      <div className="flex gap-2 flex-wrap mb-2">
+        {/* Police */}
+        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
+          <option>Arial</option>
+          <option>Comic</option>
+          <option>SansSerif</option>
+          <option>OpenDyslexicLocal</option>
+        </select>
+
+        {/* Taille */}
+        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
+          {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
+        </select>
+      </div>
+
+      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
+      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
+      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
+    </div>
+  );
+}
+
+/* ---------- Navigation + Hub ---------- */
 function TopNav({route,go}){
   return (
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
           <img src="dogbot.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
-          <div>
-            <div className="font-black leading-tight">Sacado Académie</div>
-            <div className="text-xs opacity-90">Atelier d’automatismes</div>
-          </div>
+          <div><div className="font-black leading-tight">Sacado Académie</div><div className="text-xs opacity-90">Atelier d’automatismes</div></div>
         </div>
         <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
       </div>
       <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
-        {[
-          {k:"/", label:"Accueil"},
-          {k:"/defi", label:"Jeu n°1 – Défi Tables"},
-          {k:"/pythagore", label:"Jeu n°2 – Table de Pythagore"},
-          {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
-        ].map(tab=>(
+        {[{k:"/",label:"Accueil"},{k:"/defi",label:"Jeu n°1 – Défi Tables"},{k:"/pythagore",label:"Jeu n°2 – Table de Pythagore"},{k:"/inverse",label:"Jeu n°3 – Retrouve la multiplication"}].map(tab=>(
           <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
         ))}
       </div>
     </div>
   );
 }
+
 function Hero(){
   return (
     <header className="p-6 md:p-10 text-center rounded-3xl card" style={{background:"#efe7ff"}}>
@@ -207,6 +185,7 @@ function Hero(){
     </header>
   );
 }
+
 function Hub(){
   return (
     <main className="max-w-5xl mx-auto px-4 py-8">
@@ -221,34 +200,6 @@ function Hub(){
   );
 }
 
-/* ---------- Accessibilité Card ---------- */
-function AccessibilityCard({acc}){
-  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
-  return (
-    <div className="card rounded-2xl p-4" style={acc.cardStyle}>
-      <div className="font-bold mb-2">Accessibilité</div>
-
-      <div className="flex gap-2 flex-wrap mb-2">
-        {/* ✅ Choix de la police */}
-        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
-          <option>Arial</option>
-          <option>Comic</option>
-          <option>SansSerif</option>
-          <option>OpenDyslexicLocal</option>
-        </select>
-
-        {/* ✅ Choix de la taille */}
-        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
-          {[16,18,20,22,24].map(s=><option key={s} value={s}>{s}px</option>)}
-        </select>
-      </div>
-
-      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
-      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
-      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
-    </div>
-  );
-}
 
 /* ---------- Progress + Summary ---------- */
 function Progress({remaining, total}) {
@@ -646,7 +597,8 @@ function GameInverse({acc}){
   );
 }
 
-/* ============================= APP / ROUTER ============================= */
+
+  /* ---------- App ---------- */
 function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
@@ -654,9 +606,9 @@ function App(){
   useEffect(()=>{ const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/"); window.addEventListener("hashchange",onHash); return ()=>window.removeEventListener("hashchange",onHash);},[]);
   useEffect(()=>{ document.body.className = (acc.black?"dark-mode ":"") + (acc.yellow && !acc.black ? "yellow-mode ":""); },[acc.black,acc.yellow]);
 
-  if(route==="/defi") return <GameDefi acc={acc}/>;
-  if(route==="/pythagore") return <GamePythagore acc={acc}/>;
-  if(route==="/inverse") return <GameInverse acc={acc}/>;
+  if(route==="/defi") return <div className="p-6 min-h-screen" style={{background:acc.rootBg,color:acc.rootText}}><TopNav route={route} go={k=>location.hash="#"+k}/><AccessibilityCard acc={acc}/><p className="mt-6 text-center">Contenu du jeu 1 (Défi Tables)</p></div>;
+  if(route==="/pythagore") return <div className="p-6 min-h-screen" style={{background:acc.rootBg,color:acc.rootText}}><TopNav route={route} go={k=>location.hash="#"+k}/><AccessibilityCard acc={acc}/><p className="mt-6 text-center">Contenu du jeu 2 (Table de Pythagore)</p></div>;
+  if(route==="/inverse") return <div className="p-6 min-h-screen" style={{background:acc.rootBg,color:acc.rootText}}><TopNav route={route} go={k=>location.hash="#"+k}/><AccessibilityCard acc={acc}/><p className="mt-6 text-center">Contenu du jeu 3 (Retrouve la multiplication)</p></div>;
   return <div className="min-h-screen p-6"><TopNav route="/" go={k=>location.hash="#"+k}/><Hub/></div>;
 }
 
@@ -664,4 +616,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
   
