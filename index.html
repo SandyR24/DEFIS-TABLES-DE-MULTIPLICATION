@@ -148,13 +148,14 @@ function useAccessibility(){
   const toggleYellow = (v)=>{ setYellow(v); if(v) setBlack(false); };
   const toggleBlack  = (v)=>{ setBlack(v); if(v) setYellow(false); };
 
-  useEffect(()=>{
-  document.body.style.fontSize=`${size}px`;
-  document.body.style.fontFamily = font === "OpenDyslexicLocal"
-    ? "'OpenDyslexicLocal', Arial, sans-serif"
-    : font + ", sans-serif";
-},[size,font]);
-
+useEffect(()=>{
+  document.body.style.fontFamily =
+    acc.font==="OpenDyslexic" ? "OpenDyslexicLocal, Arial, sans-serif" :
+    acc.font==="Verdana"      ? "Verdana, Geneva, Tahoma, sans-serif" :
+    acc.font==="Comic"        ? "'Comic Sans MS','Comic Sans',cursive" :
+    acc.font==="SansSerif"    ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif' :
+                                "Arial, Helvetica, sans-serif";
+},[acc.font]);
 
   const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
   const rootText= black ? "#f8fafc" : "#111";
