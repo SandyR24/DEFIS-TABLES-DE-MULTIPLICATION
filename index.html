@@ -1000,9 +1000,42 @@ function GameInverse({acc}) {
                     >
                       Valider
                     </button>
-                  </div>
-         );
+                </form>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FIN DU JEU */}
+        {finished && (
+          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
+            <h2 className="text-2xl font-bold mb-4">Résultats 🎯</h2>
+            <p className="mb-2">
+              Tu as réussi{" "}
+              <strong>
+                {answers.filter((a) => a.correct).length}/{answers.length}
+              </strong>{" "}
+              questions.
+            </p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => {
+                  setStarted(false);
+                  setFinished(false);
+                }}
+                className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
+                style={{backgroundColor: "#8374a7"}}
+              >
+                Rejouer
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
+
 
 
 /* ============================= APP / ROUTER ============================= */
@@ -1026,9 +1059,6 @@ function App(){
     </div>
   );
 }
-
-
-
 
                   
 
