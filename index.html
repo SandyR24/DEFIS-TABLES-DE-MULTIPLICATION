@@ -1001,7 +1001,30 @@ function GameInverse({acc}) {
                       Valider
                     </button>
                   </div>
-               
+
+
+/* ============================= APP / ROUTER ============================= */
+function App(){
+  const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
+  const acc=useAccessibility();
+
+  useEffect(()=>{ const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/"); window.addEventListener("hashchange",onHash); return ()=>window.removeEventListener("hashchange",onHash);},[]);
+  useEffect(()=>{ document.body.className = (acc.black?"dark-mode ":"") + (acc.yellow && !acc.black ? "yellow-mode ":""); },[acc.black,acc.yellow]);
+
+  return (
+    <div className="min-h-screen p-6" style={{background:acc.rootBg,color:acc.rootText}}>
+      <TopNav route={route} go={k=>location.hash="#"+k}/>
+      {route==="/"        && <Hub/>}
+      {route==="/defi"    && <GameDefi acc={acc}/>}
+      {route==="/pythagore" && <GamePythagore acc={acc}/>}
+      {route==="/inverse" && <GameInverse acc={acc}/>}
+    </div>
+  );
+}
+
+
+
+                  
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
