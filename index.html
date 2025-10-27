@@ -283,7 +283,6 @@ function GameDefi({acc}){
 
   return (
     <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/defi" go={k=>location.hash="#"+k}/>
       <div className="max-w-4xl mx-auto space-y-6">
 
         {!started && !finished && (
@@ -421,8 +420,7 @@ function GamePythagore({acc}){
 
   return (
     <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/pythagore" go={(k)=>location.hash="#"+k}/>
-      <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto">
         <div className="grid xl:grid-cols-3 gap-4 mb-4">
           <AccessibilityCard acc={acc}/>
           <div className="card rounded-2xl p-4" style={cardStyle}>
@@ -693,8 +691,7 @@ function GameInverse({acc}){
 
   return (
     <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
-      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
 
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
