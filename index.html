@@ -87,10 +87,25 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 <body>
 <div id="root"></div>
 
+
+
 <script type="text/babel" data-presets="env,react">
-const {useState,useEffect,useRef} = React;
-const BRAND = "#8374a7";
-const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+// === Montage unique, anti-doublon ===
+(() => {
+  const container = document.getElementById('root');
+  // Si une app est déjà montée, on la démonte proprement
+  if (window.__SACADO_ROOT__) {
+    try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
+  }
+  // Monte une seule instance et mémorise la racine
+  window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
+  window.__SACADO_ROOT__.render(<App />);
+})();
+</script>
+
+
+
+  
 
 /* ==================== ACCESSIBILITÉ ==================== */
 function useAccessibility(){
