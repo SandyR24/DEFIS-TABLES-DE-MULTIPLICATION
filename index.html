@@ -693,18 +693,6 @@ function App() {
   );
 }
 
-/* === Montage unique, anti-doublon === */
-(() => {
-  const container = document.getElementById('root');
-  if (window.__SACADO_ROOT__) {
-    try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
-  }
-  window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
-  window.__SACADO_ROOT__.render(<App />);
-})();
-
-
-
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
   <!-- ======================= SCRIPT REACT PRINCIPAL ======================= -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
