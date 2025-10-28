@@ -87,7 +87,18 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 <body>
 <div id="root"></div>
 
+<script type="text/babel">
+  // tout ton code React ici
+  // y compris les fonctions : useAccessibility, TopNav, Hub, GameDefi, GamePythagore, GameInverse, App()
 
+  (() => {
+    const container = document.getElementById('root');
+    if (window.__SACADO_ROOT__) {
+      try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
+    }
+    window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
+    window.__SACADO_ROOT__.render(<App />);
+  })();
 
 
 
@@ -206,21 +217,6 @@ function Progress({remaining, total}) {
   return <div className="progress-wrap mt-2"><div className="progress-bar" style={{width:`${pct}%`}}></div></div>;
 }
 const vibrate = (p=[80,40,120]) => { try { if (navigator.vibrate) navigator.vibrate(p); } catch(_){} };
-
-
-<script type="text/babel">
-  // tout ton code React ici
-  // y compris les fonctions : useAccessibility, TopNav, Hub, GameDefi, GamePythagore, GameInverse, App()
-
-  (() => {
-    const container = document.getElementById('root');
-    if (window.__SACADO_ROOT__) {
-      try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
-    }
-    window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
-    window.__SACADO_ROOT__.render(<App />);
-  })();
-
 
   
 
