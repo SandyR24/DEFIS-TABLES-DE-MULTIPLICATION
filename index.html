@@ -234,7 +234,8 @@ function GameDefi({acc}){
   const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-            <div className="max-w-4xl mx-auto space-y-6">
+      <TopNav route="/defi" go={k=>location.hash="#"+k}/>
+      <div className="max-w-4xl mx-auto space-y-6">
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
             <AccessibilityCard acc={acc}/>
@@ -323,7 +324,8 @@ function GamePythagore({acc}){
 
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-           <div className="max-w-6xl mx-auto">
+      <TopNav route="/pythagore" go={k=>location.hash="#"+k}/>
+      <div className="max-w-6xl mx-auto">
         <div className="grid xl:grid-cols-3 gap-4 mb-4">
           <AccessibilityCard acc={acc}/>
           <div className="card rounded-2xl p-4" style={cardStyle}>
@@ -522,7 +524,8 @@ function GameInverse({acc}){
 
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-         <div className="max-w-4xl mx-auto space-y-6">
+      <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
+      <div className="max-w-4xl mx-auto space-y-6">
 
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
@@ -695,3 +698,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
