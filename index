@@ -150,8 +150,17 @@ function AccessibilityCard({acc}){
 }
 
 /* ==================== NAV / HUB ==================== */
-function TopNav({route,go}){
-  return (
+
+ return (
+    <div className="min-h-screen p-6" style={{background:acc.rootBg, color:acc.rootText}}>
+      <TopNav route={route} go={k=>location.hash="#"+k}/>  {/* Un seul ici */}
+      {route === "/" && <Hub/>}
+      {route === "/defi" && <GameDefi acc={acc}/>}
+      {route === "/pythagore" && <GamePythagore acc={acc}/>}
+      {route === "/inverse" && <GameInverse acc={acc}/>}
+    </div>
+  );
+
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
