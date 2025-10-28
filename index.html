@@ -1002,7 +1002,122 @@ function GameInverse({acc}) {
                       Valider
                     </button>
                   </div>
-               
+
+                                    </div>
+                </form>
+              </div>
+            )}
+
+            {/* FACTEUR MANQUANT */}
+            {current.kind === "missing" && (
+              <div
+                className="rounded-3xl border p-6 text-center shadow-sm card"
+                style={cardStyle}
+              >
+                <div className="text-slate-500">Complète :</div>
+                <div className="font-black text-4xl mb-6">
+                  {current.missing === "a"
+                    ? "… × " + current.b + " = " + current.product
+                    : current.a + " × … = " + current.product}
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(false);
+                  }}
+                  className="flex gap-4 justify-center items-center"
+                >
+                  <input
+                    ref={xRef}
+                    value={missing}
+                    onChange={(e) =>
+                      setMissing(e.target.value.replace(/\D/g, ""))
+                    }
+                    inputMode="numeric"
+                    type="tel"
+                    className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt"
+                  />
+                  <button
+                    type="submit"
+                    className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
+                    style={{backgroundColor: "#8374a7"}}
+                  >
+                    Valider
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* DIVISIONS */}
+            {current.kind === "div" && (
+              <div
+                className="rounded-3xl border p-6 text-center shadow-sm card"
+                style={cardStyle}
+              >
+                <div className="text-slate-500">Complète :</div>
+                <div className="font-black text-4xl mb-6">
+                  {current.dividend} ÷ {current.divisor} = …
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(false);
+                  }}
+                  className="flex gap-4 justify-center items-center"
+                >
+                  <input
+                    ref={xRef}
+                    value={quotient}
+                    onChange={(e) =>
+                      setQuotient(e.target.value.replace(/\D/g, ""))
+                    }
+                    inputMode="numeric"
+                    type="tel"
+                    className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt"
+                  />
+                  <button
+                    type="submit"
+                    className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
+                    style={{backgroundColor: "#8374a7"}}
+                  >
+                    Valider
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FIN DU JEU */}
+        {finished && (
+          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
+            <h2 className="text-2xl font-bold mb-4">Résultats 🎯</h2>
+            <p className="mb-2">
+              Tu as réussi{" "}
+              <strong>
+                {answers.filter((a) => a.correct).length}/{answers.length}
+              </strong>{" "}
+              questions.
+            </p>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => {
+                  setStarted(false);
+                  setFinished(false);
+                }}
+                className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
+                style={{backgroundColor: "#8374a7"}}
+              >
+                Rejouer
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 /* ============================= APP / ROUTER ============================= */
 function App(){
