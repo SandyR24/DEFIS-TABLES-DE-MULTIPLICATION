@@ -89,23 +89,7 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 
 
 
-<script type="text/babel" data-presets="env,react">
-// === Montage unique, anti-doublon ===
-(() => {
-  const container = document.getElementById('root');
-  // Si une app est déjà montée, on la démonte proprement
-  if (window.__SACADO_ROOT__) {
-    try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
-  }
-  // Monte une seule instance et mémorise la racine
-  window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
-  window.__SACADO_ROOT__.render(<App />);
-})();
-</script>
 
-
-
-  
 
 /* ==================== ACCESSIBILITÉ ==================== */
 function useAccessibility(){
@@ -680,34 +664,45 @@ function GameInverse({acc}){
     </div>
   );
 }
+        /* ============================= APP / ROUTER ============================= */
+function App() {
+  const [route, setRoute] = useState(location.hash.replace(/^#/, "") || "/");
+  const acc = useAccessibility();
 
-/* ============================= APP / ROUTER ============================= */
-function App(){
-  const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
-  const acc=useAccessibility();
+  useEffect(() => {
+    const onHash = () => setRoute(location.hash.replace(/^#/, "") || "/");
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
-  useEffect(()=>{
-    const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/");
-    window.addEventListener("hashchange",onHash);
-    return ()=>window.removeEventListener("hashchange",onHash);
-  },[]);
-
-  useEffect(()=>{
+  useEffect(() => {
     document.body.className =
       (acc.black ? "dark-mode " : "") +
       (acc.yellow && !acc.black ? "yellow-mode " : "");
-  },[acc.black,acc.yellow]);
+  }, [acc.black, acc.yellow]);
 
   return (
-    <div className="min-h-screen p-6" style={{background:acc.rootBg, color:acc.rootText}}>
-      <TopNav route={route} go={k=>location.hash="#"+k}/>
-      {route === "/" && <Hub/>}
-      {route === "/defi" && <GameDefi acc={acc}/>}
-      {route === "/pythagore" && <GamePythagore acc={acc}/>}
-      {route === "/inverse" && <GameInverse acc={acc}/>}
+    <div className="min-h-screen p-6" style={{ background: acc.rootBg, color: acc.rootText }}>
+      <TopNav route={route} go={k => (location.hash = "#" + k)} />
+      {route === "/" && <Hub />}
+      {route === "/defi" && <GameDefi acc={acc} />}
+      {route === "/pythagore" && <GamePythagore acc={acc} />}
+      {route === "/inverse" && <GameInverse acc={acc} />}
     </div>
   );
 }
+
+/* === Montage unique, anti-doublon === */
+(() => {
+  const container = document.getElementById('root');
+  if (window.__SACADO_ROOT__) {
+    try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
+  }
+  window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
+  window.__SACADO_ROOT__.render(<App />);
+})();
+
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
