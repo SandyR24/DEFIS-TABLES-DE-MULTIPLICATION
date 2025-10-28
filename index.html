@@ -1121,7 +1121,7 @@ function GameInverse({acc}) {
 
 /* ============================= APP / ROUTER ============================= */
 function App(){
-  const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
+ const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
 
   useEffect(()=>{ const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/"); window.addEventListener("hashchange",onHash); return ()=>window.removeEventListener("hashchange",onHash);},[]);
