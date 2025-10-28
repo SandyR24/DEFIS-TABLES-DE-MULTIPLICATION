@@ -1,47 +1,59 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Sacado Académie — Atelier d’automatismes</title>
+
+<!-- Tailwind (utilisé pour le style utilitaire) -->
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
 :root { --brand:#8374a7; }
-body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f8fafc; color:#111; }
+body { margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
 
+/* Cartes & pills */
 .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; }
 .btn{ background:var(--brand); color:#fff; border-radius:16px; padding:.6rem 1rem; }
 .pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
 .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
 
+/* Progress bar */
+.progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
+.progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
+
+/* Mode noir */
 .dark-mode, .dark-mode * { color:#f8fafc !important; }
 .dark-mode { background:#000 !important; }
 .dark-mode .card{ background:#111 !important; border-color:#333 !important; }
 .dark-mode .pill{ background:#fff !important; color:#111 !important; }
 .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111 !important; }
 
+/* Mode jaune */
 .yellow-mode{ background:#fff7cc !important; color:#111 !important; }
 .yellow-mode .card{ background:#fff7cc !important; border-color:#e6db91 !important; }
 
-.progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
-.progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
-
+/* Jeu 2 : tête du tableau (restent lisibles dans tous les modes) */
+.hdr{ background:#f1f5f9; font-weight:600; }
+.dark-mode .hdr{ background:#111827 !important; color:#f8fafc !important; }
+.yellow-mode .hdr{ background:#fff3b0 !important; color:#111 !important; }
 </style>
 </head>
+
 <body>
 <div id="root"></div>
 
-<!-- Librairies React -->
+<!-- React + Babel -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <script type="text/babel" data-presets="env,react">
 const {useState,useEffect,useRef} = React;
+const BRAND = "#8374a7";
 const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
-const BRAND="#8374a7";
 
-/* ---------- Accessibilité ---------- */
+/* ============================ ACCESSIBILITÉ ============================ */
 function useAccessibility(){
   const [font,setFont]=useState("Arial");
   const [size,setSize]=useState(16);
@@ -49,37 +61,60 @@ function useAccessibility(){
   const [black,setBlack]=useState(false);
   const [audio,setAudio]=useState(false);
 
-  const toggleYellow=v=>{setYellow(v);if(v) setBlack(false);}
-  const toggleBlack=v=>{setBlack(v);if(v) setYellow(false);}
+  // exclusivité des modes d’arrière-plan
+  const toggleYellow = v => { setYellow(v); if(v) setBlack(false); };
+  const toggleBlack  = v => { setBlack(v); if(v) setYellow(false); };
 
+  // appliquer police + taille en direct
   useEffect(()=>{
-    document.body.style.fontFamily=
-      font==="Comic"?"'Comic Sans MS',cursive":
-      font==="Verdana"?"Verdana,Geneva,Tahoma,sans-serif":
-      font==="SansSerif"?"ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Noto Sans,sans-serif":
+    const FAMILY =
+      font==="Verdana" ? "Verdana,Geneva,Tahoma,sans-serif" :
+      font==="Comic"   ? "'Comic Sans MS','Comic Sans',cursive" :
+      font==="SansSerif" ? 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif' :
       "Arial,Helvetica,sans-serif";
-    document.body.style.fontSize=`${size}px`;
+    document.body.style.fontFamily = FAMILY;
+    document.body.style.fontSize   = `${size}px`;
   },[font,size]);
 
-  const speak=txt=>{
+  const speak = txt => {
     if(!audio) return;
-    try{
-      const u=new SpeechSynthesisUtterance(txt);
-      u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);
-    }catch{}
-  }
+    try{ const u=new SpeechSynthesisUtterance(txt); u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch{}
+  };
 
-  const cardStyle={backgroundColor:black?"#111":(yellow?"#fff7cc":"#fff"),color:black?"#f8fafc":"#111"};
-  return {font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,cardStyle,speak};
+  const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
+  const rootTxt = black ? "#f8fafc" : "#111";
+  const cardStyle = { backgroundColor: black ? "#111" : (yellow ? "#fff7cc" : "#fff"), color: rootTxt };
+
+  return {font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,rootBg,rootTxt,cardStyle,speak};
 }
 
-/* ---------- UI ---------- */
+function AccessibilityCard({acc}){
+  const lightSelect = acc.black ? {background:'#f8fafc',color:'#111',borderColor:'#cbd5e1'} : {};
+  return (
+    <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+      <div className="font-bold mb-2">Accessibilité</div>
+      <div className="flex gap-2 flex-wrap mb-2">
+        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
+          <option>Arial</option><option>Verdana</option><option>Comic</option><option>SansSerif</option>
+        </select>
+        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
+          {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
+        </select>
+      </div>
+      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
+      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
+      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
+    </div>
+  );
+}
+
+/* =============================== NAV / HUB ============================== */
 function TopNav({route,go}){
   return (
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
-        <div className="font-black">Sacado Académie</div>
-        <div className="text-sm opacity-90">Atelier d’automatismes</div>
+        <div className="font-black leading-tight">Sacado Académie</div>
+        <div className="text-xs opacity-90">Atelier d’automatismes</div>
       </div>
       <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
         {[{k:"/",label:"Accueil"},{k:"/defi",label:"Jeu n°1 – Défi Tables"},{k:"/pythagore",label:"Jeu n°2 – Table de Pythagore"},{k:"/inverse",label:"Jeu n°3 – Retrouve la multiplication"}]
@@ -88,134 +123,228 @@ function TopNav({route,go}){
     </div>
   );
 }
-function AccessibilityCard({acc}){
-  const lightSelect=acc.black?{background:'#f8fafc',color:'#111827',borderColor:'#cbd5e1'}:{};
+function Hero(){
   return (
-    <div className="card p-4 rounded-2xl" style={acc.cardStyle}>
-      <div className="font-bold mb-2">Accessibilité</div>
-      <div className="flex gap-2 mb-2 flex-wrap">
-        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
-          <option>Arial</option><option>Comic</option><option>Verdana</option><option>SansSerif</option>
-        </select>
-        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
-          {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
-        </select>
+    <header className="p-8 text-center rounded-3xl card" style={{background:"#efe7ff"}}>
+      <h1 className="text-3xl md:text-5xl font-extrabold" style={{color:"var(--brand)"}}>Atelier d’automatismes</h1>
+      <p className="mt-1 text-xl font-semibold" style={{color:"var(--brand)"}}>Sacado Académie</p>
+      <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
+    </header>
+  );
+}
+function Hub(){
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-8">
+      <Hero/>
+      <h2 className="text-center text-2xl md:text-3xl font-extrabold my-4" style={{color:"var(--brand)"}}>Choisis ton activité</h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°1 — Défi Tables</h3><a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a></article>
       </div>
-      <label><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label><br/>
-      <label><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label><br/>
-      <label><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
-    </div>
+    </main>
   );
 }
 
-/* ---------- Jeu 3 — Retrouve la multiplication (4 modes) ---------- */
+/* ============================ JEU 1 (simple) ============================ */
+function GameDefi(){ return <div className="max-w-4xl mx-auto p-6 card">Jeu n°1 – (code existant)</div>; }
+
+/* ===================== JEU 2 (table Pythagore simple) ==================== */
+function GamePythagore(){ return <div className="max-w-6xl mx-auto p-6 card">Jeu n°2 – (code existant)</div>; }
+
+/* ===================== JEU 3 — 4 MODES COMPLETS ===================== */
 function GameInverse({acc}){
-  const {cardStyle}=acc;
-  const [mode,setMode]=useState("classique");
-  const [started,setStarted]=useState(false);
-  const [finished,setFinished]=useState(false);
-  const [questions,setQuestions]=useState([]);
-  const [index,setIndex]=useState(0);
-  const [answers,setAnswers]=useState([]);
-  const [tick,setTick]=useState(0);
-  const [timeLimit,setTimeLimit]=useState(15);
+  const {cardStyle,speak}=acc;
+
+  const [mode,setMode]=useState("classique"); // classique | tousCouples | manquant | div
   const [questionCount,setQuestionCount]=useState(10);
-  const [x,setX]=useState(""); const [y,setY]=useState(""); const [q,setQ]=useState(""); const [pairs,setPairs]=useState([]);
+  const [timeLimit,setTimeLimit]=useState(15);
+
+  const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
+  const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
+  const [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
+
+  // inputs
+  const [x,setX]=useState(""), [y,setY]=useState("");
+  const [q,setQ]=useState(""); // missing/div
+  const [pairs,setPairs]=useState([]); // pour "tousCouples"
+
   const rand=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
   const factorPairs=p=>{const r=[];for(let a=2;a<=10;a++)for(let b=a;b<=10;b++)if(a*b===p)r.push([a,b]);return r;}
 
-  useEffect(()=>{if(!started||finished)return;const id=setInterval(()=>setTick(t=>t+1),1000);return()=>clearInterval(id)},[started,finished]);
+  useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
 
   const start=()=>{
     const list=[];
     for(let i=0;i<questionCount;i++){
-      if(mode==="classique") list.push({kind:"classic",product:rand(2,10)*rand(2,10)});
-      else if(mode==="tousCouples"){const a=rand(2,10),b=rand(2,10),p=a*b;list.push({kind:"pairs",product:p,pairs:factorPairs(p)});}
-      else if(mode==="manquant"){const a=rand(2,10),b=rand(2,10),missing=Math.random()<.5?"a":"b";list.push({kind:"missing",product:a*b,a,b,missing});}
-      else list.push({kind:"div",divisor:rand(2,10),quotient:rand(2,10)});}
-    setQuestions(list);setStarted(true);setFinished(false);setIndex(0);setAnswers([]);setTick(0);
-    setX("");setY("");setQ("");
+      if(mode==="classique"){ const a=rand(2,10), b=rand(2,10); list.push({kind:"classic", product:a*b}); }
+      else if(mode==="tousCouples"){ const a=rand(2,10), b=rand(2,10), p=a*b; list.push({kind:"pairs", product:p, pairs:factorPairs(p)}); }
+      else if(mode==="manquant"){ const a=rand(2,10), b=rand(2,10), missing=Math.random()<.5?"a":"b"; list.push({kind:"missing", product:a*b, a,b, missing}); }
+      else { const divisor=rand(2,10), q=rand(2,10); list.push({kind:"div", divisor, quotient:q}); }
+    }
+    setQuestions(list); setIndex(0); setAnswers([]); setTick(0); setStarted(true); setFinished(false);
+    setX(""); setY(""); setQ(""); setPairs([]);
   };
 
-  const handleSubmit=()=>{
-    const cur=questions[index];if(!cur)return;
-    let ok=false,user=null;
-    if(cur.kind==="classic"){ok=parseInt(x)*parseInt(y)===cur.product;user=`${x}×${y}`;}
-    else if(cur.kind==="pairs"){const exp=new Set(cur.pairs.map(p=>p.join("×")));const prov=new Set(pairs.map(p=>p.join("×")));ok=exp.size===prov.size&&[...exp].every(e=>prov.has(e));user=[...prov].join("; ");}
-    else if(cur.kind==="manquant"){const val=parseInt(q);ok=(cur.missing==="a"?val*cur.b===cur.product:val*cur.a===cur.product);user=val;}
-    else if(cur.kind==="div"){ok=parseInt(q)===cur.quotient;user=q;}
-    setAnswers(a=>[...a,{correct:ok,user}]);
-    if(index+1>=questions.length){setFinished(true);setStarted(false);}else{setIndex(i=>i+1);setTick(0);setX("");setY("");setQ("");setPairs([]);}
+  useEffect(()=>{ if(started && questions[index]){ const cur=questions[index]; if(cur.kind==="classic") speak(String(cur.product)); } },[index,started]);
+
+  const current=questions[index];
+  const remaining = timeLimit==null ? null : Math.max(0,timeLimit-tick);
+
+  useEffect(()=>{ if(!started||finished||timeLimit==null) return; if(tick>=timeLimit){ handleSubmit(true);} },[tick]);
+
+  const handleSubmit=(timeout=false)=>{
+    if(!current) return;
+    let ok=false, user=null;
+    if(current.kind==="classic"){
+      const a=parseInt(x,10), b=parseInt(y,10);
+      const provided=Number.isInteger(a)&&Number.isInteger(b);
+      ok=!timeout && provided && a>=2&&a<=10&&b>=2&&b<=10 && (a*b===current.product);
+      user = timeout? null : (provided? `${a}×${b}` : null);
+    }else if(current.kind==="pairs"){
+      // comparaison d’ensembles
+      const key=p=>p.join("×");
+      const exp=new Set(current.pairs.map(key));
+      const prov=new Set(pairs.map(key));
+      ok=!timeout && exp.size===prov.size && [...exp].every(k=>prov.has(k));
+      user = timeout? null : [...prov].join("; ");
+    }else if(current.kind==="missing"){
+      const val=parseInt(q,10); const provided=Number.isInteger(val);
+      ok=!timeout && provided && (current.missing==="a" ? val*current.b===current.product : val*current.a===current.product);
+      user = timeout? null : (provided? String(val) : null);
+    }else{ // divisions
+      const val=parseInt(q,10); const provided=Number.isInteger(val);
+      ok=!timeout && provided && val===current.quotient;
+      user = timeout? null : (provided? String(val) : null);
+    }
+    setAnswers(a=>[...a,{correct:ok,user,game:"inverse"}]);
+    if(index+1>=questions.length){ setFinished(true); setStarted(false); }
+    else { setIndex(i=>i+1); setTick(0); setX(""); setY(""); setQ(""); setPairs([]); }
   };
 
-  const cur=questions[index];
-  const tip=mode==="classique"?"Retrouve une multiplication.":mode==="tousCouples"?"Donne tous les couples possibles.":mode==="manquant"?"Trouve le facteur manquant.":"Complète la division.";
+  const tip =
+    mode==="classique"   ? "Retrouve une multiplication (tu vois le produit)."
+  : mode==="tousCouples" ? "Donne tous les couples possibles (3×8, 4×6, …)."
+  : mode==="manquant"    ? "Trouve le facteur manquant (ex. 45 = 5 × ?)."
+  :                       "Complète la division (diviseur ∈ [2..10]).";
 
-  return(
-    <div className="min-h-screen p-6" style={{background:acc.black?"#000":acc.yellow?"#fff7cc":"#f8fafc",color:acc.black?"#fff":"#111"}}>
+  return (
+    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{background:acc.rootBg,color:acc.rootTxt}}>
       <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
       <div className="max-w-4xl mx-auto space-y-6">
-        {!started&&!finished&&(
+
+        {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
             <AccessibilityCard acc={acc}/>
-            <div className="card p-4 rounded-2xl" style={cardStyle}>
+
+            <div className="card rounded-2xl p-4" style={cardStyle}>
               <div className="font-bold mb-2">Mode</div>
-              <label><input type="radio" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label><br/>
-              <label><input type="radio" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Mémorise les doublons</label><br/>
-              <label><input type="radio" checked={mode==="manquant"} onChange={()=>setMode("manquant")}/> Trouve le facteur manquant</label><br/>
-              <label><input type="radio" checked={mode==="div"} onChange={()=>setMode("div")}/> Multiplications inversées</label>
-              <div className="mt-3 font-bold">Nombre de questions</div>
-              {[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}
-              <div className="mt-3 font-bold">Temps par question</div>
-              {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
-              <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
+              <div className="grid gap-2">
+                <label><input type="radio" name="m3" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label>
+                <label><input type="radio" name="m3" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Mémorise les doublons</label>
+                <label><input type="radio" name="m3" checked={mode==="manquant"} onChange={()=>setMode("manquant")}/> Trouve le facteur manquant</label>
+                <label><input type="radio" name="m3" checked={mode==="div"} onChange={()=>setMode("div")}/> Multiplications inversées</label>
+              </div>
+
+              <div className="font-bold mt-3 mb-1">Nombre de questions</div>
+              <div className="flex gap-2 flex-wrap">
+                {[5,10,15,20].map(n=>
+                  <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>
+                )}
+              </div>
+
+              <div className="font-bold mt-3 mb-1">Temps par question</div>
+              <div className="flex gap-2 flex-wrap">
+                {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+                <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
+              </div>
             </div>
-            <div className="card p-4 rounded-2xl flex flex-col justify-center items-center" style={cardStyle}>
-              <button onClick={start} className="px-4 py-2 btn">Commencer</button>
+
+            <div className="card rounded-2xl p-4 flex items-center justify-center" style={cardStyle}>
+              <button onClick={start} className="px-4 py-2 rounded-2xl text-white btn">Commencer</button>
             </div>
           </div>
         )}
 
-        {started&&cur&&(
+        {started && current && (
           <div className="space-y-6">
-            <div className="card p-4 rounded-2xl" style={cardStyle}><strong>Consigne :</strong> {tip}</div>
-            {cur.kind==="classic"&&(
-              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
-                <div className="text-5xl font-black mb-4">{cur.product}</div>
-                <input value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-20 text-center"/> × 
-                <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-20 text-center"/>
-                <button onClick={handleSubmit} className="ml-3 px-4 py-2 btn">Valider</button>
+            <div className="card rounded-2xl p-3" style={cardStyle}>
+              <strong>Consigne :</strong> {tip}
+              {timeLimit!=null && (
+                <div className="mt-2 text-sm opacity-80">⏱ Temps restant : {remaining}s</div>
+              )}
+            </div>
+
+            {current.kind==="classic" && (
+              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+                <div className="text-slate-500">Résultat</div>
+                <div className="font-black text-5xl mb-6">{current.product}</div>
+                <form onSubmit={(e)=>{e.preventDefault();handleSubmit(false);}} className="flex gap-4 justify-center items-center">
+                  <input value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
+                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
+                         className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border" />
+                  <span className="text-3xl">×</span>
+                  <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))}
+                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
+                         className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border" />
+                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow btn">Valider</button>
+                </form>
               </div>
             )}
-            {cur.kind==="manquant"&&(
-              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
-                <div className="text-3xl mb-4">{cur.product} = {cur.missing==="a"?"?":cur.a} × {cur.missing==="b"?"?":cur.b}</div>
-                <input value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-24 text-center"/>
-                <button onClick={handleSubmit} className="ml-3 px-4 py-2 btn">Valider</button>
+
+            {current.kind==="missing" && (
+              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+                <div className="text-slate-500">Complète</div>
+                <div className="font-black text-4xl mb-6">
+                  {current.product} = {current.missing==="a"?"?":current.a} × {current.missing==="b"?"?":current.b}
+                </div>
+                <form onSubmit={(e)=>{e.preventDefault();handleSubmit(false);}} className="flex gap-4 justify-center items-center">
+                  <input value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))}
+                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
+                         className="w-28 text-center text-3xl px-4 py-3 rounded-2xl border" />
+                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow btn">Valider</button>
+                </form>
               </div>
             )}
-            {cur.kind==="div"&&(
-              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
-                <div className="text-3xl mb-4">{cur.divisor*cur.quotient} ÷ {cur.divisor} = ?</div>
-                <input value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-24 text-center"/>
-                <button onClick={handleSubmit} className="ml-3 px-4 py-2 btn">Valider</button>
+
+            {current.kind==="div" && (
+              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+                <div className="text-slate-500">Division</div>
+                <div className="font-black text-4xl mb-6">{current.divisor*current.quotient} ÷ {current.divisor} = ?</div>
+                <form onSubmit={(e)=>{e.preventDefault();handleSubmit(false);}} className="flex gap-4 justify-center items-center">
+                  <input value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))}
+                         inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
+                         className="w-28 text-center text-3xl px-4 py-3 rounded-2xl border" />
+                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow btn">Valider</button>
+                </form>
               </div>
             )}
-            {cur.kind==="pairs"&&(
-              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
-                <div className="text-3xl mb-4">{cur.product}</div>
-                {pairs.map((p,i)=><div key={i}>{p.join("×")}</div>)}
-                <button onClick={handleSubmit} className="px-4 py-2 btn">Valider</button>
+
+            {current.kind==="pairs" && (
+              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+                <div className="text-slate-500">Produit</div>
+                <div className="font-black text-5xl mb-6">{current.product}</div>
+                <div className="text-sm opacity-80 mb-2">Saisis tous les couples (ordre libre).</div>
+                {/* interface simple : deux champs, bouton “Ajouter” pour créer la liste puis Valider */}
+                <AddPair onAdd={(a,b)=>setPairs(p=>[...p,[a,b]])}/>
+                <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                  {pairs.map((p,i)=><span key={i} className="px-2 py-1 rounded border">{p[0]}×{p[1]}</span>)}
+                </div>
+                <div className="mt-4">
+                  <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow btn">Valider</button>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {finished&&(
-          <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
+        {finished && (
+          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
             <h2 className="text-2xl font-bold mb-2">Résultats 🎯</h2>
-            <p>{answers.filter(a=>a.correct).length}/{answers.length} correctes</p>
-            <button onClick={()=>{setStarted(false);setFinished(false);}} className="mt-3 px-4 py-2 btn">Rejouer</button>
+            <p className="mb-2">
+              Score : <strong>{answers.filter(a=>a.correct).length}/{answers.length}</strong>
+            </p>
+            <button onClick={()=>{setStarted(false);setFinished(false);}} className="px-5 py-3 rounded-2xl text-white font-semibold shadow btn">Rejouer</button>
           </div>
         )}
       </div>
@@ -223,19 +352,61 @@ function GameInverse({acc}){
   );
 }
 
-/* ---------- Jeu 1 + 2 + Hub (versions simples pour intégration) ---------- */
-function Hub(){return(<div className="text-center p-8"><h1 className="text-3xl font-bold text-purple-700">Bienvenue dans l’Atelier d’automatismes</h1><p className="mt-2">Choisis ton jeu ci-dessus 👆</p></div>);}
-function GameDefi(){return(<div className="text-center p-8">Jeu 1 – Défi Tables</div>);}
-function GamePythagore(){return(<div className="text-center p-8">Jeu 2 – Table de Pythagore</div>);}
+// mini composant pour ajouter des couples (mode “tousCouples”)
+function AddPair({onAdd}){
+  const [a,setA]=useState(""), [b,setB]=useState("");
+  return (
+    <form onSubmit={e=>{e.preventDefault(); if(a && b) {onAdd(parseInt(a,10),parseInt(b,10)); setA(""); setB("");}}}
+          className="flex gap-2 justify-center items-center">
+      <input value={a} onChange={e=>setA(e.target.value.replace(/\D/g,""))} className="w-16 text-center border rounded p-2" inputMode="numeric"/>
+      <span>×</span>
+      <input value={b} onChange={e=>setB(e.target.value.replace(/\D/g,""))} className="w-16 text-center border rounded p-2" inputMode="numeric"/>
+      <button className="btn">Ajouter</button>
+    </form>
+  );
+}
 
-/* ---------- APP ---------- */
+/* ============================== APP / ROUTER ============================== */
 function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
-  useEffect(()=>{const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/");window.addEventListener("hashchange",onHash);return()=>window.removeEventListener("hashchange",onHash)},[]);
-  return(
-    <div className="min-h-screen p-6" style={{background:acc.black?"#000":acc.yellow?"#fff7cc":"#f8fafc",color:acc.black?"#fff":"#111"}}>
-      <TopNav route={route} go={k=>location.hash="#"+k}/>
-      {route==="/"&&<Hub/>}
-      {route==="/defi"&&<GameDefi acc={acc}/>}
-      {route==="/pythagore"
+
+  useEffect(()=>{
+    const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/");
+    window.addEventListener("hashchange",onHash);
+    return ()=>window.removeEventListener("hashchange",onHash);
+  },[]);
+
+  // classes globales pour les modes
+  useEffect(()=>{
+    document.body.className =
+      (acc.black ? "dark-mode " : "") +
+      (acc.yellow && !acc.black ? "yellow-mode " : "");
+  },[acc.black,acc.yellow]);
+
+  const go = k => location.hash="#"+k;
+
+  return (
+    <div className="min-h-screen p-6" style={{background:acc.rootBg,color:acc.rootTxt}}>
+      <TopNav route={route} go={go}/>
+      {route==="/" && <Hub/>}
+      {route==="/defi" && <GameDefi acc={acc}/>}
+      {route==="/pythagore" && <GamePythagore acc={acc}/>}
+      {route==="/inverse" && <GameInverse acc={acc}/>}
+    </div>
+  );
+}
+
+/* ============= Montage unique pour éviter tout doublon de rendu ============= */
+(() => {
+  const container = document.getElementById('root');
+  if (window.__SACADO_ROOT__) {
+    try { window.__SACADO_ROOT__.unmount(); } catch(e){}
+  }
+  window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
+  window.__SACADO_ROOT__.render(<App />);
+})();
+</script>
+</body>
+</html>
+
