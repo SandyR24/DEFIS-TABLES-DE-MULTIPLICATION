@@ -171,10 +171,10 @@ function TopNav({route,go}){
           {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
         ].map(tab=>(
           <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
-        )}
+        ))}
       </div>
     </div>
-  ));
+  );
 }
 function Hero(){
   return (
@@ -234,7 +234,7 @@ function GameDefi({acc}){
   const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-     
+      <TopNav route="/defi" go={k=>location.hash="#"+k}/>
       <div className="max-w-4xl mx-auto space-y-6">
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
@@ -269,8 +269,7 @@ function GameDefi({acc}){
             <a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Rejouer</a>
           </div>
         )}
-          <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a></div>
-        </div>
+      </div>
     </div>
   );
 }
@@ -325,7 +324,7 @@ function GamePythagore({acc}){
 
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-     
+      <TopNav route="/pythagore" go={k=>location.hash="#"+k}/>
       <div className="max-w-6xl mx-auto">
         <div className="grid xl:grid-cols-3 gap-4 mb-4">
           <AccessibilityCard acc={acc}/>
@@ -525,7 +524,7 @@ function GameInverse({acc}){
 
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      
+      <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
       <div className="max-w-4xl mx-auto space-y-6">
 
         {!started && !finished && (
@@ -662,7 +661,6 @@ function GameInverse({acc}){
             </div>
           </div>
         )}
-          <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a></div>
       </div>
     </div>
   );
@@ -700,5 +698,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
 
 
