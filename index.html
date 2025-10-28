@@ -150,7 +150,7 @@ function AccessibilityCard({acc}){
 }
 
 /* ==================== NAV / HUB ==================== */
-function TopNav({route,go}){
+
   return (
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
@@ -171,7 +171,7 @@ function TopNav({route,go}){
           {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
         ].map(tab=>(
           <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
-        ))}
+        )}
       </div>
     </div>
   );
