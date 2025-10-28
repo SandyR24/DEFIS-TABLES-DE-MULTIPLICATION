@@ -1,96 +1,47 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta http-equiv="Cache-Control" content="no-store"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sacado Académie — Atelier d’automatismes</title>
-
-<!-- React, ReactDOM, Babel, Tailwind -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-
 <style>
-:root{ --brand:#8374a7; }
-body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+:root { --brand:#8374a7; }
+body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f8fafc; color:#111; }
 
-/* UI */
 .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; }
 .btn{ background:var(--brand); color:#fff; border-radius:16px; padding:.6rem 1rem; }
 .pill{ padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; color:#111827; }
 .pill.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
-.hdr{ background:#f1f5f9; }
-.ok{ background:#dcfce7 !important; }
-.ko{ background:#fee2e2 !important; }
-.diag-bg{ background:rgba(131,116,167,.16) !important; }
-.diag-txt{ color:#8374a7 !important; font-weight:700; }
-.fill-hint{ background:rgba(131,116,167,.12) !important; }
-.violet-border{ border-color:#8374a7 !important; box-shadow:0 0 0 2px rgba(131,116,167,.25) inset; }
 
-/* Progress */
+.dark-mode, .dark-mode * { color:#f8fafc !important; }
+.dark-mode { background:#000 !important; }
+.dark-mode .card{ background:#111 !important; border-color:#333 !important; }
+.dark-mode .pill{ background:#fff !important; color:#111 !important; }
+.dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111 !important; }
+
+.yellow-mode{ background:#fff7cc !important; color:#111 !important; }
+.yellow-mode .card{ background:#fff7cc !important; border-color:#e6db91 !important; }
+
 .progress-wrap{ height:10px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
 .progress-bar{ height:100%; background:#8374a7; transition:width .25s linear; }
 
-/* Dark mode */
-.dark-mode{ background:#000 !important; color:#f8fafc !important; }
-.dark-mode .card{ background:#111 !important; border-color:#333 !important; }
-.dark-mode .hdr{ background:#1f2937 !important; color:#f8fafc !important; }
-.dark-mode input, .dark-mode select{ background:#000 !important; color:#f8fafc !important; border-color:#555 !important; }
-.dark-mode .pill{ background:#fff !important; color:#111 !important; }
-.dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111 !important; }
-.dark-mode .progress-bar{ background:#a69acc !important; }
-
-/* Jeu 2 en sombre */
-.dark-mode .max-w-6xl table th{
-  background:#f8fafc !important; color:#000 !important; border-color:#333 !important;
-}
-.dark-mode .max-w-6xl table th:first-child{ background:#f1f5f9 !important; }
-.dark-mode .max-w-6xl table td{ background:#111 !important; border-color:#222 !important; }
-.dark-mode .max-w-6xl table td span:not(.diag-txt){ color:#f8fafc !important; font-weight:700 !important; }
-.dark-mode .max-w-6xl table td input{
-  background:#fff !important; color:#000 !important; border:3px solid #c6b8ff !important;
-  border-radius:10px !important; font-weight:700 !important; box-shadow:0 0 8px rgba(198,184,255,.9);
-}
-.dark-mode .diag-bg{ background:#2b2440 !important; }
-
-/* Yellow mode */
-.yellow-mode{ background:#fff7cc !important; color:#111 !important; }
-.yellow-mode .card{ background:#fff7cc !important; border-color:#eadf9c !important; }
-.yellow-mode .hdr{ background:#fff3b0 !important; color:#111 !important; }
-.yellow-mode .max-w-6xl table th{
-  background:#f1f5f9 !important; color:#000 !important; border-color:#cfd7e3 !important;
-}
-.yellow-mode .max-w-6xl table td{ background:#fff7cc !important; border-color:#e9dfaa !important; }
-.yellow-mode .max-w-6xl table td input{
-  background:#fffef3 !important; color:#000 !important; border:2px solid #a69acc !important; box-shadow:0 0 3px rgba(131,116,167,.25);
-}
-
-/* DogBot */
-.bot-bubble{ display:flex; gap:.75rem; align-items:flex-start; border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.05); }
-.bot-bubble.ok{ border-color:#22c55e; }
-.bot-bubble.ko{ border-color:#ef4444; }
-.dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
-.dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
-.dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
-
-/* Optional dys font local name (kept to avoid console warnings if not present) */
-@font-face{
-  font-family:'OpenDyslexicLocal';
-  src:url('OpenDyslexic-Regular.otf') format('opentype'),
-      url('OpenDyslexicAlta-Regular.otf') format('opentype');
-  font-display:swap;
-}
 </style>
 </head>
 <body>
 <div id="root"></div>
 
+<!-- Librairies React -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+<script type="text/babel" data-presets="env,react">
+const {useState,useEffect,useRef} = React;
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+const BRAND="#8374a7";
 
-
-/* ==================== ACCESSIBILITÉ ==================== */
+/* ---------- Accessibilité ---------- */
 function useAccessibility(){
   const [font,setFont]=useState("Arial");
   const [size,setSize]=useState(16);
@@ -98,618 +49,193 @@ function useAccessibility(){
   const [black,setBlack]=useState(false);
   const [audio,setAudio]=useState(false);
 
-  // Exclusivité
-  const toggleYellow = (v)=>{ setYellow(v); if(v) setBlack(false); };
-  const toggleBlack  = (v)=>{ setBlack(v);  if(v) setYellow(false); };
+  const toggleYellow=v=>{setYellow(v);if(v) setBlack(false);}
+  const toggleBlack=v=>{setBlack(v);if(v) setYellow(false);}
 
-  // Appliquer police + taille immédiatement
   useEffect(()=>{
-    const FAMILY =
-      font==="OpenDyslexic" || font==="OpenDyslexicLocal" ? "OpenDyslexicLocal, Arial, sans-serif" :
-      font==="Verdana"      ? "Verdana, Geneva, Tahoma, sans-serif" :
-      font==="Comic"        ? "'Comic Sans MS','Comic Sans',cursive" :
-      font==="SansSerif"    ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif' :
-                              "Arial, Helvetica, sans-serif";
-    document.body.style.fontFamily = FAMILY;
-    document.body.style.fontSize = `${size}px`;
+    document.body.style.fontFamily=
+      font==="Comic"?"'Comic Sans MS',cursive":
+      font==="Verdana"?"Verdana,Geneva,Tahoma,sans-serif":
+      font==="SansSerif"?"ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Noto Sans,sans-serif":
+      "Arial,Helvetica,sans-serif";
+    document.body.style.fontSize=`${size}px`;
   },[font,size]);
 
-  const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
-  const rootText= black ? "#f8fafc" : "#111";
-  const cardStyle = { backgroundColor: yellow ? "#fff7cc" : (black ? "#111" : "#fff"), color: rootText };
+  const speak=txt=>{
+    if(!audio) return;
+    try{
+      const u=new SpeechSynthesisUtterance(txt);
+      u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }catch{}
+  }
 
-  const speak=(txt)=>{ try{ if(!audio) return; const u=new SpeechSynthesisUtterance(txt); u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} };
-
-  return {font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,rootBg,rootText,cardStyle,speak};
+  const cardStyle={backgroundColor:black?"#111":(yellow?"#fff7cc":"#fff"),color:black?"#f8fafc":"#111"};
+  return {font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,cardStyle,speak};
 }
 
-function AccessibilityCard({acc}){
-  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
+/* ---------- UI ---------- */
+function TopNav({route,go}){
   return (
-    <div className="card rounded-2xl p-4" style={acc.cardStyle}>
+    <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
+      <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
+        <div className="font-black">Sacado Académie</div>
+        <div className="text-sm opacity-90">Atelier d’automatismes</div>
+      </div>
+      <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
+        {[{k:"/",label:"Accueil"},{k:"/defi",label:"Jeu n°1 – Défi Tables"},{k:"/pythagore",label:"Jeu n°2 – Table de Pythagore"},{k:"/inverse",label:"Jeu n°3 – Retrouve la multiplication"}]
+          .map(t=><button key={t.k} onClick={()=>go(t.k)} className={"pill "+(route===t.k?"active":"")}>{t.label}</button>)}
+      </div>
+    </div>
+  );
+}
+function AccessibilityCard({acc}){
+  const lightSelect=acc.black?{background:'#f8fafc',color:'#111827',borderColor:'#cbd5e1'}:{};
+  return (
+    <div className="card p-4 rounded-2xl" style={acc.cardStyle}>
       <div className="font-bold mb-2">Accessibilité</div>
-      <div className="flex gap-2 flex-wrap mb-2">
+      <div className="flex gap-2 mb-2 flex-wrap">
         <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
-          <option>Arial</option>
-          <option>Verdana</option>
-          <option>Comic</option>
-          <option>SansSerif</option>
-          <option>OpenDyslexicLocal</option>
+          <option>Arial</option><option>Comic</option><option>Verdana</option><option>SansSerif</option>
         </select>
         <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
           {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
         </select>
       </div>
-      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
-      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
-      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
+      <label><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label><br/>
+      <label><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label><br/>
+      <label><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
     </div>
   );
 }
 
-/* ==================== NAV / HUB ==================== */
-function TopNav({route,go}){
-  return (
-    <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
-      <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
-        <div className="flex items-center gap-3">
-          <img src="dogbot.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
-          <div>
-            <div className="font-black leading-tight">Sacado Académie</div>
-            <div className="text-xs opacity-90">Atelier d’automatismes</div>
-          </div>
-        </div>
-        <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
-      </div>
-      <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
-        {[
-          {k:"/", label:"Accueil"},
-          {k:"/defi", label:"Jeu n°1 – Défi Tables"},
-          {k:"/pythagore", label:"Jeu n°2 – Table de Pythagore"},
-          {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
-        ].map(tab=>(
-          <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
-        ))}
-      </div>
-    </div>
-  );
-}
-function Hero(){
-  return (
-    <header className="p-6 md:p-10 text-center rounded-3xl card" style={{background:"#efe7ff"}}>
-      <h1 className="text-3xl md:text-5xl font-extrabold" style={{color:"var(--brand)"}}>Atelier d’automatismes</h1>
-      <p className="mt-1 text-xl font-semibold" style={{color:"var(--brand)"}}>Sacado Académie</p>
-      <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
-      <img src="dogbot.png" className="mx-auto mt-4 h-28 w-28 rounded-full bg-white p-1 shadow" alt="DogBot"/>
-    </header>
-  );
-}
-function Hub(){
-  return (
-    <main className="max-w-5xl mx-auto px-4 py-8">
-      <Hero/>
-      <h2 className="text-center text-2xl md:text-3xl font-extrabold my-4" style={{color:"var(--brand)"}}>Choisis ton activité</h2>
-      <div className="grid md:grid-cols-3 gap-6">
-        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°1 — Défi Tables</h3><a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a></article>
-        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a></article>
-        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a></article>
-      </div>
-    </main>
-  );
-}
-
-/* ==================== UTIL ==================== */
-function Progress({remaining, total}) {
-  if (total==null) return null;
-  const pct = Math.max(0, Math.min(100, (remaining/total)*100));
-  return <div className="progress-wrap mt-2"><div className="progress-bar" style={{width:`${pct}%`}}></div></div>;
-}
-const vibrate = (p=[80,40,120]) => { try { if (navigator.vibrate) navigator.vibrate(p); } catch(_){} };
-
-  <!-- Charge React + Babel AVANT ton code React -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-/* ==================== JEU 1 — Défi Tables ==================== */
-function GameDefi({acc}){
-  const {rootBg,rootText,cardStyle,speak}=acc;
-  const [selectedTables,setSelectedTables]=useState(range(2,10));
-  const [questionCount,setQuestionCount]=useState(10);
-  const [timeLimit,setTimeLimit]=useState(5);
-  const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
-  const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
-  const [input,setInput]=useState(""), [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
-  const [flash,setFlash]=useState(false);
-  const inputRef=useRef(null);
-
-  useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
-  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit){ setFlash(true); vibrate(); setTimeout(()=>setFlash(false),650); handleSubmit(true);} },[tick]);
-  useEffect(()=>{ if(started && !finished && questions[index]){ const q=questions[index]; acc.audio && speak(`${q.a} multiplié par ${q.b}`);} },[index,started,finished]);
-
-  const start=()=>{ const list=[]; for(let i=0;i<questionCount;i++){ const a=selectedTables[Math.floor(Math.random()*selectedTables.length)]; const b=Math.floor(Math.random()*9)+2; list.push({a,b,product:a*b}); } setQuestions(list); setIndex(0); setAnswers([]); setInput(""); setTick(0); setStarted(true); setFinished(false); setTimeout(()=>inputRef.current?.focus(),0); };
-  const current=questions[index];
-
-  const handleSubmit=(timeout=false)=>{ if(!current) return; const userNum = Number(input); const userProvided = input !== ""; const correct = !timeout && userProvided && userNum===current.product;
-    const record = {game:"defi",a:current.a,b:current.b,product:current.product,user:timeout?null:(userProvided?userNum:null),correct,timeout};
-    setAnswers(p=>[...p,record]); if(index+1>=questions.length){ setFinished(true); setStarted(false); } else { setIndex(i=>i+1); setTick(0); setInput(""); } };
-
-  const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
-  return (
-    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/defi" go={k=>location.hash="#"+k}/>
-      <div className="max-w-4xl mx-auto space-y-6">
-        {!started && !finished && (
-          <div className="grid md:grid-cols-3 gap-4">
-            <AccessibilityCard acc={acc}/>
-            <div className="card rounded-2xl p-4" style={cardStyle}>
-              <div className="font-bold mb-2">Réglages</div>
-              <div className="mb-2"><div className="text-sm mb-1">Tables</div><div className="flex flex-wrap gap-2">{range(2,10).map(n=>(<button key={n} onClick={()=>setSelectedTables(p=>p.includes(n)?p.filter(x=>x!==n):[...p,n])} className={"pill "+(selectedTables.includes(n)?"active":"")}>{n}</button>))}</div></div>
-              <div className="mb-2"><div className="text-sm mb-1">Nombre de questions</div><div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}</div></div>
-              <div><div className="text-sm mb-1">Temps par question</div><div className="flex gap-2 flex-wrap">{[3,5,10].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}<button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button></div></div>
-            </div>
-            <div className="card rounded-2xl p-4" style={cardStyle}><div className="font-bold mb-2">Action</div><button onClick={start} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:BRAND}}>Lancer le défi</button></div>
-          </div>
-        )}
-
-        {started && current && (
-          <div className="space-y-6">
-            <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={cardStyle}><div className="flex items-center justify-between"><div><strong>Question :</strong> {index+1} / {questions.length}</div><div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div></div><Progress remaining={remaining??0} total={timeLimit}/></div>
-            <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
-              <div className="font-black text-5xl mb-4">{current.a} × {current.b} = ?</div>
-              <div className="flex gap-3 justify-center">
-                <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value.replace(/\D/g,""))} onKeyDown={e=>{ if(e.key==='Enter') { e.preventDefault(); handleSubmit(false);} }} inputMode="numeric" type="tel" autoComplete="off" spellCheck="false" className="w-40 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                <button onClick={()=>handleSubmit(false)} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:BRAND}}>Valider</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {finished && (
-          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
-            <h2 className="text-2xl font-bold mb-3">Résultats 🎯</h2>
-            <p>Tu as réussi <strong>{answers.filter(a=>a.correct).length}/{answers.length}</strong> questions.</p>
-            <a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Rejouer</a>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ==================== JEU 2 — Table de Pythagore ==================== */
-function GamePythagore({acc}){
-  const {rootBg,rootText,cardStyle}=acc;
-  const A=range(2,10), B=range(2,10);
-  const [mode,setMode]=useState("random"); // random | table | diagonal | mirror | minimal
-  const [count,setCount]=useState(10);
-  const [table,setTable]=useState(6);
-  const [feedback,setFeedback]=useState(null);
-
-  const key=(a,b)=>`${a}x${b}`, mirrorKey=(a,b)=>`${b}x${a}`;
-  const blanks=React.useMemo(()=>{
-    const set=new Set();
-    if(mode==="random"){ const all=[]; for(const a of A)for(const b of B) all.push(key(a,b)); while(set.size<Math.min(count,all.length)) set.add(all[Math.floor(Math.random()*all.length)]); }
-    else if(mode==="table"){ B.forEach(b=> set.add(key(table,b))); }
-    else if(mode==="diagonal"){ A.forEach(a=> set.add(key(a,a))); }
-    else if(mode==="mirror"){ for(const a of A) for(const b of B) if(a<=b && a!==b) set.add(key(a,b)); }
-    else if(mode==="minimal"){ for(let a=6;a<=9;a++) for(let b=a+1;b<=9;b++) set.add(key(a,b)); }
-    return set;
-  },[mode,count,table]);
-
-  const [values,setValues]=useState({}); const [checked,setChecked]=useState({});
-  const onChange=(k,v)=> setValues(p=>({...p,[k]:v.replace(/\D/g,"")}));
-  const getDisplayValue=(a,b)=>{ const k=key(a,b), m=mirrorKey(a,b); return values[k] ?? (mode==="mirror" ? values[m] : "") ?? ""; };
-
-  const checkAll=()=>{
-    const res={}; let total=0, errors=0;
-    for(const a of A)for(const b of B){
-      const k=key(a,b), onDiag=(a===b);
-      const shouldCheck = blanks.has(k) || (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))) || (mode==="diagonal" && onDiag);
-      if(!shouldCheck) continue; total++;
-      const good=a*b; const vStr = values[k] ?? (mode==="mirror" ? values[mirrorKey(a,b)] : "");
-      const isOk = vStr!==undefined && vStr!=="" && Number(vStr)===good; res[k] = isOk ? "ok":"ko"; if(!isOk) errors++;
-    }
-    setChecked(res);
-    if(total>0){
-      if(errors===0) setFeedback({type:"ok", msg:"Bravo ! Toutes les réponses sont correctes 🎉"});
-      else setFeedback({type:"ko", msg:`Tu as ${errors} erreur${errors>1?"s":""}. Essaie encore !`});
-    } else setFeedback(null);
-  };
-  const resetAll=()=>{ setValues({}); setChecked({}); setFeedback(null); };
-
-  const tip =
-    mode==="random"   ? "Complète les cases violettes (au hasard)."
-  : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
-  : mode==="diagonal" ? "Complète seulement la diagonale (les carrés)."
-  : mode==="mirror"   ? "Complète la partie du haut, l’autre moitié se remplit par miroir."
-  :                     "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
-
-  return (
-    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/pythagore" go={k=>location.hash="#"+k}/>
-      <div className="max-w-6xl mx-auto">
-        <div className="grid xl:grid-cols-3 gap-4 mb-4">
-          <AccessibilityCard acc={acc}/>
-          <div className="card rounded-2xl p-4" style={cardStyle}>
-            <div className="font-bold mb-2">Mode</div>
-            <div className="grid gap-2">
-              <label><input type="radio" name="m" checked={mode==="random"} onChange={()=>setMode("random")}/> Aléatoires</label>
-              {mode==="random" && (
-                <div className="ml-6"><label className="text-sm">Nombre de cases</label>
-                <input type="number" min="1" max="81" value={count} onChange={e=>setCount(parseInt(e.target.value)||1)} className="border rounded px-2 py-1 w-24 ml-2"/></div>
-              )}
-              <label><input type="radio" name="m" checked={mode==="table"} onChange={()=>setMode("table")}/> Table par table</label>
-              {mode==="table" && (
-                <div className="ml-6"><label className="text-sm">Table</label>
-                <select value={table} onChange={e=>setTable(parseInt(e.target.value))} className="border rounded px-2 py-1 ml-2">{A.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-              )}
-              <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des carrés</label>
-              <label><input type="radio" name="m" checked={mode==="mirror"} onChange={()=>setMode("mirror")}/> Miroir de la diagonale</label>
-              <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6 cases)</label>
-            </div>
-          </div>
-          <div className="card rounded-2xl p-4 space-y-3" style={cardStyle}>
-            <div className="font-bold mb-2">Actions</div>
-            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
-            <button onClick={resetAll} className="px-4 py-2 rounded-2xl border">Réinitialiser</button>
-            {feedback && (
-              <div className={"bot-bubble "+feedback.type}>
-                <img src="dogbot.png" alt="DogBot"/><div className="msg">
-                  <div className="font-semibold" style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>DogBot</div>
-                  <div>{feedback.msg}</div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="card rounded-2xl p-3 mb-4" style={cardStyle}>
-          <strong>Consigne :</strong> <span className="diag-txt">{tip}</span>
-        </div>
-
-        <div className="overflow-auto">
-          <table className="min-w-[900px] border-collapse w-full">
-            <thead>
-              <tr>
-                <th className="p-2 hdr text-left">×</th>
-                {B.map(b=><th key={b} className="p-2 hdr">{b}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {A.map(a=>(
-                <tr key={a}>
-                  <th className="p-2 hdr text-left">{a}</th>
-                  {B.map(b=>{
-                    const k=`${a}x${b}`, onDiag=a===b;
-                    let shouldFill;
-                    if(mode==="mirror") shouldFill=(a<=b && !onDiag);
-                    else if(mode==="minimal") shouldFill=(a>=6 && b>=6 && a<b && b!==10);
-                    else if(mode==="diagonal") shouldFill=onDiag;
-                    else if(mode==="table") shouldFill=(a===table);
-                    else shouldFill=blanks.has(k);
-
-                    const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
-                    const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
-
-                    const baseInput="border rounded px-2 py-2 w-[84px] text-center text-lg";
-                    const clsWrong=" ko-border ko-input";
-                    const clsReady=" violet-border diag-txt";
-
-                    if((mode==="mirror"||mode==="minimal") && onDiag){
-                      return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
-                    }
-                    if(mode==="mirror" && a>b){
-                      const val = getDisplayValue(a,b);
-                      return <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}><input readOnly value={val} className={baseInput+(st==="ko"?clsWrong:clsReady)} /></td>;
-                    }
-                    if(mode==="diagonal" && onDiag){
-                      return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={baseInput+(st==="ko"?clsWrong:clsReady)} /></td>;
-                    }
-                    const content = shouldFill
-                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={baseInput+(st==="ko"?clsWrong:clsReady)} />
-                      : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
-
-                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>{content}</td>;
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a></div>
-      </div>
-    </div>
-  );
-}
-
-/* ==================== JEU 3 — Retrouve la multiplication ==================== */
+/* ---------- Jeu 3 — Retrouve la multiplication (4 modes) ---------- */
 function GameInverse({acc}){
-  const {rootBg,rootText,cardStyle}=acc;
-
-  const [questionCount,setQuestionCount]=useState(10);
+  const {cardStyle}=acc;
+  const [mode,setMode]=useState("classique");
+  const [started,setStarted]=useState(false);
+  const [finished,setFinished]=useState(false);
+  const [questions,setQuestions]=useState([]);
+  const [index,setIndex]=useState(0);
+  const [answers,setAnswers]=useState([]);
+  const [tick,setTick]=useState(0);
   const [timeLimit,setTimeLimit]=useState(15);
-  const [mode, setMode] = useState("classique"); // classique | tousCouples | facteur | divisions
+  const [questionCount,setQuestionCount]=useState(10);
+  const [x,setX]=useState(""); const [y,setY]=useState(""); const [q,setQ]=useState(""); const [pairs,setPairs]=useState([]);
+  const rand=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  const factorPairs=p=>{const r=[];for(let a=2;a<=10;a++)for(let b=a;b<=10;b++)if(a*b===p)r.push([a,b]);return r;}
 
-  const [divTables,setDivTables]=useState(range(2,10));
-  const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
-  const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
-  const [tick,setTick]=useState(0), [answers,setAnswers]=useState([]); const [flash,setFlash]=useState(false);
-
-  const [x,setX]=useState(""), [y,setY]=useState(""); const xRef=useRef(null);
-  const [pairs,setPairs]=useState([]); const [quotient,setQuotient]=useState("");
-  const [missing,setMissing]=useState({which:null,known:null,product:null}); // pour "facteur manquant"
-
-  const rand = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
-  function factorPairs(product){ const res=[]; for(let a=2;a<=10;a++) for(let b=a;b<=10;b++) if(a*b===product) res.push([a,b]); return res; }
-  function newProductWithMultiPairs(){ while(true){ const a=rand(2,10), b=rand(2,10); const p=a*b; const fps=factorPairs(p); if(fps.length>=2) return {product:p, pairs:fps}; } }
-  function newDivisionQuestion(){ const divisor = divTables[Math.floor(Math.random()*divTables.length)]; const q = rand(2,10); return { dividend: divisor*q, divisor, quotient:q }; }
-  function newClassicProduct(){ const a=rand(2,10), b=rand(2,10); return a*b; }
-
-  function newMissingFactor(){ const a=rand(2,10), b=rand(2,10); const which = Math.random()<0.5 ? "a":"b"; const known = which==="a"? b : a; return {which, known, product:a*b}; }
-
-  useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
-  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit){ setFlash(true); setTimeout(()=>setFlash(false),650); handleSubmit(true);} },[tick]);
+  useEffect(()=>{if(!started||finished)return;const id=setInterval(()=>setTick(t=>t+1),1000);return()=>clearInterval(id)},[started,finished]);
 
   const start=()=>{
     const list=[];
-    if(mode==="classique"){
-      for(let i=0;i<questionCount;i++) list.push({kind:"classic", product:newClassicProduct()});
-    }else if(mode==="tousCouples"){
-      for(let i=0;i<questionCount;i++){ const q=newProductWithMultiPairs(); list.push({kind:"pairs", product:q.product, pairs:q.pairs}); }
-    }else if(mode==="facteur"){
-      for(let i=0;i<questionCount;i++){ const q=newMissingFactor(); list.push({kind:"missing", ...q}); }
-    }else if(mode==="divisions"){
-      for(let i=0;i<questionCount;i++) list.push({kind:"div", ...newDivisionQuestion()});
-    }
-    setQuestions(list);
-    setIndex(0); setAnswers([]); setTick(0); setStarted(true); setFinished(false);
-    setX(""); setY(""); setQuotient(""); setMissing({which:null,known:null,product:null});
-    setTimeout(()=>xRef.current?.focus(),0);
+    for(let i=0;i<questionCount;i++){
+      if(mode==="classique") list.push({kind:"classic",product:rand(2,10)*rand(2,10)});
+      else if(mode==="tousCouples"){const a=rand(2,10),b=rand(2,10),p=a*b;list.push({kind:"pairs",product:p,pairs:factorPairs(p)});}
+      else if(mode==="manquant"){const a=rand(2,10),b=rand(2,10),missing=Math.random()<.5?"a":"b";list.push({kind:"missing",product:a*b,a,b,missing});}
+      else list.push({kind:"div",divisor:rand(2,10),quotient:rand(2,10)});}
+    setQuestions(list);setStarted(true);setFinished(false);setIndex(0);setAnswers([]);setTick(0);
+    setX("");setY("");setQ("");
   };
 
-  useEffect(()=>{ if(!started) return; setTick(0); setX(""); setY(""); setQuotient("");
-    if(questions[index]?.kind==="pairs"){ const slots = questions[index].pairs.length; setPairs(Array.from({length:slots},()=>({a:"",b:""}))); } else setPairs([]);
-    if(questions[index]?.kind==="missing"){ const q=questions[index]; setMissing({which:q.which, known:q.known, product:q.product}); }
-    setTimeout(()=>xRef.current?.focus(),0);
-  },[index,started]);
-
-  const current = questions[index];
-  const remaining = timeLimit==null ? null : Math.max(0,timeLimit-tick);
-
-  const handleSubmit=(timeout=false)=>{
-    if(!current) return;
-
-    if(current.kind==="classic"){
-      const a=parseInt(x,10), b=parseInt(y,10);
-      const provided = Number.isInteger(a) && Number.isInteger(b);
-      const ok = !timeout && provided && a>=2&&a<=10&&b>=2&&b<=10 && (a*b===current.product);
-      const rec = { game:"inverse", product: current.product, user: timeout ? null : (provided ? `${a}×${b}` : null), correct: ok, timeout };
-      setAnswers(p=>[...p,rec]);
-    }
-    else if(current.kind==="pairs"){
-      const norm=(A,B)=>[Math.min(A,B),Math.max(A,B)];
-      const providedPairs=[]; let allProvided=true;
-      for(const {a,b} of pairs){ const ai=parseInt(a,10), bi=parseInt(b,10); if(!Number.isInteger(ai)||!Number.isInteger(bi)){ allProvided=false; break; } providedPairs.push(norm(ai,bi)); }
-      const expected = current.pairs.map(([A,B])=>[A,B]); const key=(p)=>p.join("×");
-      const setE=new Set(expected.map(key)), setP=new Set(providedPairs.map(key));
-      const ok=!timeout && allProvided && setE.size===setP.size && [...setE].every(k=>setP.has(k));
-      const rec = { game:"inverse", product: current.product, user: timeout ? null : (allProvided ? providedPairs.map(p=>p.join("×")).join(" ; ") : null), correct: ok, timeout };
-      setAnswers(p=>[...p,rec]);
-    }
-    else if(current.kind==="missing"){
-      const guess = parseInt(x,10);
-      let expected = null;
-      if(missing.which==="a"){ expected = missing.product / missing.known; }
-      else { expected = missing.product / missing.known; }
-      const ok = !timeout && Number.isInteger(guess) && guess===expected;
-      const rec = { game:"inverse-missing", product: missing.product, known: missing.known, which: missing.which, user: timeout? null : (Number.isInteger(guess)? String(guess): null), correct: ok, timeout };
-      setAnswers(p=>[...p,rec]);
-    }
-    else if(current.kind==="div"){
-      const q=parseInt(quotient,10);
-      const provided = Number.isInteger(q);
-      const ok = !timeout && provided && q===current.quotient;
-      const rec = { game:"inverse-div", dividend: current.dividend, divisor: current.divisor, quotient: current.quotient, user: timeout ? null : (provided ? String(q) : null), correct: ok, timeout };
-      setAnswers(p=>[...p,rec]);
-    }
-
-    if(index+1>=questions.length){ setFinished(true); setStarted(false); }
-    else { setIndex(i=>i+1); }
+  const handleSubmit=()=>{
+    const cur=questions[index];if(!cur)return;
+    let ok=false,user=null;
+    if(cur.kind==="classic"){ok=parseInt(x)*parseInt(y)===cur.product;user=`${x}×${y}`;}
+    else if(cur.kind==="pairs"){const exp=new Set(cur.pairs.map(p=>p.join("×")));const prov=new Set(pairs.map(p=>p.join("×")));ok=exp.size===prov.size&&[...exp].every(e=>prov.has(e));user=[...prov].join("; ");}
+    else if(cur.kind==="manquant"){const val=parseInt(q);ok=(cur.missing==="a"?val*cur.b===cur.product:val*cur.a===cur.product);user=val;}
+    else if(cur.kind==="div"){ok=parseInt(q)===cur.quotient;user=q;}
+    setAnswers(a=>[...a,{correct:ok,user}]);
+    if(index+1>=questions.length){setFinished(true);setStarted(false);}else{setIndex(i=>i+1);setTick(0);setX("");setY("");setQ("");setPairs([]);}
   };
 
-  const tip =
-    mode==="classique"   ? "Retrouve une multiplication dans les tables de 2 à 10."
-  : mode==="tousCouples" ? "Retrouve tous les couples de facteurs possibles (ex. 24 = 3×8 et 4×6)."
-  : mode==="facteur"     ? "Trouve le facteur manquant : ex. 45 = 5×…"
-  :                       "Complète la division : le diviseur est choisi dans tes tables (2 à 10).";
+  const cur=questions[index];
+  const tip=mode==="classique"?"Retrouve une multiplication.":mode==="tousCouples"?"Donne tous les couples possibles.":mode==="manquant"?"Trouve le facteur manquant.":"Complète la division.";
 
-  return (
-    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
+  return(
+    <div className="min-h-screen p-6" style={{background:acc.black?"#000":acc.yellow?"#fff7cc":"#f8fafc",color:acc.black?"#fff":"#111"}}>
       <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
       <div className="max-w-4xl mx-auto space-y-6">
-
-        {!started && !finished && (
+        {!started&&!finished&&(
           <div className="grid md:grid-cols-3 gap-4">
             <AccessibilityCard acc={acc}/>
-            <div className="card rounded-2xl p-4" style={cardStyle}>
+            <div className="card p-4 rounded-2xl" style={cardStyle}>
               <div className="font-bold mb-2">Mode</div>
-              <div className="grid gap-2">
-                <label><input type="radio" name="m3" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label>
-                <label><input type="radio" name="m3" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Mémorise les doublons</label>
-                <label><input type="radio" name="m3" checked={mode==="facteur"} onChange={()=>setMode("facteur")}/> Trouve le facteur manquant</label>
-                <label><input type="radio" name="m3" checked={mode==="divisions"} onChange={()=>setMode("divisions")}/> Multiplications inversées</label>
-              </div>
-
-              <div className="font-bold mt-3 mb-1">Nombre de questions</div>
-              <div className="flex gap-2 flex-wrap">{[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}</div>
-
-              <div className="font-bold mt-3 mb-1">Temps par question</div>
-              <div className="flex gap-2 flex-wrap">
-                {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
-                <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
-              </div>
+              <label><input type="radio" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label><br/>
+              <label><input type="radio" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Mémorise les doublons</label><br/>
+              <label><input type="radio" checked={mode==="manquant"} onChange={()=>setMode("manquant")}/> Trouve le facteur manquant</label><br/>
+              <label><input type="radio" checked={mode==="div"} onChange={()=>setMode("div")}/> Multiplications inversées</label>
+              <div className="mt-3 font-bold">Nombre de questions</div>
+              {[5,10,15,20].map(n=><button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>)}
+              <div className="mt-3 font-bold">Temps par question</div>
+              {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
+              <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
             </div>
-
-            <div className="card rounded-2xl p-4" style={cardStyle}>
-              <div className="font-bold mb-2">Action</div>
-              <button onClick={()=>start()} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:"#8374a7"}}>Commencer</button>
+            <div className="card p-4 rounded-2xl flex flex-col justify-center items-center" style={cardStyle}>
+              <button onClick={start} className="px-4 py-2 btn">Commencer</button>
             </div>
           </div>
         )}
 
-        {started && current && (
+        {started&&cur&&(
           <div className="space-y-6">
-            <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={cardStyle}>
-              <div className="flex items-center justify-between">
-                <div><strong>Question :</strong> {index+1} / {questions.length}</div>
-                <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
-              </div>
-              <Progress remaining={remaining??0} total={timeLimit}/>
-            </div>
-
-            <div className="card rounded-2xl p-3" style={cardStyle}>
-              <strong>Consigne :</strong> <span className="diag-txt">{tip}</span>
-            </div>
-
-            {/* CLASSIQUE */}
-            {current.kind==="classic" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
-                <div className="text-slate-500">Résultat</div>
-                <div className="font-black text-5xl mb-6">{current.product}</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
-                  <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                  <span className="text-3xl">×</span>
-                  <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
-                </form>
+            <div className="card p-4 rounded-2xl" style={cardStyle}><strong>Consigne :</strong> {tip}</div>
+            {cur.kind==="classic"&&(
+              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
+                <div className="text-5xl font-black mb-4">{cur.product}</div>
+                <input value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-20 text-center"/> × 
+                <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-20 text-center"/>
+                <button onClick={handleSubmit} className="ml-3 px-4 py-2 btn">Valider</button>
               </div>
             )}
-
-            {/* PAIRS */}
-            {current.kind==="pairs" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
-                <div className="text-slate-500">Produit</div>
-                <div className="font-black text-5xl mb-6">{current.product}</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="space-y-3">
-                  {pairs.map((p,idx)=>(
-                    <div key={idx} className="flex gap-3 justify-center items-center">
-                      <input value={p.a} onChange={e=>setPairs(arr=>arr.map((q,i)=> i===idx? {...q,a:e.target.value.replace(/\D/g,"")} : q))}
-                            inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                            className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint diag-txt" />
-                      <span className="text-2xl">×</span>
-                      <input value={p.b} onChange={e=>setPairs(arr=>arr.map((q,i)=> i===idx? {...q,b:e.target.value.replace(/\D/g,"")} : q))}
-                            inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                            className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint diag-txt" />
-                    </div>
-                  ))}
-                  <div className="text-xs text-slate-500">Astuce : l’ordre n’a pas d’importance (3×8 = 8×3).</div>
-                  <div className="pt-2">
-                    <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
-                  </div>
-                </form>
+            {cur.kind==="manquant"&&(
+              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
+                <div className="text-3xl mb-4">{cur.product} = {cur.missing==="a"?"?":cur.a} × {cur.missing==="b"?"?":cur.b}</div>
+                <input value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-24 text-center"/>
+                <button onClick={handleSubmit} className="ml-3 px-4 py-2 btn">Valider</button>
               </div>
             )}
-
-            {/* FACTEUR MANQUANT */}
-            {current.kind==="missing" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
-                <div className="text-slate-500">Produit</div>
-                <div className="font-black text-5xl mb-6">{missing.product} = {missing.which==="a" ? "…":missing.known} × {missing.which==="b" ? "…":missing.known}</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
-                  <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-28 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
-                </form>
+            {cur.kind==="div"&&(
+              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
+                <div className="text-3xl mb-4">{cur.divisor*cur.quotient} ÷ {cur.divisor} = ?</div>
+                <input value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))} className="border rounded p-2 w-24 text-center"/>
+                <button onClick={handleSubmit} className="ml-3 px-4 py-2 btn">Valider</button>
               </div>
             )}
-
-            {/* DIVISIONS */}
-            {current.kind==="div" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
-                <div className="text-slate-500">Division</div>
-                <div className="font-black text-4xl mb-6">{current.dividend} ÷ {current.divisor} = ?</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
-                  <input value={quotient} onChange={e=>setQuotient(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-28 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
-                </form>
+            {cur.kind==="pairs"&&(
+              <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
+                <div className="text-3xl mb-4">{cur.product}</div>
+                {pairs.map((p,i)=><div key={i}>{p.join("×")}</div>)}
+                <button onClick={handleSubmit} className="px-4 py-2 btn">Valider</button>
               </div>
             )}
           </div>
         )}
 
-        {/* FIN DU JEU */}
-        {finished && (
-          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
-            <h2 className="text-2xl font-bold mb-4">Résultats 🎯</h2>
-            <p className="mb-2">
-              Tu as réussi <strong>{answers.filter((a) => a.correct).length}/{answers.length}</strong> questions.
-            </p>
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={() => { setStarted(false); setFinished(false); }}
-                className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
-                style={{backgroundColor: "#8374a7"}}
-              >
-                Rejouer
-              </button>
-            </div>
+        {finished&&(
+          <div className="card p-6 rounded-2xl text-center" style={cardStyle}>
+            <h2 className="text-2xl font-bold mb-2">Résultats 🎯</h2>
+            <p>{answers.filter(a=>a.correct).length}/{answers.length} correctes</p>
+            <button onClick={()=>{setStarted(false);setFinished(false);}} className="mt-3 px-4 py-2 btn">Rejouer</button>
           </div>
         )}
       </div>
     </div>
   );
 }
-        /* ============================= APP / ROUTER ============================= */
-function App() {
-  const [route, setRoute] = useState(location.hash.replace(/^#/, "") || "/");
-  const acc = useAccessibility();
 
-  useEffect(() => {
-    const onHash = () => setRoute(location.hash.replace(/^#/, "") || "/");
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+/* ---------- Jeu 1 + 2 + Hub (versions simples pour intégration) ---------- */
+function Hub(){return(<div className="text-center p-8"><h1 className="text-3xl font-bold text-purple-700">Bienvenue dans l’Atelier d’automatismes</h1><p className="mt-2">Choisis ton jeu ci-dessus 👆</p></div>);}
+function GameDefi(){return(<div className="text-center p-8">Jeu 1 – Défi Tables</div>);}
+function GamePythagore(){return(<div className="text-center p-8">Jeu 2 – Table de Pythagore</div>);}
 
-  useEffect(() => {
-    document.body.className =
-      (acc.black ? "dark-mode " : "") +
-      (acc.yellow && !acc.black ? "yellow-mode " : "");
-  }, [acc.black, acc.yellow]);
-
-  return (
-    <div className="min-h-screen p-6" style={{ background: acc.rootBg, color: acc.rootText }}>
-      <TopNav route={route} go={k => (location.hash = "#" + k)} />
-      {route === "/" && <Hub />}
-      {route === "/defi" && <GameDefi acc={acc} />}
-      {route === "/pythagore" && <GamePythagore acc={acc} />}
-      {route === "/inverse" && <GameInverse acc={acc} />}
-    </div>
-  );
-}
-
-
-<!-- ======================= SCRIPT PRINCIPAL ======================= -->
-<script type="text/babel">
-  /* === Montage unique, anti-doublon === */
-  (() => {
-    const container = document.getElementById('root');
-    if (window.__SACADO_ROOT__) {
-      try { window.__SACADO_ROOT__.unmount(); } catch (e) {}
-    }
-    window.__SACADO_ROOT__ = ReactDOM.createRoot(container);
-    window.__SACADO_ROOT__.render(<App />);
-  })();
-</script>
-
-</body>
-</html>
-
+/* ---------- APP ---------- */
+function App(){
+  const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
+  const acc=useAccessibility();
+  useEffect(()=>{const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/");window.addEventListener("hashchange",onHash);return()=>window.removeEventListener("hashchange",onHash)},[]);
+  return(
+    <div className="min-h-screen p-6" style={{background:acc.black?"#000":acc.yellow?"#fff7cc":"#f8fafc",color:acc.black?"#fff":"#111"}}>
+      <TopNav route={route} go={k=>location.hash="#"+k}/>
+      {route==="/"&&<Hub/>}
+      {route==="/defi"&&<GameDefi acc={acc}/>}
+      {route==="/pythagore"
