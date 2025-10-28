@@ -516,168 +516,293 @@ function GamePythagore({acc}){
 }
 
 /* =================== JEU 3 — Retrouve la multiplication =================== */
-function GameInverse({acc}){
-  const {rootBg,rootText,cardStyle}=acc;
+/* =================== JEU 3 — Retrouve la multiplication =================== */
+function GameInverse({acc}) {
+  const {rootBg, rootText, cardStyle, speak} = acc;
+  const [questionCount, setQuestionCount] = useState(10);
+  const [timeLimit, setTimeLimit] = useState(15);
+  const [mode, setMode] = useState("classique"); // classique | tousCouples | missing | divisions
+  const [divTables, setDivTables] = useState(range(2, 10));
+  const [started, setStarted] = useState(false),
+        [finished, setFinished] = useState(false);
+  const [questions, setQuestions] = useState([]),
+        [index, setIndex] = useState(0);
+  const [tick, setTick] = useState(0),
+        [answers, setAnswers] = useState([]);
+  const [flash, setFlash] = useState(false);
+  const [x, setX] = useState(""),
+        [y, setY] = useState(""),
+        [pairs, setPairs] = useState([]),
+        [quotient, setQuotient] = useState(""),
+        [missing, setMissing] = useState("");
+  const xRef = useRef(null);
 
-  const [questionCount,setQuestionCount]=useState(10);
-  const [timeLimit,setTimeLimit]=useState(15);
-  const [mode, setMode] = useState("classique"); // classique | tousCouples | divisions
-  const [divTables,setDivTables]=useState(range(2,10));
-
-  const [started,setStarted]=useState(false), [finished,setFinished]=useState(false);
-  const [questions,setQuestions]=useState([]), [index,setIndex]=useState(0);
-  const [tick,setTick]=useState(0), [answers,setAnswers]=useState([]);
-  const [flash,setFlash]=useState(false);
-
-  const [x,setX]=useState(""), [y,setY]=useState(""); const xRef=useRef(null);
-  const [pairs,setPairs]=useState([]);
-  const [quotient,setQuotient]=useState("");
-
-  const rand = (min,max)=> min + Math.floor(Math.random()*(max-min+1));
-
-  function factorPairs(product){
-    const res=[];
-    for(let a=2;a<=10;a++){
-      for(let b=a;b<=10;b++){
-        if(a*b===product) res.push([a,b]);
-      }
-    }
+  const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+  const factorPairs = (product) => {
+    const res = [];
+    for (let a = 2; a <= 10; a++)
+      for (let b = a; b <= 10; b++)
+        if (a * b === product) res.push([a, b]);
     return res;
-  }
-
-  function newProductWithMultiPairs(){
-    while(true){
-      const a=rand(2,10), b=rand(2,10);
-      const p=a*b;
-      const fps=factorPairs(p);
-      if(fps.length>=2) return {product:p, pairs:fps};
+  };
+  const newProductWithMultiPairs = () => {
+    while (true) {
+      const a = rand(2, 10),
+        b = rand(2, 10);
+      const p = a * b;
+      const fps = factorPairs(p);
+      if (fps.length >= 2) return {product: p, pairs: fps};
     }
-  }
-
-  function newDivisionQuestion(){
-    const divisor = divTables[Math.floor(Math.random()*divTables.length)];
-    const q = rand(2,10);
-    return { dividend: divisor*q, divisor, quotient:q };
-  }
-
-  function newClassicProduct(){ const a=rand(2,10), b=rand(2,10); return a*b; }
-
-  useEffect(()=>{ if(!started||finished) return; const id=setInterval(()=>setTick(t=>t+1),1000); return ()=>clearInterval(id);},[started,finished]);
-  useEffect(()=>{ if(!started||finished) return; if(timeLimit!=null && tick>=timeLimit){ setFlash(true); setTimeout(()=>setFlash(false),650); handleSubmit(true);} },[tick]);
-
-  const start=()=>{
-    const list=[];
-    if(mode==="classique"){
-      for(let i=0;i<questionCount;i++) list.push({kind:"classic", product:newClassicProduct()});
-    }else if(mode==="tousCouples"){
-      for(let i=0;i<questionCount;i++){ const q=newProductWithMultiPairs(); list.push({kind:"pairs", product:q.product, pairs:q.pairs}); }
-    }else if(mode==="divisions"){
-      for(let i=0;i<questionCount;i++) list.push({kind:"div", ...newDivisionQuestion()});
-    }
-    setQuestions(list);
-    setIndex(0); setAnswers([]); setTick(0); setStarted(true); setFinished(false);
-
-    setX(""); setY(""); setPairs([]); setQuotient("");
-    setTimeout(()=>xRef.current?.focus(),0);
+  };
+  const newDivisionQuestion = () => {
+    const divisor = divTables[Math.floor(Math.random() * divTables.length)];
+    const q = rand(2, 10);
+    return {dividend: divisor * q, divisor, quotient: q};
+  };
+  const newClassicProduct = () => {
+    const a = rand(2, 10),
+      b = rand(2, 10);
+    return a * b;
   };
 
-  useEffect(()=>{
-    if(!started) return;
-    setTick(0);
-    setX(""); setY(""); setQuotient("");
-    if(questions[index]?.kind==="pairs"){
-      const slots = questions[index].pairs.length;
-      setPairs(Array.from({length:slots},()=>({a:"",b:""})));
-    } else {
-      setPairs([]);
+  useEffect(() => {
+    if (!started || finished) return;
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [started, finished]);
+
+  useEffect(() => {
+    if (!started || finished) return;
+    if (timeLimit != null && tick >= timeLimit) {
+      setFlash(true);
+      setTimeout(() => setFlash(false), 650);
+      handleSubmit(true);
     }
-    setTimeout(()=>xRef.current?.focus(),0);
-  },[index,started]);
+  }, [tick]);
+
+  const start = () => {
+    const list = [];
+    if (mode === "classique") {
+      for (let i = 0; i < questionCount; i++)
+        list.push({kind: "classic", product: newClassicProduct()});
+    } else if (mode === "tousCouples") {
+      for (let i = 0; i < questionCount; i++) {
+        const q = newProductWithMultiPairs();
+        list.push({kind: "pairs", product: q.product, pairs: q.pairs});
+      }
+    } else if (mode === "missing") {
+      for (let i = 0; i < questionCount; i++) {
+        const a = rand(2, 10),
+          b = rand(2, 10);
+        const missing = Math.random() < 0.5 ? "a" : "b";
+        list.push({kind: "missing", product: a * b, a, b, missing});
+      }
+    } else if (mode === "divisions") {
+      for (let i = 0; i < questionCount; i++)
+        list.push({kind: "div", ...newDivisionQuestion()});
+    }
+    setQuestions(list);
+    setIndex(0);
+    setAnswers([]);
+    setTick(0);
+    setStarted(true);
+    setFinished(false);
+    setX("");
+    setY("");
+    setPairs([]);
+    setQuotient("");
+    setMissing("");
+    setTimeout(() => xRef.current?.focus(), 0);
+  };
+
+  useEffect(() => {
+    if (!started) return;
+    setTick(0);
+    setX("");
+    setY("");
+    setQuotient("");
+    setMissing("");
+    if (questions[index]?.kind === "pairs") {
+      const slots = questions[index].pairs.length;
+      setPairs(Array.from({length: slots}, () => ({a: "", b: ""})));
+    } else setPairs([]);
+    setTimeout(() => xRef.current?.focus(), 0);
+  }, [index, started]);
 
   const current = questions[index];
-  const remaining = timeLimit==null ? null : Math.max(0,timeLimit-tick);
+  const remaining = timeLimit == null ? null : Math.max(0, timeLimit - tick);
 
-  const handleSubmit=(timeout=false)=>{
-    if(!current) return;
-
-    if(current.kind==="classic"){
-      const a = parseInt(x,10), b = parseInt(y,10);
+  const handleSubmit = (timeout = false) => {
+    if (!current) return;
+    let rec;
+    if (current.kind === "classic") {
+      const a = parseInt(x, 10),
+        b = parseInt(y, 10);
       const provided = Number.isInteger(a) && Number.isInteger(b);
-      const ok = !timeout && provided && a>=2&&a<=10&&b>=2&&b<=10 && (a*b===current.product);
-      const rec = { game:"inverse", product: current.product, user: timeout ? null : (provided ? `${a}×${b}` : null), correct: ok, timeout };
-      setAnswers(p=>[...p,rec]);
-    }
-    else if(current.kind==="pairs"){
-      const norm = (A,B)=>[Math.min(A,B), Math.max(A,B)];
-      const providedPairs=[];
-      let allProvided=true;
-      for(const {a,b} of pairs){
-        const ai=parseInt(a,10), bi=parseInt(b,10);
-        if(!Number.isInteger(ai)||!Number.isInteger(bi)){ allProvided=false; break; }
-        providedPairs.push(norm(ai,bi));
-      }
-      const expected = current.pairs.map(([A,B])=>[A,B]);
-      const key = (p)=>p.join("×");
-      const setE = new Set(expected.map(key));
-      const setP = new Set(providedPairs.map(key));
-      const ok = !timeout && allProvided && setE.size===setP.size && [...setE].every(k=>setP.has(k));
-
-      const rec = {
-        game:"inverse",
+      const ok =
+        !timeout &&
+        provided &&
+        a >= 2 &&
+        a <= 10 &&
+        b >= 2 &&
+        b <= 10 &&
+        a * b === current.product;
+      rec = {
+        game: "inverse",
         product: current.product,
-        user: timeout ? null : (allProvided ? providedPairs.map(p=>p.join("×")).join(" ; ") : null),
+        user: timeout ? null : provided ? `${a}×${b}` : null,
         correct: ok,
-        timeout
+        timeout,
       };
-      setAnswers(p=>[...p,rec]);
-    }
-    else if(current.kind==="div"){
-      const q = parseInt(quotient,10);
+    } else if (current.kind === "pairs") {
+      const norm = (A, B) => [Math.min(A, B), Math.max(A, B)];
+      const providedPairs = [];
+      let allProvided = true;
+      for (const {a, b} of pairs) {
+        const ai = parseInt(a, 10),
+          bi = parseInt(b, 10);
+        if (!Number.isInteger(ai) || !Number.isInteger(bi)) {
+          allProvided = false;
+          break;
+        }
+        providedPairs.push(norm(ai, bi));
+      }
+      const expected = current.pairs.map(([A, B]) => [A, B]);
+      const key = (p) => p.join("×");
+      const setE = new Set(expected.map(key)),
+        setP = new Set(providedPairs.map(key));
+      const ok =
+        !timeout &&
+        allProvided &&
+        setE.size === setP.size &&
+        [...setE].every((k) => setP.has(k));
+      rec = {
+        game: "inverse",
+        product: current.product,
+        user: timeout
+          ? null
+          : allProvided
+          ? providedPairs.map((p) => p.join("×")).join(" ; ")
+          : null,
+        correct: ok,
+        timeout,
+      };
+    } else if (current.kind === "missing") {
+      const miss = parseInt(missing, 10);
+      const provided = Number.isInteger(miss);
+      const good =
+        current.missing === "a"
+          ? current.product / current.b
+          : current.product / current.a;
+      const ok = !timeout && provided && miss === good;
+      rec = {
+        game: "inverse-missing",
+        product: current.product,
+        user: timeout ? null : provided ? String(miss) : null,
+        correct: ok,
+        timeout,
+      };
+    } else if (current.kind === "div") {
+      const q = parseInt(quotient, 10);
       const provided = Number.isInteger(q);
-      const ok = !timeout && provided && q===current.quotient;
-      const rec = {
-        game:"inverse-div",
+      const ok = !timeout && provided && q === current.quotient;
+      rec = {
+        game: "inverse-div",
         dividend: current.dividend,
         divisor: current.divisor,
         quotient: current.quotient,
-        user: timeout ? null : (provided ? String(q) : null),
+        user: timeout ? null : provided ? String(q) : null,
         correct: ok,
-        timeout
+        timeout,
       };
-      setAnswers(p=>[...p,rec]);
     }
-
-    if(index+1>=questions.length){ setFinished(true); setStarted(false); }
-    else { setIndex(i=>i+1); }
+    setAnswers((p) => [...p, rec]);
+    if (index + 1 >= questions.length) {
+      setFinished(true);
+      setStarted(false);
+    } else setIndex((i) => i + 1);
   };
 
   const tip =
-    mode==="classique"   ? "Retrouve une multiplication dans les tables de 2 à 10."
-  : mode==="tousCouples" ? "Retrouve tous les couples de facteurs possibles dans les tables de 2 à 10 (ex. 24 = 3×8 et 4×6)."
-  :                       "Complète la division : le diviseur est choisi dans tes tables (2 à 10).";
+    mode === "classique"
+      ? "Retrouve une multiplication dans les tables de 2 à 10."
+      : mode === "tousCouples"
+      ? "Retrouve tous les couples de facteurs possibles (ex. 24 = 3×8 et 4×6)."
+      : mode === "missing"
+      ? "Complète le facteur manquant (ex. 45 = 5×… ou …×9)."
+      : "Complète la division : le diviseur est choisi dans tes tables (2 à 10).";
 
   return (
-    <div className="min-h-screen p-6" style={{backgroundColor:rootBg,color:rootText}}>
-        <div className="max-w-4xl mx-auto space-y-6">
-
+    <div
+      className={
+        (acc.black ? "dark-mode " : "") +
+        (acc.yellow && !acc.black ? "yellow-mode " : "") +
+        "min-h-screen p-6"
+      }
+      style={{backgroundColor: rootBg, color: rootText}}
+    >
+      <div className="max-w-4xl mx-auto space-y-6">
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
-            <AccessibilityCard acc={acc}/>
-
+            <AccessibilityCard acc={acc} />
             <div className="card rounded-2xl p-4" style={cardStyle}>
               <div className="font-bold mb-2">Mode</div>
               <div className="grid gap-2">
-                <label><input type="radio" name="m3" checked={mode==="classique"} onChange={()=>setMode("classique")}/> Retrouve la multiplication</label>
-                <label><input type="radio" name="m3" checked={mode==="tousCouples"} onChange={()=>setMode("tousCouples")}/> Mémorise les doublons </label>
-                <label><input type="radio" name="m3" checked={mode==="divisions"} onChange={()=>setMode("divisions")}/> Multiplications inversées</label>
-                {mode==="divisions" && (
+                <label>
+                  <input
+                    type="radio"
+                    name="m3"
+                    checked={mode === "classique"}
+                    onChange={() => setMode("classique")}
+                  />{" "}
+                  Retrouve la multiplication
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="m3"
+                    checked={mode === "tousCouples"}
+                    onChange={() => setMode("tousCouples")}
+                  />{" "}
+                  Mémorise les doublons
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="m3"
+                    checked={mode === "missing"}
+                    onChange={() => setMode("missing")}
+                  />{" "}
+                  Trouve le facteur manquant
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="m3"
+                    checked={mode === "divisions"}
+                    onChange={() => setMode("divisions")}
+                  />{" "}
+                  Multiplications inversées
+                </label>
+
+                {mode === "divisions" && (
                   <div className="ml-6">
                     <div className="text-sm">Tables (diviseur)</div>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {range(2,10).map(t=>(
-                        <button key={t}
-                          onClick={()=>setDivTables(p=> p.includes(t)? p.filter(x=>x!==t) : [...p,t])}
-                          className={"pill "+(divTables.includes(t)?"active":"")}>
+                      {range(2, 10).map((t) => (
+                        <button
+                          key={t}
+                          onClick={() =>
+                            setDivTables((p) =>
+                              p.includes(t)
+                                ? p.filter((x) => x !== t)
+                                : [...p, t]
+                            )
+                          }
+                          className={
+                            "pill " + (divTables.includes(t) ? "active" : "")
+                          }
+                        >
                           {t}
                         </button>
                       ))}
@@ -688,101 +813,196 @@ function GameInverse({acc}){
 
               <div className="font-bold mt-3 mb-1">Nombre de questions</div>
               <div className="flex gap-2 flex-wrap">
-                {[5,10,15,20].map(n=>
-                  <button key={n} onClick={()=>setQuestionCount(n)} className={"pill "+(questionCount===n?"active":"")}>{n}</button>
-                )}
+                {[5, 10, 15, 20].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setQuestionCount(n)}
+                    className={"pill " + (questionCount === n ? "active" : "")}
+                  >
+                    {n}
+                  </button>
+                ))}
               </div>
 
               <div className="font-bold mt-3 mb-1">Temps par question</div>
               <div className="flex gap-2 flex-wrap">
-                {[15,20].map(s=><button key={s} onClick={()=>setTimeLimit(s)} className={"pill "+(timeLimit===s?"active":"")}>{s}s</button>)}
-                <button onClick={()=>setTimeLimit(null)} className={"pill "+(timeLimit==null?"active":"")}>Pas de chrono</button>
+                {[15, 20].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setTimeLimit(s)}
+                    className={"pill " + (timeLimit === s ? "active" : "")}
+                  >
+                    {s}s
+                  </button>
+                ))}
+                <button
+                  onClick={() => setTimeLimit(null)}
+                  className={
+                    "pill " + (timeLimit == null ? "active" : "")
+                  }
+                >
+                  Pas de chrono
+                </button>
               </div>
             </div>
 
-            <div className="card rounded-2xl p-4" style={cardStyle}>
+            <div
+              className="card rounded-2xl p-4"
+              style={cardStyle}
+            >
               <div className="font-bold mb-2">Action</div>
-              <button onClick={()=>start()} className="px-4 py-2 rounded-2xl text-white" style={{backgroundColor:"#8374a7"}}>Commencer</button>
+              <button
+                onClick={() => start()}
+                className="px-4 py-2 rounded-2xl text-white"
+                style={{backgroundColor: BRAND}}
+              >
+                Commencer
+              </button>
             </div>
           </div>
         )}
 
         {started && current && (
           <div className="space-y-6">
-            <div className={"card rounded-2xl p-3 "+(flash?"flash":"")} style={cardStyle}>
+            <div
+              className={
+                "card rounded-2xl p-3 " + (flash ? "flash" : "")
+              }
+              style={cardStyle}
+            >
               <div className="flex items-center justify-between">
-                <div><strong>Question :</strong> {index+1} / {questions.length}</div>
-                <div><strong>⏱ Temps :</strong> {timeLimit==null?"Pas de chrono":`${remaining}s`}</div>
+                <div>
+                  <strong>Question :</strong> {index + 1} / {questions.length}
+                </div>
+                <div>
+                  <strong>⏱ Temps :</strong>{" "}
+                  {timeLimit == null ? "Pas de chrono" : `${remaining}s`}
+                </div>
               </div>
-              <Progress remaining={remaining??0} total={timeLimit}/>
+              <Progress remaining={remaining ?? 0} total={timeLimit} />
             </div>
 
             <div className="card rounded-2xl p-3" style={cardStyle}>
-              <strong>Consigne :</strong> <span className="diag-txt">{tip}</span>
+              <strong>Consigne :</strong>{" "}
+              <span className="diag-txt">{tip}</span>
             </div>
 
-            {current.kind==="classic" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+            {/* CLASSIQUE */}
+            {current.kind === "classic" && (
+              <div
+                className="rounded-3xl border p-6 text-center shadow-sm card"
+                style={cardStyle}
+              >
                 <div className="text-slate-500">Résultat</div>
-                <div className="font-black text-5xl mb-6">{current.product}</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
-                  <input ref={xRef} value={x} onChange={e=>setX(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
+                <div className="font-black text-5xl mb-6">
+                  {current.product}
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(false);
+                  }}
+                  className="flex gap-4 justify-center items-center"
+                >
+                  <input
+                    ref={xRef}
+                    value={x}
+                    onChange={(e) =>
+                      setX(e.target.value.replace(/\D/g, ""))
+                    }
+                    inputMode="numeric"
+                    type="tel"
+                    className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt"
+                  />
                   <span className="text-3xl">×</span>
-                  <input value={y} onChange={e=>setY(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
+                  <input
+                    value={y}
+                    onChange={(e) =>
+                      setY(e.target.value.replace(/\D/g, ""))
+                    }
+                    inputMode="numeric"
+                    type="tel"
+                    className="w-24 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt"
+                  />
+                  <button
+                    type="submit"
+                    className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
+                    style={{backgroundColor: "#8374a7"}}
+                  >
+                    Valider
+                  </button>
                 </form>
               </div>
             )}
 
-            {current.kind==="pairs" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
+            {/* TOUS COUPLES */}
+            {current.kind === "pairs" && (
+              <div
+                className="rounded-3xl border p-6 text-center shadow-sm card"
+                style={cardStyle}
+              >
                 <div className="text-slate-500">Produit</div>
-                <div className="font-black text-5xl mb-6">{current.product}</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="space-y-3">
-                  {pairs.map((p,idx)=>(
-                    <div key={idx} className="flex gap-3 justify-center items-center">
-                      <input value={p.a} onChange={e=>setPairs(arr=>arr.map((q,i)=> i===idx? {...q,a:e.target.value.replace(/\D/g,"")} : q))}
-                            inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                            className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint diag-txt" />
+                <div className="font-black text-5xl mb-6">
+                  {current.product}
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(false);
+                  }}
+                  className="space-y-3"
+                >
+                  {pairs.map((p, idx) => (
+                    <div
+                      key={idx}
+                      className="flex gap-3 justify-center items-center"
+                    >
+                      <input
+                        value={p.a}
+                        onChange={(e) =>
+                          setPairs((arr) =>
+                            arr.map((q, i) =>
+                              i === idx
+                                ? {...q, a: e.target.value.replace(/\D/g, "")}
+                                : q
+                            )
+                          )
+                        }
+                        inputMode="numeric"
+                        type="tel"
+                        className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint diag-txt"
+                      />
                       <span className="text-2xl">×</span>
-                      <input value={p.b} onChange={e=>setPairs(arr=>arr.map((q,i)=> i===idx? {...q,b:e.target.value.replace(/\D/g,"")} : q))}
-                            inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                            className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint diag-txt" />
+                      <input
+                        value={p.b}
+                        onChange={(e) =>
+                          setPairs((arr) =>
+                            arr.map((q, i) =>
+                              i === idx
+                                ? {...q, b: e.target.value.replace(/\D/g, "")}
+                                : q
+                            )
+                          )
+                        }
+                        inputMode="numeric"
+                        type="tel"
+                        className="w-20 text-center text-2xl px-3 py-2 rounded-2xl border violet-border fill-hint diag-txt"
+                      />
                     </div>
                   ))}
-                  <div className="text-xs text-slate-500">Astuce : l’ordre n’a pas d’importance (3×8 = 8×3).</div>
-                  <div className="pt-2">
-                    <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
+                  <div className="text-xs text-slate-500">
+                    Astuce : l’ordre n’a pas d’importance (3×8 = 8×3).
                   </div>
-                </form>
-              </div>
-            )}
-
-            {current.kind==="div" && (
-              <div className="rounded-3xl border p-6 text-center shadow-sm card" style={cardStyle}>
-                <div className="text-slate-500">Division</div>
-                <div className="font-black text-4xl mb-6">{current.dividend} ÷ {current.divisor} = ?</div>
-                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(false);}} className="flex gap-4 justify-center items-center">
-                  <input value={quotient} onChange={e=>setQuotient(e.target.value.replace(/\D/g,""))}
-                        inputMode="numeric" type="tel" autoComplete="off" spellCheck="false"
-                        className="w-28 text-center text-3xl px-4 py-3 rounded-2xl border violet-border fill-hint diag-txt" />
-                  <button type="submit" className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>Valider</button>
-                </form>
-              </div>
-            )}
-          </div>
-        )}
-
-        {finished && <Summary cardStyle={cardStyle} answers={answers} />}
-        <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">⬅ Retour au menu</a></div>
-      </div>
-    </div>
-  );
-}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
+                      style={{backgroundColor: "#8374a7"}}
+                    >
+                      Valider
+                    </button>
+                  </div>
+               
 
 /* ============================= APP / ROUTER ============================= */
 function App(){
