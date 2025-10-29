@@ -217,6 +217,115 @@ function Progress({remaining, total}) {
 }
 const vibrate = (p=[80,40,120]) => { try { if (navigator.vibrate) navigator.vibrate(p); } catch(_){} };
 
+
+/* ==================== RECAP – commun aux jeux ==================== */
+function RecapTable({ answers, onReplay, cardStyle }) {
+  // util: paires de facteurs (2..10) pour un produit donné
+  const factorPairs = (product) => {
+    const res = [];
+    for (let a = 2; a <= 10; a++) {
+      for (let b = a; b <= 10; b++) {
+        if (a * b === product) res.push([a, b]);
+      }
+    }
+    return res;
+  };
+
+  const total = answers.length;
+  const ok = answers.filter(a => a.correct).length;
+
+  // Rend une ligne selon le type d'item
+  const renderRow = (a, i) => {
+    let question = "";
+    let correction = "";
+    let taReponse = "";
+    let extra = "";
+
+    if (a.game === "defi") {
+      // Jeu 1 — Défi Tables
+      question = `${a.a} × ${a.b}`;
+      correction = `${a.product}`;
+      taReponse = a.user === null ? "—" : String(a.user);
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    } 
+    else if (a.game === "inverse") {
+      // Jeu 3 — "tousCouples" (toutes les paires)
+      question = `${a.product} (toutes les décompositions)`;
+      const pairs = factorPairs(a.product).map(([x, y]) => `${x}×${y}`).join(" ; ");
+      correction = pairs || "—";
+      taReponse = a.user === null ? "—" : a.user; // déjà concaténée "x×y ; ..."
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    } 
+    else if (a.game === "inverse-missing") {
+      // Jeu 3 — facteur manquant
+      const exp = a.product / a.known;
+      question = a.which === "a" ? `${a.product} = … × ${a.known}` : `${a.product} = ${a.known} × …`;
+      correction = String(exp);
+      taReponse = a.user === null ? "—" : a.user;
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    } 
+    else if (a.game === "inverse-div") {
+      // Jeu 3 — divisions
+      question = `${a.dividend} ÷ ${a.divisor}`;
+      correction = String(a.quotient);
+      taReponse = a.user === null ? "—" : a.user;
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    }
+
+    const rowCls = a.correct ? "ok" : "ko";
+    return (
+      <tr key={i} className={rowCls}>
+        <td className="border px-3 py-2">{i + 1}</td>
+        <td className="border px-3 py-2">{question}</td>
+        <td className="border px-3 py-2">{correction}</td>
+        <td className="border px-3 py-2">{taReponse}</td>
+        <td className="border px-3 py-2 whitespace-nowrap">{a.correct ? "✅ Correct" : "❌ Incorrect"}</td>
+        <td className="border px-3 py-2 text-slate-600">{extra}</td>
+      </tr>
+    );
+  };
+
+  return (
+    <div className="card rounded-2xl p-6" style={cardStyle}>
+      <h2 className="text-2xl font-bold mb-2">Résultats 🎯</h2>
+      <p className="mb-4">Tu as réussi <strong>{ok}/{total}</strong> questions.</p>
+
+      <div className="overflow-auto">
+        <table className="w-full border-collapse min-w-[800px]">
+          <thead>
+            <tr className="hdr">
+              <th className="border px-3 py-2 text-left">#</th>
+              <th className="border px-3 py-2 text-left">Question</th>
+              <th className="border px-3 py-2 text-left">Bonne réponse</th>
+              <th className="border px-3 py-2 text-left">Ta réponse</th>
+              <th className="border px-3 py-2 text-left">Statut</th>
+              <th className="border px-3 py-2 text-left">Remarque</th>
+            </tr>
+          </thead>
+          <tbody>
+            {answers.map(renderRow)}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex gap-2 justify-center mt-6">
+        <button onClick={onReplay} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>
+          Rejouer
+        </button>
+        <a href="#/" className="px-5 py-3 rounded-2xl border">Retour au menu</a>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
 /* ==================== JEU 1 — Défi Tables ==================== */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
