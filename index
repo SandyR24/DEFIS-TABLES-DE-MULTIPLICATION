@@ -322,10 +322,6 @@ function RecapTable({ answers, onReplay, cardStyle }) {
   );
 }
 
-
-
-
-
 /* ==================== JEU 1 — Défi Tables ==================== */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
@@ -381,12 +377,22 @@ function GameDefi({acc}){
         )}
 
         {finished && (
-          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
-            <h2 className="text-2xl font-bold mb-3">Résultats 🎯</h2>
-            <p>Tu as réussi <strong>{answers.filter(a=>a.correct).length}/{answers.length}</strong> questions.</p>
-            <a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Rejouer</a>
-          </div>
-        )}
+  <RecapTable
+    answers={answers}
+    cardStyle={cardStyle}
+    onReplay={() => {
+      // reset simple : on revient à l’écran de réglages
+      setStarted(false);
+      setFinished(false);
+      setQuestions([]);
+      setIndex(0);
+      setAnswers([]);
+      setInput("");
+      setTick(0);
+    }}
+  />
+)}
+
           <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a></div>
         </div>
     </div>
