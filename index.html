@@ -48,6 +48,14 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 .bot-bubble.ko{ border-color:#ef4444; }
 .bot-bubble img{ width:32px; height:32px; object-fit:contain; }
 
+  /* Optional dys font local name (kept to avoid console warnings if not present) */
+@font-face{
+  font-family:'OpenDyslexicLocal';
+  src:url('OpenDyslexic-Regular.otf') format('opentype'),
+      url('OpenDyslexicAlta-Regular.otf') format('opentype');
+  font-display:swap;
+}
+
 /* OK/KO cases */
 .ok input {
   background: #dcfce7 !important;
