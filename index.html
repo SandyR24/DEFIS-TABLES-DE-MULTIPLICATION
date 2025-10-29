@@ -112,8 +112,11 @@ function AccessibilityCard({acc}){
         <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={light}>
           <option>Arial</option><option>Verdana</option><option>Comic</option>
         </select>
-        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={light}>
-          {[16,18,20,22,24,26].map(s=><option key={s}>{s}px</option>)}
+          <option>Arial</option>
+          <option>Verdana</option>
+          <option>Comic</option>
+          <option>SansSerif</option>
+          <option>OpenDyslexicLocal</option>
         </select>
       </div>
       <label><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
