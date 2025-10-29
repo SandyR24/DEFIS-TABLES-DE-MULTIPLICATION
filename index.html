@@ -103,31 +103,73 @@ function useAccessibility(){
   return{font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,rootBg,rootText,cardStyle,speak};
 }
 
-function AccessibilityCard({acc}){
-  const light=acc.black?{background:'#f8fafc',color:'#111',borderColor:'#cbd5e1'}:{};
-  return(
+function AccessibilityCard({acc}) {
+  const lightSelect = acc.black
+    ? { background:'#f8fafc', color:'#111', borderColor:'#cbd5e1' }
+    : {};
+
+  return (
     <div className="card rounded-2xl p-4" style={acc.cardStyle}>
       <div className="font-bold mb-2">Accessibilité</div>
+
       <div className="flex gap-2 flex-wrap mb-2">
-        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={light}>
-          <option>Arial</option><option>Verdana</option><option>Comic</option>
+        {/* Choix de police */}
+        <select
+          value={acc.font}
+          onChange={e => acc.setFont(e.target.value)}
+          className="border rounded p-1"
+          style={lightSelect}
+        >
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Comic">Comic Sans</option>
+          <option value="SansSerif">Sans Serif</option>
+          <option value="OpenDyslexicLocal">OpenDyslexic</option>
         </select>
-          <option>Arial</option>
-          <option>Verdana</option>
-          <option>Comic</option>
-          <option>SansSerif</option>
-          <option>OpenDyslexicLocal</option>
-        </select>
-              <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
-          {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
+
+        {/* Choix de taille */}
+        <select
+          value={acc.size}
+          onChange={e => acc.setSize(parseInt(e.target.value))}
+          className="border rounded p-1"
+          style={lightSelect}
+        >
+          {[16,18,20,22,24,26,28,30].map(s => (
+            <option key={s} value={s}>{s}px</option>
+          ))}
         </select>
       </div>
-      <label><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
-      <label><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
-      <label><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio</label>
+
+      <label className="block">
+        <input
+          type="checkbox"
+          checked={acc.yellow}
+          onChange={e => acc.toggleYellow(e.target.checked)}
+        />{" "}
+        Fond jaune
+      </label>
+
+      <label className="block">
+        <input
+          type="checkbox"
+          checked={acc.black}
+          onChange={e => acc.toggleBlack(e.target.checked)}
+        />{" "}
+        Écran noir
+      </label>
+
+      <label className="block">
+        <input
+          type="checkbox"
+          checked={acc.audio}
+          onChange={e => acc.setAudio(e.target.checked)}
+        />{" "}
+        Audio
+      </label>
     </div>
   );
 }
+
 
 /* ==================== TOP NAV ==================== */
 function TopNav({route,go}){
