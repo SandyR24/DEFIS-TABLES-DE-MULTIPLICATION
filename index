@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -42,40 +42,21 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 .dark-mode .pill.active{ background:#a69acc !important; border-color:#a69acc !important; color:#111 !important; }
 .dark-mode .progress-bar{ background:#a69acc !important; }
 
-/* Jeu 2 en sombre */
-.dark-mode .max-w-6xl table th{
-  background:#f8fafc !important; color:#000 !important; border-color:#333 !important;
-}
-.dark-mode .max-w-6xl table th:first-child{ background:#f1f5f9 !important; }
-.dark-mode .max-w-6xl table td{ background:#111 !important; border-color:#222 !important; }
-.dark-mode .max-w-6xl table td span:not(.diag-txt){ color:#f8fafc !important; font-weight:700 !important; }
-.dark-mode .max-w-6xl table td input{
-  background:#fff !important; color:#000 !important; border:3px solid #c6b8ff !important;
-  border-radius:10px !important; font-weight:700 !important; box-shadow:0 0 8px rgba(198,184,255,.9);
-}
-.dark-mode .diag-bg{ background:#2b2440 !important; }
-
-/* Yellow mode */
-.yellow-mode{ background:#fff7cc !important; color:#111 !important; }
-.yellow-mode .card{ background:#fff7cc !important; border-color:#eadf9c !important; }
-.yellow-mode .hdr{ background:#fff3b0 !important; color:#111 !important; }
-.yellow-mode .max-w-6xl table th{
-  background:#f1f5f9 !important; color:#000 !important; border-color:#cfd7e3 !important;
-}
-.yellow-mode .max-w-6xl table td{ background:#fff7cc !important; border-color:#e9dfaa !important; }
-.yellow-mode .max-w-6xl table td input{
-  background:#fffef3 !important; color:#000 !important; border:2px solid #a69acc !important; box-shadow:0 0 3px rgba(131,116,167,.25);
-}
-
 /* DogBot */
 .bot-bubble{ display:flex; gap:.75rem; align-items:flex-start; border:1px solid #e5e7eb; border-radius:16px; padding:10px 12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.05); }
 .bot-bubble.ok{ border-color:#22c55e; }
 .bot-bubble.ko{ border-color:#ef4444; }
-.dark-mode .bot-bubble{ background:#0b0b0b !important; border-color:#334155 !important; }
-.dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
-.dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
+.bot-bubble img{ width:32px; height:32px; object-fit:contain; }
 
-/* === Couleur d'aide visuelle pour les réponses du Jeu 2 === */
+  /* Optional dys font local name (kept to avoid console warnings if not present) */
+@font-face{
+  font-family:'OpenDyslexicLocal';
+  src:url('OpenDyslexic-Regular.otf') format('opentype'),
+      url('OpenDyslexicAlta-Regular.otf') format('opentype');
+  font-display:swap;
+}
+
+/* OK/KO cases */
 .ok input {
   background: #dcfce7 !important;
   border: 2px solid #16a34a !important;
@@ -88,28 +69,14 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
   color: #991b1b !important;
   font-weight: 700;
 }
-/* Taille réduite de DogBot dans la bulle de feedback */
-.bot-bubble img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-/* Optional dys font local name (kept to avoid console warnings if not present) */
-@font-face{
-  font-family:'OpenDyslexicLocal';
-  src:url('OpenDyslexic-Regular.otf') format('opentype'),
-      url('OpenDyslexicAlta-Regular.otf') format('opentype');
-  font-display:swap;
-}
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel" data-presets="env,react">
-const {useState,useEffect,useRef} = React;
-const BRAND = "#8374a7";
+const {useState,useEffect,useRef}=React;
+const BRAND="#8374a7";
 const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
 
 /* ==================== ACCESSIBILITÉ ==================== */
@@ -119,85 +86,111 @@ function useAccessibility(){
   const [yellow,setYellow]=useState(false);
   const [black,setBlack]=useState(false);
   const [audio,setAudio]=useState(false);
-
-  // Exclusivité
-  const toggleYellow = (v)=>{ setYellow(v); if(v) setBlack(false); };
-  const toggleBlack  = (v)=>{ setBlack(v);  if(v) setYellow(false); };
-
-  // Appliquer police + taille immédiatement
+  const toggleYellow=v=>{setYellow(v);if(v)setBlack(false);};
+  const toggleBlack=v=>{setBlack(v);if(v)setYellow(false);};
   useEffect(()=>{
     const FAMILY =
-      font==="OpenDyslexic" || font==="OpenDyslexicLocal" ? "OpenDyslexicLocal, Arial, sans-serif" :
-      font==="Verdana"      ? "Verdana, Geneva, Tahoma, sans-serif" :
-      font==="Comic"        ? "'Comic Sans MS','Comic Sans',cursive" :
-      font==="SansSerif"    ? 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans","Liberation Sans", sans-serif' :
-                              "Arial, Helvetica, sans-serif";
-    document.body.style.fontFamily = FAMILY;
-    document.body.style.fontSize = `${size}px`;
+      font==="Comic" ? "'Comic Sans MS','Comic Sans',cursive" :
+      font==="Verdana" ? "Verdana, Geneva, Tahoma, sans-serif" :
+      "Arial, Helvetica, sans-serif";
+    document.body.style.fontFamily=FAMILY;
+    document.body.style.fontSize=`${size}px`;
   },[font,size]);
-
-  const rootBg  = black ? "#000" : (yellow ? "#fff7cc" : "#f8fafc");
-  const rootText= black ? "#f8fafc" : "#111";
-  const cardStyle = { backgroundColor: yellow ? "#fff7cc" : (black ? "#111" : "#fff"), color: rootText };
-
-  const speak=(txt)=>{ try{ if(!audio) return; const u=new SpeechSynthesisUtterance(txt); u.lang="fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} };
-
-  return {font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,rootBg,rootText,cardStyle,speak};
+  const rootBg=black?"#000":yellow?"#fff7cc":"#f8fafc";
+  const rootText=black?"#f8fafc":"#111";
+  const cardStyle={backgroundColor:yellow?"#fff7cc":black?"#111":"#fff",color:rootText};
+  const speak=txt=>{try{if(!audio)return;const u=new SpeechSynthesisUtterance(txt);u.lang="fr-FR";speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}};
+  return{font,setFont,size,setSize,yellow,black,audio,setAudio,toggleYellow,toggleBlack,rootBg,rootText,cardStyle,speak};
 }
 
-function AccessibilityCard({acc}){
-  const lightSelect = acc.black ? { background:'#f8fafc', color:'#111827', borderColor:'#cbd5e1' } : {};
+function AccessibilityCard({acc}) {
+  const lightSelect = acc.black
+    ? { background:'#f8fafc', color:'#111', borderColor:'#cbd5e1' }
+    : {};
+
   return (
     <div className="card rounded-2xl p-4" style={acc.cardStyle}>
       <div className="font-bold mb-2">Accessibilité</div>
+
       <div className="flex gap-2 flex-wrap mb-2">
-        <select value={acc.font} onChange={e=>acc.setFont(e.target.value)} className="border rounded p-1" style={lightSelect}>
-          <option>Arial</option>
-          <option>Verdana</option>
-          <option>Comic</option>
-          <option>SansSerif</option>
-          <option>OpenDyslexicLocal</option>
+        {/* Choix de police */}
+        <select
+          value={acc.font}
+          onChange={e => acc.setFont(e.target.value)}
+          className="border rounded p-1"
+          style={lightSelect}
+        >
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Comic">Comic Sans</option>
+          <option value="SansSerif">Sans Serif</option>
+          <option value="OpenDyslexicLocal">OpenDyslexic</option>
         </select>
-        <select value={acc.size} onChange={e=>acc.setSize(parseInt(e.target.value))} className="border rounded p-1" style={lightSelect}>
-          {[16,18,20,22,24,26,28,30].map(s=><option key={s} value={s}>{s}px</option>)}
+
+        {/* Choix de taille */}
+        <select
+          value={acc.size}
+          onChange={e => acc.setSize(parseInt(e.target.value))}
+          className="border rounded p-1"
+          style={lightSelect}
+        >
+          {[16,18,20,22,24,26,28,30].map(s => (
+            <option key={s} value={s}>{s}px</option>
+          ))}
         </select>
       </div>
-      <label className="block"><input type="checkbox" checked={acc.yellow} onChange={e=>acc.toggleYellow(e.target.checked)}/> Fond jaune</label>
-      <label className="block"><input type="checkbox" checked={acc.black} onChange={e=>acc.toggleBlack(e.target.checked)}/> Écran noir</label>
-      <label className="block"><input type="checkbox" checked={acc.audio} onChange={e=>acc.setAudio(e.target.checked)}/> Audio (TTS)</label>
+
+      <label className="block">
+        <input
+          type="checkbox"
+          checked={acc.yellow}
+          onChange={e => acc.toggleYellow(e.target.checked)}
+        />{" "}
+        Fond jaune
+      </label>
+
+      <label className="block">
+        <input
+          type="checkbox"
+          checked={acc.black}
+          onChange={e => acc.toggleBlack(e.target.checked)}
+        />{" "}
+        Écran noir
+      </label>
+
+      <label className="block">
+        <input
+          type="checkbox"
+          checked={acc.audio}
+          onChange={e => acc.setAudio(e.target.checked)}
+        />{" "}
+        Audio
+      </label>
     </div>
   );
 }
 
-/* ==================== NAV / HUB ==================== */
 
- return (
-    <div className="min-h-screen p-6" style={{background:acc.rootBg, color:acc.rootText}}>
-      <TopNav route={route} go={k=>location.hash="#"+k}/>  {/* Un seul ici */}
-      {route === "/" && <Hub/>}
-      {route === "/defi" && <GameDefi acc={acc}/>}
-      {route === "/pythagore" && <GamePythagore acc={acc}/>}
-      {route === "/inverse" && <GameInverse acc={acc}/>}
-    </div>
-  );
-
+/* ==================== TOP NAV ==================== */
+function TopNav({route,go}){
+  return(
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
-          <img src="dogbot.png" className="h-8 w-8 rounded-lg bg-white/90 p-1" alt="SACADO"/>
+          <img src="dogbot.png" className="h-8 w-8 rounded-lg bg-white/90 p-1"/>
           <div>
             <div className="font-black leading-tight">Sacado Académie</div>
             <div className="text-xs opacity-90">Atelier d’automatismes</div>
           </div>
         </div>
-        <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5" alt="DogBot"/>
+        <img src="dogbot.png" className="h-8 w-8 rounded-full bg-white/90 p-0.5"/>
       </div>
       <div className="px-4 py-3 flex flex-wrap gap-2 bg-white/60">
         {[
-          {k:"/", label:"Accueil"},
-          {k:"/defi", label:"Jeu n°1 – Défi Tables"},
-          {k:"/pythagore", label:"Jeu n°2 – Table de Pythagore"},
-          {k:"/inverse", label:"Jeu n°3 – Retrouve la multiplication"},
+          {k:"/",label:"Accueil"},
+          {k:"/defi",label:"Jeu n°1 – Défi Tables"},
+          {k:"/pythagore",label:"Jeu n°2 – Table de Pythagore"},
+          {k:"/inverse",label:"Jeu n°3 – Retrouve la multiplication"},
         ].map(tab=>(
           <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
         ))}
@@ -205,25 +198,26 @@ function AccessibilityCard({acc}){
     </div>
   );
 }
+
+/* ==================== HERO & HUB ==================== */
 function Hero(){
-  return (
-    <header className="p-6 md:p-10 text-center rounded-3xl card" style={{background:"#efe7ff"}}>
-      <h1 className="text-3xl md:text-5xl font-extrabold" style={{color:"var(--brand)"}}>Atelier d’automatismes</h1>
-      <p className="mt-1 text-xl font-semibold" style={{color:"var(--brand)"}}>Sacado Académie</p>
-      <p className="mt-2 text-slate-700">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
-      <img src="dogbot.png" className="mx-auto mt-4 h-28 w-28 rounded-full bg-white p-1 shadow" alt="DogBot"/>
+  return(
+    <header className="p-6 text-center rounded-3xl card" style={{background:"#efe7ff"}}>
+      <h1 className="text-3xl font-extrabold" style={{color:"var(--brand)"}}>Atelier d’automatismes</h1>
+      <p className="text-slate-700 mt-2">Entraîne-toi sur les tables de multiplication avec DogBot 🐾</p>
+      <img src="dogbot.png" className="mx-auto mt-4 h-24 w-24 rounded-full bg-white p-1 shadow"/>
     </header>
   );
 }
 function Hub(){
-  return (
+  return(
     <main className="max-w-5xl mx-auto px-4 py-8">
       <Hero/>
-      <h2 className="text-center text-2xl md:text-3xl font-extrabold my-4" style={{color:"var(--brand)"}}>Choisis ton activité</h2>
+      <h2 className="text-center text-2xl font-extrabold my-4" style={{color:"var(--brand)"}}>Choisis ton activité</h2>
       <div className="grid md:grid-cols-3 gap-6">
-        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°1 — Défi Tables</h3><a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Commencer</a></article>
-        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Découvrir</a></article>
-        <article className="card p-6"><h3 className="text-xl font-extrabold" style={{color:"var(--brand)"}}>Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Jouer</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°1 — Défi Tables</h3><a href="#/defi" className="btn mt-4 inline-block">Commencer</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="btn mt-4 inline-block">Découvrir</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="btn mt-4 inline-block">Jouer</a></article>
       </div>
     </main>
   );
@@ -834,30 +828,22 @@ function GameInverse({acc}){
   );
 }
 
-/* ============================= APP / ROUTER ============================= */
+/* ==================== APP ==================== */
 function App(){
   const [route,setRoute]=useState(location.hash.replace(/^#/,"")||"/");
   const acc=useAccessibility();
-
   useEffect(()=>{
     const onHash=()=>setRoute(location.hash.replace(/^#/,"")||"/");
     window.addEventListener("hashchange",onHash);
-    return ()=>window.removeEventListener("hashchange",onHash);
+    return()=>window.removeEventListener("hashchange",onHash);
   },[]);
-
-  useEffect(()=>{
-    document.body.className =
-      (acc.black ? "dark-mode " : "") +
-      (acc.yellow && !acc.black ? "yellow-mode " : "");
-  },[acc.black,acc.yellow]);
-
-  return (
-    <div className="min-h-screen p-6" style={{background:acc.rootBg, color:acc.rootText}}>
+  return(
+    <div className="min-h-screen p-6" style={{background:acc.rootBg,color:acc.rootText}}>
       <TopNav route={route} go={k=>location.hash="#"+k}/>
-      {route === "/" && <Hub/>}
-      {route === "/defi" && <GameDefi acc={acc}/>}
-      {route === "/pythagore" && <GamePythagore acc={acc}/>}
-      {route === "/inverse" && <GameInverse acc={acc}/>}
+      {route==="/" && <Hub/>}
+      {route==="/defi" && <GameDefi acc={acc}/>}
+      {route==="/pythagore" && <GamePythagore acc={acc}/>}
+      {route==="/inverse" && <GameInverse acc={acc}/>}
     </div>
   );
 }
