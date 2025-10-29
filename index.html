@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -75,6 +75,26 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 .dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
 .dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
 
+/* === Couleur d'aide visuelle pour les réponses du Jeu 2 === */
+.ok input {
+  background: #dcfce7 !important;
+  border: 2px solid #16a34a !important;
+  color: #065f46 !important;
+  font-weight: 700;
+}
+.ko input {
+  background: #fee2e2 !important;
+  border: 2px solid #ef4444 !important;
+  color: #991b1b !important;
+  font-weight: 700;
+}
+/* Taille réduite de DogBot dans la bulle de feedback */
+.bot-bubble img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 /* Optional dys font local name (kept to avoid console warnings if not present) */
 @font-face{
   font-family:'OpenDyslexicLocal';
@@ -150,8 +170,17 @@ function AccessibilityCard({acc}){
 }
 
 /* ==================== NAV / HUB ==================== */
-function TopNav({route,go}){
-  return (
+
+ return (
+    <div className="min-h-screen p-6" style={{background:acc.rootBg, color:acc.rootText}}>
+      <TopNav route={route} go={k=>location.hash="#"+k}/>  {/* Un seul ici */}
+      {route === "/" && <Hub/>}
+      {route === "/defi" && <GameDefi acc={acc}/>}
+      {route === "/pythagore" && <GamePythagore acc={acc}/>}
+      {route === "/inverse" && <GameInverse acc={acc}/>}
+    </div>
+  );
+
     <div className="mb-6 rounded-3xl overflow-hidden shadow-sm border card">
       <div className="px-4 py-3 text-white flex items-center justify-between" style={{backgroundColor:BRAND}}>
         <div className="flex items-center gap-3">
@@ -208,6 +237,111 @@ function Progress({remaining, total}) {
 }
 const vibrate = (p=[80,40,120]) => { try { if (navigator.vibrate) navigator.vibrate(p); } catch(_){} };
 
+
+/* ==================== RECAP – commun aux jeux ==================== */
+function RecapTable({ answers, onReplay, cardStyle }) {
+  // util: paires de facteurs (2..10) pour un produit donné
+  const factorPairs = (product) => {
+    const res = [];
+    for (let a = 2; a <= 10; a++) {
+      for (let b = a; b <= 10; b++) {
+        if (a * b === product) res.push([a, b]);
+      }
+    }
+    return res;
+  };
+
+  const total = answers.length;
+  const ok = answers.filter(a => a.correct).length;
+
+  // Rend une ligne selon le type d'item
+  const renderRow = (a, i) => {
+    let question = "";
+    let correction = "";
+    let taReponse = "";
+    let extra = "";
+
+    if (a.game === "defi") {
+      // Jeu 1 — Défi Tables
+      question = `${a.a} × ${a.b}`;
+      correction = `${a.product}`;
+      taReponse = a.user === null ? "—" : String(a.user);
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    } 
+    else if (a.game === "inverse") {
+      // Jeu 3 — "tousCouples" (toutes les paires)
+      question = `${a.product} (toutes les décompositions)`;
+      const pairs = factorPairs(a.product).map(([x, y]) => `${x}×${y}`).join(" ; ");
+      correction = pairs || "—";
+      taReponse = a.user === null ? "—" : a.user; // déjà concaténée "x×y ; ..."
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    } 
+    else if (a.game === "inverse-missing") {
+      // Jeu 3 — facteur manquant
+      const exp = a.product / a.known;
+      question = a.which === "a" ? `${a.product} = … × ${a.known}` : `${a.product} = ${a.known} × …`;
+      correction = String(exp);
+      taReponse = a.user === null ? "—" : a.user;
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    } 
+    else if (a.game === "inverse-div") {
+      // Jeu 3 — divisions
+      question = `${a.dividend} ÷ ${a.divisor}`;
+      correction = String(a.quotient);
+      taReponse = a.user === null ? "—" : a.user;
+      if (a.timeout) extra = "⏳ Temps dépassé";
+      else if (a.user === null) extra = "Aucune réponse";
+    }
+
+    const rowCls = a.correct ? "ok" : "ko";
+    return (
+      <tr key={i} className={rowCls}>
+        <td className="border px-3 py-2">{i + 1}</td>
+        <td className="border px-3 py-2">{question}</td>
+        <td className="border px-3 py-2">{correction}</td>
+        <td className="border px-3 py-2">{taReponse}</td>
+        <td className="border px-3 py-2 whitespace-nowrap">{a.correct ? "✅ Correct" : "❌ Incorrect"}</td>
+        <td className="border px-3 py-2 text-slate-600">{extra}</td>
+      </tr>
+    );
+  };
+
+  return (
+    <div className="card rounded-2xl p-6" style={cardStyle}>
+      <h2 className="text-2xl font-bold mb-2">Résultats 🎯</h2>
+      <p className="mb-4">Tu as réussi <strong>{ok}/{total}</strong> questions.</p>
+
+      <div className="overflow-auto">
+        <table className="w-full border-collapse min-w-[800px]">
+          <thead>
+            <tr className="hdr">
+              <th className="border px-3 py-2 text-left">#</th>
+              <th className="border px-3 py-2 text-left">Question</th>
+              <th className="border px-3 py-2 text-left">Bonne réponse</th>
+              <th className="border px-3 py-2 text-left">Ta réponse</th>
+              <th className="border px-3 py-2 text-left">Statut</th>
+              <th className="border px-3 py-2 text-left">Remarque</th>
+            </tr>
+          </thead>
+          <tbody>
+            {answers.map(renderRow)}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex gap-2 justify-center mt-6">
+        <button onClick={onReplay} className="px-5 py-3 rounded-2xl text-white font-semibold shadow" style={{backgroundColor:"#8374a7"}}>
+          Rejouer
+        </button>
+        <a href="#/" className="px-5 py-3 rounded-2xl border">Retour au menu</a>
+      </div>
+    </div>
+  );
+}
+
 /* ==================== JEU 1 — Défi Tables ==================== */
 function GameDefi({acc}){
   const {rootBg,rootText,cardStyle,speak}=acc;
@@ -234,7 +368,7 @@ function GameDefi({acc}){
   const remaining = timeLimit==null ? null : Math.max(0, timeLimit - tick);
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/defi" go={k=>location.hash="#"+k}/>
+      
       <div className="max-w-4xl mx-auto space-y-6">
         {!started && !finished && (
           <div className="grid md:grid-cols-3 gap-4">
@@ -263,19 +397,30 @@ function GameDefi({acc}){
         )}
 
         {finished && (
-          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
-            <h2 className="text-2xl font-bold mb-3">Résultats 🎯</h2>
-            <p>Tu as réussi <strong>{answers.filter(a=>a.correct).length}/{answers.length}</strong> questions.</p>
-            <a href="#/defi" className="inline-block mt-4 px-4 py-2 rounded-2xl btn">Rejouer</a>
-          </div>
-        )}
-      </div>
+  <RecapTable
+    answers={answers}
+    cardStyle={cardStyle}
+    onReplay={() => {
+      // reset simple : on revient à l’écran de réglages
+      setStarted(false);
+      setFinished(false);
+      setQuestions([]);
+      setIndex(0);
+      setAnswers([]);
+      setInput("");
+      setTick(0);
+    }}
+  />
+)}
+
+          <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a></div>
+        </div>
     </div>
   );
 }
 
 /* ==================== JEU 2 — Table de Pythagore ==================== */
-function GamePythagore({acc}){
+function GamePythagore({acc}) {
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
   const [mode,setMode]=useState("random"); // random | table | diagonal | mirror | minimal
@@ -294,9 +439,14 @@ function GamePythagore({acc}){
     return set;
   },[mode,count,table]);
 
-  const [values,setValues]=useState({}); const [checked,setChecked]=useState({});
+  const [values,setValues]=useState({});
+  const [checked,setChecked]=useState({});
+
   const onChange=(k,v)=> setValues(p=>({...p,[k]:v.replace(/\D/g,"")}));
-  const getDisplayValue=(a,b)=>{ const k=key(a,b), m=mirrorKey(a,b); return values[k] ?? (mode==="mirror" ? values[m] : "") ?? ""; };
+  const getDisplayValue=(a,b)=>{
+    const k=key(a,b), m=mirrorKey(a,b);
+    return values[k] ?? (mode==="mirror" ? values[m] : "") ?? "";
+  };
 
   const checkAll=()=>{
     const res={}; let total=0, errors=0;
@@ -305,7 +455,8 @@ function GamePythagore({acc}){
       const shouldCheck = blanks.has(k) || (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))) || (mode==="diagonal" && onDiag);
       if(!shouldCheck) continue; total++;
       const good=a*b; const vStr = values[k] ?? (mode==="mirror" ? values[mirrorKey(a,b)] : "");
-      const isOk = vStr!==undefined && vStr!=="" && Number(vStr)===good; res[k] = isOk ? "ok":"ko"; if(!isOk) errors++;
+      const isOk = vStr!==undefined && vStr!=="" && Number(vStr)===good;
+      res[k] = isOk ? "ok":"ko"; if(!isOk) errors++;
     }
     setChecked(res);
     if(total>0){
@@ -313,6 +464,7 @@ function GamePythagore({acc}){
       else setFeedback({type:"ko", msg:`Tu as ${errors} erreur${errors>1?"s":""}. Essaie encore !`});
     } else setFeedback(null);
   };
+
   const resetAll=()=>{ setValues({}); setChecked({}); setFeedback(null); };
 
   const tip =
@@ -323,8 +475,8 @@ function GamePythagore({acc}){
   :                     "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
 
   return (
-    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/pythagore" go={k=>location.hash="#"+k}/>
+    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"}
+         style={{backgroundColor:rootBg,color:rootText}}>
       <div className="max-w-6xl mx-auto">
         <div className="grid xl:grid-cols-3 gap-4 mb-4">
           <AccessibilityCard acc={acc}/>
@@ -334,26 +486,37 @@ function GamePythagore({acc}){
               <label><input type="radio" name="m" checked={mode==="random"} onChange={()=>setMode("random")}/> Aléatoires</label>
               {mode==="random" && (
                 <div className="ml-6"><label className="text-sm">Nombre de cases</label>
-                <input type="number" min="1" max="81" value={count} onChange={e=>setCount(parseInt(e.target.value)||1)} className="border rounded px-2 py-1 w-24 ml-2"/></div>
+                <input type="number" min="1" max="81" value={count}
+                  onChange={e=>setCount(parseInt(e.target.value)||1)}
+                  className="border rounded px-2 py-1 w-24 ml-2"/></div>
               )}
               <label><input type="radio" name="m" checked={mode==="table"} onChange={()=>setMode("table")}/> Table par table</label>
               {mode==="table" && (
                 <div className="ml-6"><label className="text-sm">Table</label>
-                <select value={table} onChange={e=>setTable(parseInt(e.target.value))} className="border rounded px-2 py-1 ml-2">{A.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+                <select value={table} onChange={e=>setTable(parseInt(e.target.value))}
+                  className="border rounded px-2 py-1 ml-2">{A.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
               )}
               <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des carrés</label>
               <label><input type="radio" name="m" checked={mode==="mirror"} onChange={()=>setMode("mirror")}/> Miroir de la diagonale</label>
               <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6 cases)</label>
             </div>
           </div>
+
           <div className="card rounded-2xl p-4 space-y-3" style={cardStyle}>
             <div className="font-bold mb-2">Actions</div>
-            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
+            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2"
+                    style={{backgroundColor:BRAND}}>Corriger</button>
             <button onClick={resetAll} className="px-4 py-2 rounded-2xl border">Réinitialiser</button>
+
             {feedback && (
               <div className={"bot-bubble "+feedback.type}>
-                <img src="dogbot.png" alt="DogBot"/><div className="msg">
-                  <div className="font-semibold" style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>DogBot</div>
+                {/* 🐾 Image DogBot réduite */}
+                <img src="dogbot.png" alt="DogBot" style={{width:"32px",height:"32px",objectFit:"contain"}}/>
+                <div className="msg">
+                  <div className="font-semibold"
+                       style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>
+                    DogBot
+                  </div>
                   <div>{feedback.msg}</div>
                 </div>
               </div>
@@ -389,25 +552,27 @@ function GamePythagore({acc}){
                     const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
 
-                    const baseInput="border rounded px-2 py-2 w-[84px] text-center text-lg";
-                    const clsWrong=" ko-border ko-input";
-                    const clsReady=" violet-border diag-txt";
+                    const baseInput="border rounded px-2 py-2 w-[84px] text-center text-lg violet-border fill-hint diag-txt";
 
                     if((mode==="mirror"||mode==="minimal") && onDiag){
-                      return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
+                      return <td key={k} className="p-1 text-center diag-bg">
+                        <span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span>
+                      </td>;
                     }
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
-                      return <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}><input readOnly value={val} className={baseInput+(st==="ko"?clsWrong:clsReady)} /></td>;
-                    }
-                    if(mode==="diagonal" && onDiag){
-                      return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={baseInput+(st==="ko"?clsWrong:clsReady)} /></td>;
+                      return <td key={k} className={"p-1 text-center diag-bg "+(st==="ok"?"ok":st==="ko"?"ko":"")}>
+                        <input readOnly value={val} className={baseInput}/>
+                      </td>;
                     }
                     const content = shouldFill
-                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={baseInput+(st==="ko"?clsWrong:clsReady)} />
+                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)}
+                          className={baseInput}/>
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
 
-                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>{content}</td>;
+                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>
+                      {content}
+                    </td>;
                   })}
                 </tr>
               ))}
@@ -420,6 +585,9 @@ function GamePythagore({acc}){
     </div>
   );
 }
+
+
+
 
 /* ==================== JEU 3 — Retrouve la multiplication ==================== */
 function GameInverse({acc}){
@@ -524,7 +692,7 @@ function GameInverse({acc}){
 
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      <TopNav route="/inverse" go={k=>location.hash="#"+k}/>
+      
       <div className="max-w-4xl mx-auto space-y-6">
 
         {!started && !finished && (
@@ -643,24 +811,24 @@ function GameInverse({acc}){
           </div>
         )}
 
-        {/* FIN DU JEU */}
-        {finished && (
-          <div className="card rounded-2xl p-6 text-center" style={cardStyle}>
-            <h2 className="text-2xl font-bold mb-4">Résultats 🎯</h2>
-            <p className="mb-2">
-              Tu as réussi <strong>{answers.filter((a) => a.correct).length}/{answers.length}</strong> questions.
-            </p>
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={() => { setStarted(false); setFinished(false); }}
-                className="px-5 py-3 rounded-2xl text-white font-semibold shadow"
-                style={{backgroundColor: "#8374a7"}}
-              >
-                Rejouer
-              </button>
-            </div>
-          </div>
-        )}
+{finished && (
+  <RecapTable
+    answers={answers}
+    cardStyle={cardStyle}
+    onReplay={() => {
+      setStarted(false);
+      setFinished(false);
+      setQuestions([]);
+      setIndex(0);
+      setAnswers([]);
+      setTick(0);
+      setX(""); setY(""); setQuotient("");
+      setPairs([]); setMissing({which:null, known:null, product:null});
+    }}
+  />
+)}
+
+          <div className="mt-6"><a href="#/" className="px-4 py-2 rounded-2xl border">Retour au menu</a></div>
       </div>
     </div>
   );
@@ -698,6 +866,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
+
 
 
 
