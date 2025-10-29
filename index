@@ -400,7 +400,7 @@ function GameDefi({acc}){
 }
 
 /* ==================== JEU 2 — Table de Pythagore ==================== */
-function GamePythagore({acc}){
+function GamePythagore({acc}) {
   const {rootBg,rootText,cardStyle}=acc;
   const A=range(2,10), B=range(2,10);
   const [mode,setMode]=useState("random"); // random | table | diagonal | mirror | minimal
@@ -419,9 +419,14 @@ function GamePythagore({acc}){
     return set;
   },[mode,count,table]);
 
-  const [values,setValues]=useState({}); const [checked,setChecked]=useState({});
+  const [values,setValues]=useState({});
+  const [checked,setChecked]=useState({});
+
   const onChange=(k,v)=> setValues(p=>({...p,[k]:v.replace(/\D/g,"")}));
-  const getDisplayValue=(a,b)=>{ const k=key(a,b), m=mirrorKey(a,b); return values[k] ?? (mode==="mirror" ? values[m] : "") ?? ""; };
+  const getDisplayValue=(a,b)=>{
+    const k=key(a,b), m=mirrorKey(a,b);
+    return values[k] ?? (mode==="mirror" ? values[m] : "") ?? "";
+  };
 
   const checkAll=()=>{
     const res={}; let total=0, errors=0;
@@ -430,7 +435,8 @@ function GamePythagore({acc}){
       const shouldCheck = blanks.has(k) || (mode==="mirror" && a>b && blanks.has(mirrorKey(a,b))) || (mode==="diagonal" && onDiag);
       if(!shouldCheck) continue; total++;
       const good=a*b; const vStr = values[k] ?? (mode==="mirror" ? values[mirrorKey(a,b)] : "");
-      const isOk = vStr!==undefined && vStr!=="" && Number(vStr)===good; res[k] = isOk ? "ok":"ko"; if(!isOk) errors++;
+      const isOk = vStr!==undefined && vStr!=="" && Number(vStr)===good;
+      res[k] = isOk ? "ok":"ko"; if(!isOk) errors++;
     }
     setChecked(res);
     if(total>0){
@@ -438,6 +444,7 @@ function GamePythagore({acc}){
       else setFeedback({type:"ko", msg:`Tu as ${errors} erreur${errors>1?"s":""}. Essaie encore !`});
     } else setFeedback(null);
   };
+
   const resetAll=()=>{ setValues({}); setChecked({}); setFeedback(null); };
 
   const tip =
@@ -448,8 +455,8 @@ function GamePythagore({acc}){
   :                     "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
 
   return (
-    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"} style={{backgroundColor:rootBg,color:rootText}}>
-      
+    <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"}
+         style={{backgroundColor:rootBg,color:rootText}}>
       <div className="max-w-6xl mx-auto">
         <div className="grid xl:grid-cols-3 gap-4 mb-4">
           <AccessibilityCard acc={acc}/>
@@ -459,26 +466,37 @@ function GamePythagore({acc}){
               <label><input type="radio" name="m" checked={mode==="random"} onChange={()=>setMode("random")}/> Aléatoires</label>
               {mode==="random" && (
                 <div className="ml-6"><label className="text-sm">Nombre de cases</label>
-                <input type="number" min="1" max="81" value={count} onChange={e=>setCount(parseInt(e.target.value)||1)} className="border rounded px-2 py-1 w-24 ml-2"/></div>
+                <input type="number" min="1" max="81" value={count}
+                  onChange={e=>setCount(parseInt(e.target.value)||1)}
+                  className="border rounded px-2 py-1 w-24 ml-2"/></div>
               )}
               <label><input type="radio" name="m" checked={mode==="table"} onChange={()=>setMode("table")}/> Table par table</label>
               {mode==="table" && (
                 <div className="ml-6"><label className="text-sm">Table</label>
-                <select value={table} onChange={e=>setTable(parseInt(e.target.value))} className="border rounded px-2 py-1 ml-2">{A.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+                <select value={table} onChange={e=>setTable(parseInt(e.target.value))}
+                  className="border rounded px-2 py-1 ml-2">{A.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
               )}
               <label><input type="radio" name="m" checked={mode==="diagonal"} onChange={()=>setMode("diagonal")}/> Diagonale des carrés</label>
               <label><input type="radio" name="m" checked={mode==="mirror"} onChange={()=>setMode("mirror")}/> Miroir de la diagonale</label>
               <label><input type="radio" name="m" checked={mode==="minimal"} onChange={()=>setMode("minimal")}/> Reste à apprendre (6 cases)</label>
             </div>
           </div>
+
           <div className="card rounded-2xl p-4 space-y-3" style={cardStyle}>
             <div className="font-bold mb-2">Actions</div>
-            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2" style={{backgroundColor:BRAND}}>Corriger</button>
+            <button onClick={checkAll} className="px-4 py-2 rounded-2xl text-white mr-2"
+                    style={{backgroundColor:BRAND}}>Corriger</button>
             <button onClick={resetAll} className="px-4 py-2 rounded-2xl border">Réinitialiser</button>
+
             {feedback && (
               <div className={"bot-bubble "+feedback.type}>
-                <img src="dogbot.png" alt="DogBot"/><div className="msg">
-                  <div className="font-semibold" style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>DogBot</div>
+                {/* 🐾 Image DogBot réduite */}
+                <img src="dogbot.png" alt="DogBot" style={{width:"32px",height:"32px",objectFit:"contain"}}/>
+                <div className="msg">
+                  <div className="font-semibold"
+                       style={{color: feedback.type==="ok" ? "#16a34a" : "#dc2626"}}>
+                    DogBot
+                  </div>
                   <div>{feedback.msg}</div>
                 </div>
               </div>
@@ -514,25 +532,27 @@ function GamePythagore({acc}){
                     const needsHint = shouldFill && !((mode==="mirror"||mode==="minimal") && onDiag);
                     const st = checked[k] || (mode==="mirror" ? checked[`${b}x${a}`] : undefined);
 
-                    const baseInput="border rounded px-2 py-2 w-[84px] text-center text-lg";
-                    const clsWrong=" ko-border ko-input";
-                    const clsReady=" violet-border diag-txt";
+                    const baseInput="border rounded px-2 py-2 w-[84px] text-center text-lg violet-border fill-hint diag-txt";
 
                     if((mode==="mirror"||mode==="minimal") && onDiag){
-                      return <td key={k} className="p-1 text-center diag-bg"><span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span></td>;
+                      return <td key={k} className="p-1 text-center diag-bg">
+                        <span className="inline-block min-w-[84px] text-lg diag-txt">{a*b}</span>
+                      </td>;
                     }
                     if(mode==="mirror" && a>b){
                       const val = getDisplayValue(a,b);
-                      return <td key={k} className={"p-1 text-center diag-bg"+(st==="ok"?" ok":st==="ko"?" ko":"")}><input readOnly value={val} className={baseInput+(st==="ko"?clsWrong:clsReady)} /></td>;
-                    }
-                    if(mode==="diagonal" && onDiag){
-                      return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}><input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={baseInput+(st==="ko"?clsWrong:clsReady)} /></td>;
+                      return <td key={k} className={"p-1 text-center diag-bg "+(st==="ok"?"ok":st==="ko"?"ko":"")}>
+                        <input readOnly value={val} className={baseInput}/>
+                      </td>;
                     }
                     const content = shouldFill
-                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)} className={baseInput+(st==="ko"?clsWrong:clsReady)} />
+                      ? <input value={getDisplayValue(a,b)} onChange={e=>onChange(k,e.target.value)}
+                          className={baseInput}/>
                       : <span className={"inline-block min-w-[84px] text-lg "+(onDiag?"diag-txt":"")}>{a*b}</span>;
 
-                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>{content}</td>;
+                    return <td key={k} className={"p-1 text-center "+(needsHint?"fill-hint ":"")+(st==="ok"?" ok":st==="ko"?" ko":"")}>
+                      {content}
+                    </td>;
                   })}
                 </tr>
               ))}
@@ -545,6 +565,9 @@ function GamePythagore({acc}){
     </div>
   );
 }
+
+
+
 
 /* ==================== JEU 3 — Retrouve la multiplication ==================== */
 function GameInverse({acc}){
