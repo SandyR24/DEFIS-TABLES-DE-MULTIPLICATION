@@ -75,6 +75,26 @@ body{ margin:0; background:#f8fafc; color:#111; font-family:system-ui,-apple-sys
 .dark-mode .bot-bubble.ok{ border-color:#16a34a !important; }
 .dark-mode .bot-bubble.ko{ border-color:#dc2626 !important; }
 
+/* === Couleur d'aide visuelle pour les réponses du Jeu 2 === */
+.ok input {
+  background: #dcfce7 !important;
+  border: 2px solid #16a34a !important;
+  color: #065f46 !important;
+  font-weight: 700;
+}
+.ko input {
+  background: #fee2e2 !important;
+  border: 2px solid #ef4444 !important;
+  color: #991b1b !important;
+  font-weight: 700;
+}
+/* Taille réduite de DogBot dans la bulle de feedback */
+.bot-bubble img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 /* Optional dys font local name (kept to avoid console warnings if not present) */
 @font-face{
   font-family:'OpenDyslexicLocal';
