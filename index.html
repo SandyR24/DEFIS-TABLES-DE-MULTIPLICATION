@@ -190,7 +190,7 @@ function TopNav({route,go}){
           {k:"/",label:"Accueil"},
           {k:"/defi",label:"Jeu n°1 – Défi Tables"},
           {k:"/pythagore",label:"Jeu n°2 – Table de Pythagore"},
-          {k:"/inverse",label:"Jeu n°3 – Retrouve la multiplication"},
+          {k:"/inverse",label:"Jeu n°3 – Tables inversées"},
         ].map(tab=>(
           <button key={tab.k} onClick={()=>go(tab.k)} className={"pill "+(route===tab.k?"active":"")}>{tab.label}</button>
         ))}
@@ -217,7 +217,7 @@ function Hub(){
       <div className="grid md:grid-cols-3 gap-6">
         <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°1 — Défi Tables</h3><a href="#/defi" className="btn mt-4 inline-block">Commencer</a></article>
         <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°2 — Table de Pythagore</h3><a href="#/pythagore" className="btn mt-4 inline-block">Découvrir</a></article>
-        <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°3 — Retrouve la multiplication</h3><a href="#/inverse" className="btn mt-4 inline-block">Jouer</a></article>
+        <article className="card p-6"><h3 className="text-xl font-extrabold text-[color:var(--brand)]">Jeu n°3 — Tables inversées</h3><a href="#/inverse" className="btn mt-4 inline-block">Jouer</a></article>
       </div>
     </main>
   );
@@ -583,7 +583,7 @@ function GamePythagore({acc}) {
 
 
 
-/* ==================== JEU 3 — Retrouve la multiplication ==================== */
+/* ==================== JEU 3 — Tables inversées ==================== */
 function GameInverse({acc}){
   const {rootBg,rootText,cardStyle}=acc;
 
