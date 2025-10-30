@@ -465,8 +465,8 @@ function GamePythagore({acc}) {
     mode==="random"   ? "Complète les cases violettes (au hasard)."
   : mode==="table"    ? `Complète les cases violettes de la table de ${table}.`
   : mode==="diagonal" ? "Complète seulement la diagonale (les carrés)."
-  : mode==="mirror"   ? "Complète la partie du haut, l’autre moitié se remplit par miroir."
-  :                     "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9.";
+  : mode==="mirror"   ? "Complète la partie du haut, l’autre moitié se remplira par miroir."
+  :                     "Complète seulement 6 cases : 6×7, 6×8, 6×9, 7×8, 7×9, 8×9 (si tu connais bien tes tables jusqu'à 6 et la diagonale.)";
 
   return (
     <div className={(acc.black?"dark-mode ":"")+(acc.yellow && !acc.black?"yellow-mode ":"")+"min-h-screen p-6"}
